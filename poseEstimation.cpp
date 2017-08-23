@@ -28,6 +28,32 @@ int readValues(std::string text, float *variable, int i)
   	myReadFile.close();
 	return i;
 }
+
+void rowMean(float *variable, int col, int row , float *mean)
+{
+	float sum;
+	for (int j = 0;j < row; j++)
+	{
+		sum = 0;
+		for (int i = 0;i < col; i++)
+		{									                
+			sum += variable[(j*col)+ i];
+		}
+		mean[j] = sum / col;
+	        //cout << "value of mean " << mean[j] << endl;
+	}
+}
+
+void Scalc(float *variable, int col, int row, float *mean)
+{
+	for (int j = 0;j < row;j++)
+	{
+		for (int i = 0;i < col;i++)
+		{
+			variable[(j * col) + i] = variable[(j * col) + i] - mean[j];
+		}
+	}
+}
 		
 
 int main(void)
@@ -39,11 +65,18 @@ int main(void)
 
 
 	float *xy = new float [row*col];
+	float *mean = new float [row];
 	int items = 0;
 
 	items = readValues("exp.txt",xy,items);
-	cout << "value of items :" << items << endl;
+	rowMean(xy, col, row, mean);
+        Scalc(xy, col, row, mean);
+        rowMean(xy, col, row, mean);
+
 
 	delete[] xy;
+        delete[] mean;
+
 
 }
+

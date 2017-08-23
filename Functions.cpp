@@ -1,8 +1,13 @@
-#include "stdafx.h"
+#include <stdio.h>
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <math.h>
+#include <stdlib.h>
 
 
 
-int readValues(string text, float *variable, int i)
+int readValues(std::string text, float *variable, int i)
 {
 	float temp;
 	//cout << "value of text " << text << endl;
