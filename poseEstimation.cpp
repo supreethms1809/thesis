@@ -104,6 +104,7 @@ int main(void)
 	float *xy = new float [row*col];
 	float *mean = new float [row];
 	float *B = new float [row1*col1];
+	float *B_mean = new float [row1];
 	int items = 0;
 	float a = 0.0f;
 	int B_items = 0;
@@ -117,11 +118,14 @@ int main(void)
 	//displayValues(xy,items);
 	B_items = readValues("exp1.txt", B, B_items);
 //	cout << "value of B_items :"<< B_items << endl;
-	
+	rowMean(B,col1,row1,B_mean);
+	Scalc(B, col1,row1,B_mean);
+	int data_size = row1/3;	
 
 	delete[] xy;
         delete[] mean;
 	delete[] B;
+	delete[] B_mean;
 
 
 }
