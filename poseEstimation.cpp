@@ -29,6 +29,14 @@ int readValues(std::string text, float *variable, int i)
 	return i;
 }
 
+void displayValues(float *variable, int items)
+{
+	for (int i =0; i < items; i++)
+	{
+		cout << "Value of variable :"<< variable[i] << endl;
+	}
+}
+
 void rowMean(float *variable, int col, int row , float *mean)
 {
 	float sum;
@@ -54,7 +62,36 @@ void Scalc(float *variable, int col, int row, float *mean)
 		}
 	}
 }
-		
+
+float mean_of_std_deviation(float *variable, int col, int row, float *mean)
+{
+	float std[2];
+	float temp,a;
+	for (int j = 0;j < row;j++)
+	{
+		temp = 0;
+		for (int i = 0;i < col;i++)
+		{
+		temp += pow((variable[(j * 15) + i] - mean[j]), 2);
+		}
+	std[j] = sqrt(temp / (col));
+	//cout << "value od std deviation " << std[j] << endl;
+	}
+	a = (std[0] + std[1]) / 2;
+	//cout << "value of a " << a << endl;
+	return a;
+}
+
+void newScalc(float *variable, int col, int row, float a)
+{
+	for (int i = 0;i < row;i++)
+	{
+		for (int j = 0;j < col;j++)
+		{
+		variable[(i * col) + j] = variable[(i * col) + j] / a;
+		}
+	}
+}
 
 int main(void)
 {
@@ -67,12 +104,15 @@ int main(void)
 	float *xy = new float [row*col];
 	float *mean = new float [row];
 	int items = 0;
+	float a = 0.0f;
 
 	items = readValues("exp.txt",xy,items);
 	rowMean(xy, col, row, mean);
         Scalc(xy, col, row, mean);
         rowMean(xy, col, row, mean);
-
+	a = mean_of_std_deviation(xy,col,row,mean);
+	newScalc(xy,col,row,a);
+	displayValues(xy,items);
 
 	delete[] xy;
         delete[] mean;
