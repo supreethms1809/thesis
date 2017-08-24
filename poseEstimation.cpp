@@ -93,6 +93,17 @@ void newScalc(float *variable, int col, int row, float a)
 	}
 }
 
+void initializeZero(float *variable, int col, int row)
+{
+	for (int i = 0;i < row;i++)
+	{
+		for (int j = 0;j < col;j++)
+		{
+		variable[(i * col) + j] = 0.0f;
+		}
+	}
+}
+
 int main(void)
 {
 	const int row = 2;
@@ -117,16 +128,31 @@ int main(void)
 	newScalc(xy,col,row,a);
 	//displayValues(xy,items);
 	B_items = readValues("exp1.txt", B, B_items);
-//	cout << "value of B_items :"<< B_items << endl;
 	rowMean(B,col1,row1,B_mean);
 	Scalc(B, col1,row1,B_mean);
-	int data_size = row1/3;	
+	const int data_size = row1/3;	
+	
+	//ssr2D3D_alm
+	//M => (2*384) = 0,  C ==> (1*384) = 0, E ==> (2*15) = 0, T ==> mean(W,2)
+	cout << "value of data_size : "<< data_size << endl;	
+	float *M = new float [row*row1];
+	float *C = new float [data_size];
+	float *E = new float [row*col];
+	float *T = new float[row];
+
+	initializeZero(M, row1,row);
+	initializeZero(C, data_size, 1);
+	initializeZero(E,col,row);
+	rowMean(xy,col,row,T);
 
 	delete[] xy;
         delete[] mean;
 	delete[] B;
 	delete[] B_mean;
-
+	delete[] M;
+	delete[] C;
+	delete[] E;
+	delete[] T;
 
 }
 
