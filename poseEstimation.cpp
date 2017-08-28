@@ -153,6 +153,39 @@ void cpuTransMatrixMult(float *A, float *B, float *C, int row, int col)
 	}
 }
 
+void initialize(float *variable,float *variable2, int col, int row)
+{
+	for (int i = 0;i < row;i++)
+	{
+		for (int j = 0;j < col;j++)
+		{
+		variable[(i * col) + j] = variable2[(i * col) + j];
+		}
+	}
+}
+
+void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_transpose, float mu, float *M, float *Y,const int row,const int col,const int row1)
+{
+	float *temp = new float [row*col];
+	float *temp2 = new float [row*row1];
+	float *temp3 = new float [row*row1]; 
+	float *Znum = new float [row*row1];
+	float *Zden = new float [row1*row1];
+	float *Zdenaug = new float [row1*row1*row1*row1];
+	float *ZdenInverse = new float [row1*row1];
+
+
+	delete [] temp;	
+	delete [] temp2;
+	delete [] temp3;
+	delete [] Znum;
+	delete [] Zden;
+	delete [] Zdenaug;
+	delete [] ZdenInverse;
+
+}
+
+
 int main(void)
 {
 	const int row = 2;
@@ -166,6 +199,7 @@ int main(void)
 	float *B = new float [row1*col1];
 	float *B_transpose = new float [col1*row1];
 	float *B_mean = new float [row1];
+	float *BBt = new float [row1*row1];
 	int items = 0;
 	float a = 0.0f;
 	int B_items = 0;
@@ -205,9 +239,11 @@ int main(void)
 	initializeZero(Y,row1,row);
 
 	mu = meanCalc(xy,col,row);
-	cout << "value of mu is " << mu << endl;
+	//cout << "value of mu is " << mu << endl;
 
 	TransposeOnCPU(B,B_transpose,row1,col);
+	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
+	initialize(Z0,Z,row1,row);
 
 
 	delete[] xy;
@@ -215,6 +251,7 @@ int main(void)
 	delete[] B;
 	delete[] B_transpose;
 	delete[] B_mean;
+	delete[] BBt;
 	delete[] M;
 	delete[] C;
 	delete[] E;
