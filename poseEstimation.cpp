@@ -174,6 +174,9 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 	float *Zdenaug = new float [row1*row1*row1*row1];
 	float *ZdenInverse = new float [row1*row1];
 
+	//numerator
+	//temp = (W-E-T*ones(1,p))
+	
 
 	delete [] temp;	
 	delete [] temp2;
