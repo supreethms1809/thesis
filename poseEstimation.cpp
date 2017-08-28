@@ -145,6 +145,12 @@ int main(void)
 	initializeZero(E,col,row);
 	rowMean(xy,col,row,T);
 
+	// auxiliary variables for ADMM
+	float *Z = (float*)_aligned_malloc(row*row1*sizeof(float), 16);
+	float *Y = (float*)_aligned_malloc(row*row1*sizeof(float), 16);
+	float *Z0 = (float*)_aligned_malloc(row*row1*sizeof(float), 16);
+	float *Q = (float*)_aligned_malloc(row*row1*sizeof(float), 16);
+
 	delete[] xy;
         delete[] mean;
 	delete[] B;
@@ -153,6 +159,10 @@ int main(void)
 	delete[] C;
 	delete[] E;
 	delete[] T;
+	delete[] Z;
+	delete[] Y;
+	delete[] Z0;
+	delete[] Q;
 
 }
 
