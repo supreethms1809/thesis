@@ -104,6 +104,25 @@ void initializeZero(float *variable, int col, int row)
 	}
 }
 
+float meanCalc(float *variable, int col, int row)
+{
+	float sum = 0;
+        float mean = 0;
+        float mu = 0;
+	for (int i = 0;i < row; i++)
+	{
+		for (int j = 0;j < col; j++)
+		{
+		sum += abs(variable[(i*col) + j]);
+		//cout << "value of varialbe is " << variable[(j*col) + i] << endl;
+		}
+	}
+	mean = sum / (col*row);
+	//cout << "value of mean " << mean << endl;
+	mu = 1 / mean;
+	return mu;
+ }
+
 int main(void)
 {
 	const int row = 2;
@@ -146,10 +165,15 @@ int main(void)
 	rowMean(xy,col,row,T);
 
 	// auxiliary variables for ADMM
-	float *Z = (float*)_aligned_malloc(row*row1*sizeof(float), 16);
-	float *Y = (float*)_aligned_malloc(row*row1*sizeof(float), 16);
-	float *Z0 = (float*)_aligned_malloc(row*row1*sizeof(float), 16);
-	float *Q = (float*)_aligned_malloc(row*row1*sizeof(float), 16);
+	float *Z = new float [row*row1];
+	float *Y = new float [row*row1];
+	float *Z0 = new float [row*row1];
+	float *Q = new float [row*row1];
+	float mu = 0.0f;
+	initializeZero(Z,row1,row);
+	initializeZero(Y,row1,row);
+
+	mu = meanCalc(xy,col,row);
 
 	delete[] xy;
         delete[] mean;
