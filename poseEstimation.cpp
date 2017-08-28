@@ -121,7 +121,37 @@ float meanCalc(float *variable, int col, int row)
 	//cout << "value of mean " << mean << endl;
 	mu = 1 / mean;
 	return mu;
- }
+}
+
+void TransposeOnCPU(float *matrix, float *matrixTranspose, int row, int col)
+{
+
+	for (int i = 0; i < row; i++)
+	{
+		for (int j = 0; j < col; j++)
+		{
+		matrixTranspose[j*row + i] = matrix[i*col + j];
+		}
+	}
+}
+
+
+void cpuTransMatrixMult(float *A, float *B, float *C, int row, int col)
+{
+        float fSum;
+	for (int i = 0; i < row; i++)
+	{		      
+		for (int j = 0; j < row; j++)
+		{
+		fSum = 0.0f;
+			for (int k = 0; k < col; k++)
+			{
+			fSum += (A[(i*col) + k] * B[(k*row) + j]);
+			}
+		C[(i*row) + j] = fSum;
+		}
+	}
+}
 
 int main(void)
 {
@@ -134,6 +164,7 @@ int main(void)
 	float *xy = new float [row*col];
 	float *mean = new float [row];
 	float *B = new float [row1*col1];
+	float *B_transpose = new float [col1*row1];
 	float *B_mean = new float [row1];
 	int items = 0;
 	float a = 0.0f;
@@ -153,7 +184,7 @@ int main(void)
 	
 	//ssr2D3D_alm
 	//M => (2*384) = 0,  C ==> (1*384) = 0, E ==> (2*15) = 0, T ==> mean(W,2)
-	cout << "value of data_size : "<< data_size << endl;	
+	//cout << "value of data_size : "<< data_size << endl;	
 	float *M = new float [row*row1];
 	float *C = new float [data_size];
 	float *E = new float [row*col];
@@ -174,10 +205,15 @@ int main(void)
 	initializeZero(Y,row1,row);
 
 	mu = meanCalc(xy,col,row);
+	cout << "value of mu is " << mu << endl;
+
+	TransposeOnCPU(B,B_transpose,row1,col);
+
 
 	delete[] xy;
         delete[] mean;
 	delete[] B;
+	delete[] B_transpose;
 	delete[] B_mean;
 	delete[] M;
 	delete[] C;
