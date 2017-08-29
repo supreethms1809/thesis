@@ -196,6 +196,35 @@ void scalarToMatrixMultiply(float *Temp, float *M, float mu, int row, int col)
 	}
 }
 
+void sumOfMatrix(float *Znum,float *temp2, float *temp3, float *temp4, int row, int col)
+{
+	for (int i = 0;i < row;i++)
+	{
+		for (int j = 0;j < col;j++)
+		{
+		Znum[(i*col) + j] = temp2[(i*col) + j] + temp3[(i*col) + j] + temp4[(i*col) + j];
+		}
+	}
+}
+
+void addScalarToDiagonal(float *Zden, float *BBt, float mu, int row, int col)
+{
+	for (int i = 0;i < row;i++)
+	{
+		for (int j = 0;j < col;j++)
+		{
+			if(i==j)
+			{
+			Zden[(i*col) + j] = BBt[(i*col) + j] + mu;
+                        }
+			else
+			{
+			Zden[(i*col) + j] = BBt[(i*col) + j] + 0.0f;
+			}
+		}
+	}
+}
+
 
 																						
 void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_transpose, float mu, float *M, float *Y,const int row,const int col,const int row1)
@@ -225,6 +254,14 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 	//temp3 = mu*M
 	scalarToMatrixMultiply(temp3, M, mu, row, row1);
 	//displayValues(temp3, row*row1);
+
+	//Znum = ((W-E-T*ones(1,p))*B'+mu*M+Y) 
+	sumOfMatrix(Znum,temp2, temp3, Y, row, row1);
+	//displayValues(Znum, row*row1);
+
+	//denominator
+	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
+	//displayValues(Zden, row1*row1);
 
 	delete [] temp;	
 	delete [] temp2;
