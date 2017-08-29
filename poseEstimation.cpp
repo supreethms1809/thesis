@@ -225,6 +225,84 @@ void addScalarToDiagonal(float *Zden, float *BBt, float mu, int row, int col)
 	}
 }
 
+void AugmentIdentity(float *matrix, float *augmatrix, int n)
+{
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+		augmatrix[(i * 2 * n) + j] = matrix[(i*n) + j];
+		augmatrix[(((2 * i) + 1)*n) + j] = 0.0f;
+		}
+	}
+	for (int i = 0; i < n; i++)
+	{
+	augmatrix[(((2 * i) + 1)*n) + i] = 1.0f;
+	}
+}
+
+void cpuInverseOfMatrix(float *matrix, int n)
+{
+	for (int m = 0; m < n; m++)
+	{
+	//Checking if diagonal element is 0
+		if (matrix[((2 * n) + 1)*m] == 0)
+		{
+                	if (m == (n - 1))
+			{
+				for (int i = 0; i < (2 * n); i++)
+				{					
+				matrix[(m * 2 * n) + i] = matrix[((m - 1) * 2 * n) + i] + matrix[(m * 2 * n) + i];
+				}
+			}
+			else
+			{
+			                                                                                                                                                                                                 for (int i = 0; i < (2 * n); i++)
+				{
+				matrix[(m * 2 * n) + i] = matrix[((m + 1) * 2 * n) + i] + matrix[(m * 2 * n) + i];
+				}
+			}
+		}
+		//Make the diagonal elements 1 along with the whole row(divide).
+		float initialValue = matrix[((2 * n) + 1)*m];
+		for (int j = 0; j < (2 * n); j++)
+		{
+		matrix[(m * 2 * n) + j] = matrix[(m * 2 * n) + j] / initialValue;
+		}
+		//Making the elements of the row to zero
+		for (int k = 0; k < n; k++)
+		{
+			float tempIni;
+			tempIni = matrix[m + (k * 2 * n)];
+			if (k == m)
+			{
+			//Just a loop to do nothing
+			}
+			else
+			{
+				for (int l = 0; l < (2 * n); l++)
+				{
+				float tempMul, tempDiv;
+				tempMul = matrix[(2 * m*n) + l] * tempIni;
+				tempDiv = tempMul / matrix[(2 * m*n) + m];
+				matrix[(k * 2 * n) + l] = matrix[(k * 2 * n) + l] - tempDiv;
+				}
+			}
+
+		}
+	}
+}
+
+void Inverse(float *augmatrix, float *matrixInverse, int n)
+{
+	for (int i = 0;i < n;i++)
+	{
+		for (int j = 0;j < n;j++)
+		{
+		matrixInverse[(i*n) + j] = augmatrix[(i*2*n)+n+j];
+		}
+        }
+}
 
 																						
 void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_transpose, float mu, float *M, float *Y,const int row,const int col,const int row1)
@@ -262,6 +340,17 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 	//denominator
 	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
 	//displayValues(Zden, row1*row1);
+
+	//Inverse calculation via guass-jordon method
+	AugmentIdentity(Zden, Zdenaug, row1);
+	cpuInverseOfMatrix(Zdenaug, row1);
+	//displayValues(Zdenaug, row1*row1);
+	Inverse(Zdenaug,ZdenInverse,row1);
+	//displayValues(ZdenInverse, row1*row1);
+
+	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
+        cpuMatrixMult(Znum, ZdenInverse, Z, row, row1, row1);	
+
 
 	delete [] temp;	
 	delete [] temp2;
