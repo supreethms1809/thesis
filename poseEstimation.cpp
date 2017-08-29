@@ -362,6 +362,27 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 
 }
 
+void differenceOfMatrix(float *diffMatrix, float *matrix1, float *matrix2, int row, int col)
+{
+        for (int i = 0;i < row;i++)
+        {
+                for (int j = 0;j < col;j++)
+                {
+                diffMatrix[(i*col) + j] = matrix1[(i*col) + j] - matrix2[(i*col) + j] ;
+                }
+        }
+}
+
+void calculateQ(float *Q, float *Z, float *Y,float mu, int row, int row1)
+{
+	float *temp = new float [row*row1];
+
+	scalarToMatrixMultiply(temp, Y, 1/mu, row, row1);
+	differenceOfMatrix(Q, Z, temp, row, row1);
+
+	delete[] temp;
+
+}
 
 int main(void)
 {
@@ -422,7 +443,7 @@ int main(void)
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
 	initialize(Z0,Z,row1,row);
 	calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
-
+	calculateQ(Q,Z,Y,mu,row,row1);
 
 	delete[] xy;
         delete[] mean;
