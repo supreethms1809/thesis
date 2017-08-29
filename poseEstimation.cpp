@@ -164,6 +164,40 @@ void initialize(float *variable,float *variable2, int col, int row)
 	}
 }
 
+void cpuMatrixMult(float *A, float *B, float *C, int row, int col,int col2)
+{
+	float fSum;
+	int count = 0;
+	for (int i = 0; i < row; i++)
+	{
+		for (int j = 0; j < col2; j++)
+		{
+		fSum = 0.0f;
+			for (int k = 0; k < col; k++)
+			{
+			fSum += (A[(i*col) + k] * B[(k*col2) + j]);
+			}
+		//cout << count<<"\t" <<"value of (i*row) + j \t"<< (i*row) + j <<"\t value of i and j"<<"\t"<<i<<" and "<<j<<"\t value of fsum" << fSum << endl;
+		count++;
+		C[(i*col2) + j] = fSum;
+		}
+	}
+	//cout << "count =" << count << endl;
+}
+
+void scalarToMatrixMultiply(float *Temp, float *M, float mu, int row, int col)
+{
+	for (int i = 0;i < row;i++)
+	{		       
+		for (int j = 0;j < col;j++)
+		{
+		Temp[(i*col) + j] = mu * M[(i*col) + j];
+		}
+	}
+}
+
+
+																						
 void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_transpose, float mu, float *M, float *Y,const int row,const int col,const int row1)
 {
 	float *temp = new float [row*col];
@@ -176,7 +210,21 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 
 	//numerator
 	//temp = (W-E-T*ones(1,p))
-	
+	for (int i = 0;i < row;i++)
+	{
+		for (int j = 0;j < col;j++)
+		{
+		temp[(i*col) + j] = xy[(i*col) + j] - E[(i*col) + j] - T[i];
+		}
+	}
+
+	//temp2 = temp * B'
+	cpuMatrixMult(temp, B_transpose, temp2, row, col, row1);
+	//displayValues(temp2,row*row1);
+
+	//temp3 = mu*M
+	scalarToMatrixMultiply(temp3, M, mu, row, row1);
+	//displayValues(temp3, row*row1);
 
 	delete [] temp;	
 	delete [] temp2;
@@ -247,6 +295,7 @@ int main(void)
 	TransposeOnCPU(B,B_transpose,row1,col);
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
 	initialize(Z0,Z,row1,row);
+	calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 
 
 	delete[] xy;
