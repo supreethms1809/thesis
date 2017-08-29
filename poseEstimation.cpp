@@ -4,6 +4,10 @@
 #include <fstream>
 #include <math.h>
 #include <stdlib.h>
+#include <mkl.h>
+#include <mkl_lapack.h>
+
+#define LAPACK_ROW_MAJOR   101
 
 int readValues(std::string text,float *variable,int i);
 
@@ -384,6 +388,37 @@ void calculateQ(float *Q, float *Z, float *Y,float mu, int row, int row1)
 
 }
 
+void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size)
+{
+	float *Qtemp = new float [6];
+	float *work = new float [6];
+	float *U = new float [4];
+	float *V = new float [6];
+	float *sigma = new float [9];
+
+	int Qtemprow = 2;
+	int Qtempcol =3;
+	int info =0;
+
+	for(int i = 0;i < data_size;i++)
+	{
+		for(int j = 0;j<2;j++)
+		{
+			for(int k=0;k<3;k++)
+			{
+			Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
+			}
+		}
+		LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', Qtemprow, Qtempcol, Qtemp, Qtemprow, sigma, U, Qtemprow, V, Qtempcol, work);
+	}
+
+	delete[] Qtemp;
+	delete[] work;
+	delete[] U;
+	delete[] V;
+	delete[] sigma;
+}
+
 int main(void)
 {
 	const int row = 2;
@@ -401,6 +436,7 @@ int main(void)
 	int items = 0;
 	float a = 0.0f;
 	int B_items = 0;
+	int lam =1;
 
 	items = readValues("exp.txt",xy,items);
 	rowMean(xy, col, row, mean);
@@ -444,6 +480,7 @@ int main(void)
 	initialize(Z0,Z,row1,row);
 	calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 	calculateQ(Q,Z,Y,mu,row,row1);
+	prox_2norm(Q,M,C,lam/mu,row,row1,data_size);
 
 	delete[] xy;
         delete[] mean;
