@@ -8,6 +8,7 @@
 #include <mkl_lapack.h>
 
 #define LAPACK_ROW_MAJOR   101
+#define min(a,b) ((a)>(b)?(b):(a))
 
 int readValues(std::string text,float *variable,int i);
 
@@ -391,13 +392,13 @@ void calculateQ(float *Q, float *Z, float *Y,float mu, int row, int row1)
 void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size)
 {
 	float *Qtemp = new float [6];
-	float *work = new float [1];
 	float *U = new float [4];
 	float *V = new float [6];
 	float *sigma = new float [9];
 
-	lapack_int Qtemprow = 2;
-	lapack_int Qtempcol =3;
+	float superb[min(2,3)-1];
+	MKL_INT Qtemprow = 2;
+	MKL_INT Qtempcol = 3;
 	int info =0;
 
 	for(int i = 0;i < data_size;i++)
@@ -409,11 +410,14 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 			Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
 			}
 		}
-		LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', Qtemprow, Qtempcol, Qtemp, Qtemprow, sigma, U, Qtemprow, V, Qtempcol, work);
+		info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', Qtemprow, Qtempcol, Qtemp, Qtemprow, sigma, U, Qtemprow, V, Qtempcol, superb);
+		if(info > 0)
+		{
+			cout << "The algorithm computing SVD failed to converge" << endl;
+		}
 	}
 
 	delete[] Qtemp;
-	delete[] work;
 	delete[] U;
 	delete[] V;
 	delete[] sigma;
