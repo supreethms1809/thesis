@@ -391,13 +391,13 @@ void calculateQ(float *Q, float *Z, float *Y,float mu, int row, int row1)
 void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size)
 {
 	float *Qtemp = new float [6];
-	float *work = new float [6];
+	float *work = new float [1];
 	float *U = new float [4];
 	float *V = new float [6];
 	float *sigma = new float [9];
 
-	int Qtemprow = 2;
-	int Qtempcol =3;
+	lapack_int Qtemprow = 2;
+	lapack_int Qtempcol =3;
 	int info =0;
 
 	for(int i = 0;i < data_size;i++)
