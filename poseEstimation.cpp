@@ -401,14 +401,6 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 	float s[COL], u[LDU*ROW], vt[LDVT*COL];
 
 	float *Qtemp = new float [6];
-//	float *U = new float [4];
-//	float *V = new float [6];
-//	float *sigma = new float [9];
-
-//	float superb[min(2,3)-1];
-//	MKL_INT Qtemprow = 2;
-//	MKL_INT Qtempcol = 3;
-//	int info =0;
 
 	for(int i = 0;i < data_size;i++)
 	{
@@ -420,6 +412,7 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 			}
 		}
 		info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, s, u, ldu, vt, ldvt, superb);
+		cout << "value of info is "<< info << endl;
 		if(info > 0)
 		{
 			cout << "The algorithm computing SVD failed to converge" << endl;
@@ -427,9 +420,6 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 	}
 
 	delete[] Qtemp;
-//	delete[] U;
-//	delete[] V;
-//	delete[] sigma;
 }
 
 int main(void)
