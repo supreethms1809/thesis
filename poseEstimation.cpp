@@ -411,17 +411,27 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 			Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
 			}
 		}
-//		for (int p = 0;p<6;p++)
-//		{
-//			cout << "value of Qtemp "<< Qtemp[p] << endl;
-//		}
-//
 		info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, s, u, ldu, vt, ldvt, superb);
-		cout << "value of info is "<< info << endl;
 		if(info > 0)
 		{
 			cout << "The algorithm computing SVD failed to converge" << endl;
 		}
+		if((s[0]+s[1]) <= lam )
+		{
+			s[0] = 0;
+			s[1] = 0;
+		}
+		else if ((s[0] - s[1]) <= lam)
+		{
+			s[0] = (s[0]+s[1]-lam)/2;
+			s[1] = s[0];
+		}
+		else
+		{
+			s[0] = s[0] - lam;
+			s[1] = s[1];
+		}
+
 	}
 
 	delete[] Qtemp;
