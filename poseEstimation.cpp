@@ -411,6 +411,11 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 			Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
 			}
 		}
+//		for (int p = 0;p<6;p++)
+//		{
+//			cout << "value of Qtemp "<< Qtemp[p] << endl;
+//		}
+//
 		info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, s, u, ldu, vt, ldvt, superb);
 		cout << "value of info is "<< info << endl;
 		if(info > 0)
