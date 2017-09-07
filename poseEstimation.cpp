@@ -9,6 +9,11 @@
 
 #define LAPACK_ROW_MAJOR   101
 #define min(a,b) ((a)>(b)?(b):(a))
+#define ROW 2
+#define COL 3
+#define LDA COL
+#define LDU ROW
+#define LDVT COL
 
 int readValues(std::string text,float *variable,int i);
 
@@ -391,15 +396,19 @@ void calculateQ(float *Q, float *Z, float *Y,float mu, int row, int row1)
 
 void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size)
 {
-	float *Qtemp = new float [6];
-	float *U = new float [4];
-	float *V = new float [6];
-	float *sigma = new float [9];
+	MKL_INT m = ROW, n = COL, lda = LDA, ldu = LDU, ldvt = LDVT, info;
+	float superb[min(ROW,COL)-1];
+	float s[COL], u[LDU*ROW], vt[LDVT*COL];
 
-	float superb[min(2,3)-1];
-	MKL_INT Qtemprow = 2;
-	MKL_INT Qtempcol = 3;
-	int info =0;
+	float *Qtemp = new float [6];
+//	float *U = new float [4];
+//	float *V = new float [6];
+//	float *sigma = new float [9];
+
+//	float superb[min(2,3)-1];
+//	MKL_INT Qtemprow = 2;
+//	MKL_INT Qtempcol = 3;
+//	int info =0;
 
 	for(int i = 0;i < data_size;i++)
 	{
@@ -410,7 +419,7 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 			Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
 			}
 		}
-		info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', Qtemprow, Qtempcol, Qtemp, Qtemprow, sigma, U, Qtemprow, V, Qtempcol, superb);
+		info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, s, u, ldu, vt, ldvt, superb);
 		if(info > 0)
 		{
 			cout << "The algorithm computing SVD failed to converge" << endl;
@@ -418,9 +427,9 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 	}
 
 	delete[] Qtemp;
-	delete[] U;
-	delete[] V;
-	delete[] sigma;
+//	delete[] U;
+//	delete[] V;
+//	delete[] sigma;
 }
 
 int main(void)
