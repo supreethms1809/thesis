@@ -399,6 +399,7 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 	MKL_INT m = ROW, n = COL, lda = LDA, ldu = LDU, ldvt = LDVT, info;
 	float superb[min(ROW,COL)-1];
 	float s[COL], u[LDU*ROW], vt[LDVT*COL];
+	float 
 
 	float *Qtemp = new float [6];
 
@@ -431,7 +432,7 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 			s[0] = s[0] - lam;
 			s[1] = s[1];
 		}
-
+				
 	}
 
 	delete[] Qtemp;
