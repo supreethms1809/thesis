@@ -394,12 +394,12 @@ void calculateQ(float *Q, float *Z, float *Y,float mu, int row, int row1)
 
 }
 
-void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size)
+void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size,int lam)
 {
 	MKL_INT m = ROW, n = COL, lda = LDA, ldu = LDU, ldvt = LDVT, info;
 	float superb[min(ROW,COL)-1];
 	float s[COL], u[LDU*ROW], vt[LDVT*COL];
-	float 
+	
 
 	float *Qtemp = new float [6];
 
@@ -499,7 +499,7 @@ int main(void)
 	initialize(Z0,Z,row1,row);
 	calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 	calculateQ(Q,Z,Y,mu,row,row1);
-	prox_2norm(Q,M,C,lam/mu,row,row1,data_size);
+	prox_2norm(Q,M,C,lam/mu,row,row1,data_size,lam);
 
 	delete[] xy;
         delete[] mean;
