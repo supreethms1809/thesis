@@ -20,7 +20,7 @@ int readValues(std::string text,float *variable,int i);
 using std::string;
 using namespace std;
 
-int readValues(std::string text, float *variable, int i)
+int readValues(char *text, float *variable, int i)
 {
  	float temp;
 	//cout << "value of text " << text << endl;
@@ -400,7 +400,7 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 	float superb[min(ROW,COL)-1];
 	float s[COL], u[LDU*ROW], vt[LDVT*COL];
 	
-
+//	float *sigma = 
 	float *Qtemp = new float [6];
 
 	for(int i = 0;i < data_size;i++)
@@ -417,6 +417,7 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 		{
 			cout << "The algorithm computing SVD failed to converge" << endl;
 		}
+		cout << "value of s is "<< endl << s[0] << endl << s[1] << endl << s[2] << endl << s[3] << endl;
 		if((s[0]+s[1]) <= lam )
 		{
 			s[0] = 0;
