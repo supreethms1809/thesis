@@ -39,6 +39,20 @@ int readValues(char *text, float *variable, int i)
 	return i;
 }
 
+void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda ) 
+{
+        MKL_INT i, j;
+        printf( "\n %s\n", desc );
+        for( i = 0; i < m; i++ ) 
+	{
+       		for( j = 0; j < n; j++ )
+		{
+		printf( " %6.2f", a[i*lda+j] );
+		}
+        printf( "\n" );
+	}
+}
+
 void displayValues(float *variable, int items)
 {
 	for (int i =0; i < items; i++)
@@ -398,10 +412,16 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 {
 	MKL_INT m = ROW, n = COL, lda = LDA, ldu = LDU, ldvt = LDVT, info;
 	float superb[min(ROW,COL)-1];
-	float s[COL], u[LDU*ROW], vt[LDVT*COL];
+	//float s[COL], u[LDU*ROW], vt[LDVT*COL];
 	
-//	float *sigma = 
+	float *sigma = new float[COL];
+	float *u = new float[LDU*ROW];
+	float *vt = new float[LDVT*COL];
 	float *Qtemp = new float [6];
+
+	cout << "value of COL "<< COL << endl;
+	cout << "value of LDU*ROW " << LDU*ROW << endl;
+	cout << "value of LDVT*COL "<< LDVT*COL << endl;
 
 	for(int i = 0;i < data_size;i++)
 	{
@@ -412,31 +432,35 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 			Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
 			}
 		}
-		info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, s, u, ldu, vt, ldvt, superb);
+		info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
 		if(info > 0)
 		{
 			cout << "The algorithm computing SVD failed to converge" << endl;
 		}
-		cout << "value of s is "<< endl << s[0] << endl << s[1] << endl << s[2] << endl << s[3] << endl;
-		if((s[0]+s[1]) <= lam )
+		cout << "value of i " << i << endl;
+		cout << "value of sigma is "<< endl << sigma[0] << endl << sigma[1] << endl << sigma[2] << endl << sigma[3] << endl;
+		if((sigma[0]+sigma[1]) <= lam )
 		{
-			s[0] = 0;
-			s[1] = 0;
+			sigma[0] = 0;
+			sigma[1] = 0;
 		}
-		else if ((s[0] - s[1]) <= lam)
+		else if ((sigma[0] - sigma[1]) <= lam)
 		{
-			s[0] = (s[0]+s[1]-lam)/2;
-			s[1] = s[0];
+			sigma[0] = (sigma[0]+sigma[1]-lam)/2;
+			sigma[1] = sigma[0];
 		}
 		else
 		{
-			s[0] = s[0] - lam;
-			s[1] = s[1];
+			sigma[0] = sigma[0] - lam;
+			sigma[1] = sigma[1];
 		}
 				
 	}
 
 	delete[] Qtemp;
+	delete[] sigma;
+	delete[] u;
+	delete[] vt;
 }
 
 int main(void)
