@@ -39,7 +39,7 @@ int readValues(char *text, float *variable, int i)
 	return i;
 }
 
-void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda ) 
+void print_matrix( char *desc, MKL_INT m, MKL_INT n, float *a, MKL_INT lda ) 
 {
         MKL_INT i, j;
         printf( "\n %s\n", desc );
@@ -419,9 +419,6 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 	float *vt = new float[LDVT*COL];
 	float *Qtemp = new float [6];
 
-	cout << "value of COL "<< COL << endl;
-	cout << "value of LDU*ROW " << LDU*ROW << endl;
-	cout << "value of LDVT*COL "<< LDVT*COL << endl;
 
 	for(int i = 0;i < data_size;i++)
 	{
@@ -432,13 +429,13 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 			Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
 			}
 		}
+		print_matrix("Qtemp matrix",ROW,COL,Qtemp,lda);
 		info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
 		if(info > 0)
 		{
 			cout << "The algorithm computing SVD failed to converge" << endl;
 		}
-		cout << "value of i " << i << endl;
-		cout << "value of sigma is "<< endl << sigma[0] << endl << sigma[1] << endl << sigma[2] << endl << sigma[3] << endl;
+		
 		if((sigma[0]+sigma[1]) <= lam )
 		{
 			sigma[0] = 0;
