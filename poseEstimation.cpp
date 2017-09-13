@@ -420,6 +420,10 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 	float *vt = new float[LDVT*COL];
 	float *Qtemp = new float [6];
 
+	float *sigma1 = new float[ROW*ROW];
+	float *vt1 = new float[ROW*COL];
+	float *Qtemp1 = new float [6];
+
 
 	for(int i = 0;i < data_size;i++)
 	{
@@ -430,12 +434,12 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 			Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
 			}
 		}
-		print_matrix("Qtemp matrix",ROW,COL,Qtemp);
+		//print_matrix("Qtemp matrix",ROW,COL,Qtemp);
 		info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
 
-		print_matrix("U matrix",ROW,ROW,u);
-		print_matrix("sigma matrix",1,COL,sigma);
-		print_matrix("vt matrix",COL,COL,vt);
+		//print_matrix("U matrix",ROW,ROW,u);
+		//print_matrix("sigma matrix",1,COL,sigma);
+		//print_matrix("vt matrix",COL,COL,vt);
 		if(info > 0)
 		{
 			cout << "The algorithm computing SVD failed to converge" << endl;
@@ -456,6 +460,7 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 			sigma[0] = sigma[0] - lam;
 			sigma[1] = sigma[1];
 		}
+			
 				
 	}
 
@@ -463,6 +468,11 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 	delete[] sigma;
 	delete[] u;
 	delete[] vt;
+	delete[] Qtemp1;
+	delete[] sigma1;
+	delete[] vt1;
+
+
 }
 
 int main(void)
