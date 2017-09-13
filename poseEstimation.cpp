@@ -460,8 +460,28 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 			sigma[0] = sigma[0] - lam;
 			sigma[1] = sigma[1];
 		}
+		for(int j = 0;j<ROW;j++)
+		{
+			for(int k =0;k<COL;k++)
+			{
+				vt1[(j*COL)+k] = vt[(j*COL) + k];
+			}
+		}	
+		for(int j = 0;j<ROW;j++)
+		{
+			for(int k =0;k<ROW;k++)
+			{
+				if(j == k)
+				{
+				sigma1[(j*COL)+k] = sigma[j];
+				}
+				else
+				{
+				sigma1[(j*COL)+k] = 0.0f;
+				}
+			}
+		}	
 			
-				
 	}
 
 	delete[] Qtemp;
