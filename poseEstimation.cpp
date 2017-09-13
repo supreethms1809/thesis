@@ -39,7 +39,7 @@ int readValues(char *text, float *variable, int i)
 	return i;
 }
 
-void print_matrix( char *desc, MKL_INT m, MKL_INT n, float *a, MKL_INT lda ) 
+void print_matrix( char *desc, MKL_INT m, MKL_INT n, float *a) 
 {
         MKL_INT i, j;
         printf( "\n %s\n", desc );
@@ -47,9 +47,9 @@ void print_matrix( char *desc, MKL_INT m, MKL_INT n, float *a, MKL_INT lda )
 	{
        		for( j = 0; j < n; j++ )
 		{
-		printf( " %6.2f", a[i*lda+j] );
+		cout << a[i*n+j] << "\t";
 		}
-        printf( "\n" );
+        cout << "\n" ;
 	}
 }
 
@@ -363,7 +363,7 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 
 	//denominator
 	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
-	//displayValues(Zden, row1*row1);
+	displayValues(Zden, row1*row1);
 
 	//Inverse calculation via guass-jordon method
 	AugmentIdentity(Zden, Zdenaug, row1);
@@ -374,7 +374,7 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
         cpuMatrixMult(Znum, ZdenInverse, Z, row, row1, row1);	
-
+	//displayValues(Z,row*row1);
 
 	delete [] temp;	
 	delete [] temp2;
@@ -429,7 +429,7 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 			Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
 			}
 		}
-		print_matrix("Qtemp matrix",ROW,COL,Qtemp,lda);
+//		print_matrix("Qtemp matrix",ROW,COL,Qtemp,lda);
 		info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
 		if(info > 0)
 		{
@@ -521,6 +521,9 @@ int main(void)
 	initialize(Z0,Z,row1,row);
 	calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 	calculateQ(Q,Z,Y,mu,row,row1);
+	//displayValues(BBt,row1*row1);
+	
+
 	prox_2norm(Q,M,C,lam/mu,row,row1,data_size,lam);
 
 	delete[] xy;
