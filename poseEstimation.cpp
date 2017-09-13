@@ -481,7 +481,17 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 				}
 			}
 		}	
-			
+		cpuMatrixMult(u,sigma1,Qtemp1,ROW,ROW,ROW);
+		cpuMatrixMult(Qtemp1,vt1,Qtemp1,ROW,ROW,COL);
+		for(int j = 0;j<2;j++)
+                {
+                        for(int k=0;k<3;k++)
+                        {
+                        M[(3 * i) + (j*col) + k] = Qtemp1[(j * 3) + k];
+                        }
+                }
+
+		C[i] = sigma1[0];
 	}
 
 	delete[] Qtemp;
@@ -559,9 +569,9 @@ int main(void)
 	calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 	calculateQ(Q,Z,Y,mu,row,row1);
 	//displayValues(Q,row*row1);
-	
 
 	prox_2norm(Q,M,C,lam/mu,row,row1,data_size,lam);
+	//displayValues(C,data_size);
 
 	delete[] xy;
         delete[] mean;
