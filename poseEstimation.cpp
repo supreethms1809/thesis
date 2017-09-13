@@ -502,7 +502,17 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 	delete[] sigma1;
 	delete[] vt1;
 
+}
 
+void updateDualvariable(float *Y,float mu,float *M,float *Z,int row,int row1)
+{
+	for(int i=0;i<row;i++)
+	{
+		for(int j = 0;j<row1;j++)
+		{
+			Y[(i*row1)+j] += mu*(M[(i*row1)+j] - Z[(i*row1)+j]); 
+		}
+	}
 }
 
 int main(void)
@@ -571,7 +581,8 @@ int main(void)
 	//displayValues(Q,row*row1);
 
 	prox_2norm(Q,M,C,lam/mu,row,row1,data_size,lam);
-	//displayValues(C,data_size);
+	updateDualvariable(Y,mu,M,Z,row,row1);
+	displayValues(Y,row*row1);
 
 	delete[] xy;
         delete[] mean;
