@@ -137,10 +137,11 @@ float meanCalc(float *variable, int col, int row)
 	{
 		for (int j = 0;j < col; j++)
 		{
-		sum += abs(variable[(i*col) + j]);
-		//cout << "value of varialbe is " << variable[(j*col) + i] << endl;
+		sum += fabs(variable[(i*col) + j]);
+	//	cout << "value of varialbe is " << fabs(variable[(i*col) + j]) << endl;
 		}
 	}
+	//cout << "value of sum is "<<sum << endl;
 	mean = sum / (col*row);
 	//cout << "value of mean " << mean << endl;
 	mu = 1 / mean;
@@ -363,7 +364,7 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 
 	//denominator
 	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
-	displayValues(Zden, row1*row1);
+	//displayValues(Zden, row1*row1);
 
 	//Inverse calculation via guass-jordon method
 	AugmentIdentity(Zden, Zdenaug, row1);
@@ -512,7 +513,9 @@ int main(void)
 	float mu = 0.0f;
 	initializeZero(Z,row1,row);
 	initializeZero(Y,row1,row);
-
+	
+	//displayValues(xy,items);
+	
 	mu = meanCalc(xy,col,row);
 	//cout << "value of mu is " << mu << endl;
 
