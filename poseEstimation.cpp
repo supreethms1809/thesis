@@ -515,6 +515,41 @@ void updateDualvariable(float *Y,float mu,float *M,float *Z,int row,int row1)
 	}
 }
 
+float febNorm(float *a, int row, int col)
+{
+	float norm = 0.0f;
+	float sum = 0.0f;
+	for(int i=0;i<row;i++)
+	{
+		for(int j=0;j<col;j++)
+		{
+		  sum +=(fabs(a[(i*col)+j]) * fabs(a[(i*col)+j]));
+		}
+	}
+	norm=sqrt(sum);
+	return norm;
+}
+
+void resCalc(float PrimRes, float DualRes, float *M, float *Z, float *ZO,float mu, int row, int row1)
+{
+	float *MminusZ = new float [row*row1];
+	float *ZminusZO = new float [row*row1];
+
+	for(int i = 0; i< row ;i++)
+	{
+		for(int j = 0; j<row1 ; j++)
+		{
+			MminusZ[(i*row1)+j] = M[(i*row1)+j] - Z[(i*row1)+j];
+			ZminusZO[(i*row1)+j] = Z[(i*row1)+j] - ZO[(i*row1)+j];
+		}
+	}
+	PrimRes = febNorm(MminusZ,row,row1)/febNorm(ZO,row,row1);
+	DualRes = mu * febNorm(ZminusZO,row,row1)/febNorm(ZO,row,row1);
+	
+	delete[] MminusZ;
+	delete[] ZminusZO;
+}
+
 int main(void)
 {
 	const int row = 2;
@@ -562,9 +597,12 @@ int main(void)
 	// auxiliary variables for ADMM
 	float *Z = new float [row*row1];
 	float *Y = new float [row*row1];
-	float *Z0 = new float [row*row1];
+	float *ZO = new float [row*row1];
 	float *Q = new float [row*row1];
 	float mu = 0.0f;
+	float PrimRes = 0.0f;
+	float DualRes = 0.0f;
+	
 	initializeZero(Z,row1,row);
 	initializeZero(Y,row1,row);
 	
@@ -575,14 +613,17 @@ int main(void)
 
 	TransposeOnCPU(B,B_transpose,row1,col);
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
-	initialize(Z0,Z,row1,row);
+	initialize(ZO,Z,row1,row);
 	calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 	calculateQ(Q,Z,Y,mu,row,row1);
 	//displayValues(Q,row*row1);
 
 	prox_2norm(Q,M,C,lam/mu,row,row1,data_size,lam);
 	updateDualvariable(Y,mu,M,Z,row,row1);
-	displayValues(Y,row*row1);
+	resCalc(PrimRes,DualRes,M,Z,ZO,mu,row,row1);
+	cout << "value of PrimRes "<< PrimRes << endl;
+	cout << "value of DualRes "<< DualRes << endl;
+//	displayValues(Y,row*row1);
 
 	delete[] xy;
         delete[] mean;
@@ -596,7 +637,7 @@ int main(void)
 	delete[] T;
 	delete[] Z;
 	delete[] Y;
-	delete[] Z0;
+	delete[] ZO;
 	delete[] Q;
 
 }
