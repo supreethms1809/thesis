@@ -547,6 +547,14 @@ void resCalc(float PrimRes, float DualRes, float *M, float *Z, float *ZO,float m
 	
 	PrimRes = febNorm(MminusZ,row,row1)/febNorm(ZO,row,row1);
 	DualRes = mu * febNorm(ZminusZO,row,row1)/febNorm(ZO,row,row1);
+	if(isnan(PrimRes))
+	{
+	PrimRes = 10000000.0;
+	}
+	if(isnan(DualRes))
+	{
+	DualRes = 10000000.0;
+	}
 	cout <<" value of PrimRes "<<PrimRes<<endl;
 	cout << "value of Dual Res "<< DualRes << endl;
 	
@@ -606,8 +614,8 @@ int main(void)
 	float *ZO = new float [row*row1];
 	float *Q = new float [row*row1];
 	float mu = 0.0f;
-	float PrimRes = 0.0f;
-	float DualRes = 0.0f;
+	float PrimRes;
+	float DualRes;
 	
 	initializeZero(Z,row1,row);
 	initializeZero(Y,row1,row);
@@ -630,8 +638,8 @@ int main(void)
 		prox_2norm(Q,M,C,lam/mu,row,row1,data_size,lam);
 		updateDualvariable(Y,mu,M,Z,row,row1);
 		resCalc(PrimRes,DualRes,M,Z,ZO,mu,row,row1);
-		//cout << "value of PrimRes "<< PrimRes << endl;
-		//cout << "value of DualRes "<< DualRes << endl;
+		cout << "value of PrimRes "<< PrimRes << endl;
+		cout << "value of DualRes "<< DualRes << endl;
 		//displayValues(Y,row*row1);
 		
 		
@@ -640,8 +648,10 @@ int main(void)
 			cout << "Iter "<<iter <<": PrimRes = "<<PrimRes <<", DualRes = "<<DualRes<<", mu = "<< mu <<endl; 
 		}
 
+		cout << "PrimRes < tol " << (PrimRes<tol) << endl;
 		if((PrimRes < tol) && (DualRes < tol))
 		{
+		cout << "coming inside if block" << endl;
 		break;
 		}
 		else
