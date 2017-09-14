@@ -543,6 +543,7 @@ void resCalc(float PrimRes, float DualRes, float *M, float *Z, float *ZO,float m
 			ZminusZO[(i*row1)+j] = Z[(i*row1)+j] - ZO[(i*row1)+j];
 		}
 	}
+	
 	PrimRes = febNorm(MminusZ,row,row1)/febNorm(ZO,row,row1);
 	DualRes = mu * febNorm(ZminusZO,row,row1)/febNorm(ZO,row,row1);
 	
@@ -621,9 +622,9 @@ int main(void)
 	prox_2norm(Q,M,C,lam/mu,row,row1,data_size,lam);
 	updateDualvariable(Y,mu,M,Z,row,row1);
 	resCalc(PrimRes,DualRes,M,Z,ZO,mu,row,row1);
-	cout << "value of PrimRes "<< PrimRes << endl;
-	cout << "value of DualRes "<< DualRes << endl;
-//	displayValues(Y,row*row1);
+	//cout << "value of PrimRes "<< PrimRes << endl;
+	//cout << "value of DualRes "<< DualRes << endl;
+	//displayValues(Y,row*row1);
 
 	delete[] xy;
         delete[] mean;
