@@ -557,7 +557,7 @@ int main(void)
 	const int col = 15;
 	const int row1 = 384;
 	const int col1 = 15;
-
+	float tol = 1e-10;
 
 	float *xy = new float [row*col];
 	float *mean = new float [row];
@@ -625,6 +625,25 @@ int main(void)
 	//cout << "value of PrimRes "<< PrimRes << endl;
 	//cout << "value of DualRes "<< DualRes << endl;
 	//displayValues(Y,row*row1);
+
+	if((PrimRes < tol) && (DualRes < tol))
+	{
+	break;
+	}
+	else
+	{
+		if(PrimRes > (10*DualRes))
+		{
+			mu = 2 * mu;
+		}
+		else if(DualRes > (10*PrimRes))
+		{
+			mu = mu/2;
+		}
+		else
+		{
+		}
+	}
 
 	delete[] xy;
         delete[] mean;
