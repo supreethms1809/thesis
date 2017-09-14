@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <mkl.h>
 #include <mkl_lapack.h>
+#include <limits.h>
 
 #define LAPACK_ROW_MAJOR   101
 #define min(a,b) ((a)>(b)?(b):(a))
@@ -546,6 +547,8 @@ void resCalc(float PrimRes, float DualRes, float *M, float *Z, float *ZO,float m
 	
 	PrimRes = febNorm(MminusZ,row,row1)/febNorm(ZO,row,row1);
 	DualRes = mu * febNorm(ZminusZO,row,row1)/febNorm(ZO,row,row1);
+	cout <<" value of PrimRes "<<PrimRes<<endl;
+	cout << "value of Dual Res "<< DualRes << endl;
 	
 	delete[] MminusZ;
 	delete[] ZminusZO;
@@ -569,6 +572,8 @@ int main(void)
 	float a = 0.0f;
 	int B_items = 0;
 	int lam =1;
+	bool verb = true;
+	float inf;
 
 	items = readValues("exp.txt",xy,items);
 	rowMean(xy, col, row, mean);
@@ -614,34 +619,44 @@ int main(void)
 
 	TransposeOnCPU(B,B_transpose,row1,col);
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
-	initialize(ZO,Z,row1,row);
-	calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
-	calculateQ(Q,Z,Y,mu,row,row1);
-	//displayValues(Q,row*row1);
 
-	prox_2norm(Q,M,C,lam/mu,row,row1,data_size,lam);
-	updateDualvariable(Y,mu,M,Z,row,row1);
-	resCalc(PrimRes,DualRes,M,Z,ZO,mu,row,row1);
-	//cout << "value of PrimRes "<< PrimRes << endl;
-	//cout << "value of DualRes "<< DualRes << endl;
-	//displayValues(Y,row*row1);
+	for(int iter = 0; iter < 500; iter++)
+	{
+		initialize(ZO,Z,row1,row);
+		calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
+		calculateQ(Q,Z,Y,mu,row,row1);
+		//displayValues(Q,row*row1);
 
-	if((PrimRes < tol) && (DualRes < tol))
-	{
-	break;
-	}
-	else
-	{
-		if(PrimRes > (10*DualRes))
+		prox_2norm(Q,M,C,lam/mu,row,row1,data_size,lam);
+		updateDualvariable(Y,mu,M,Z,row,row1);
+		resCalc(PrimRes,DualRes,M,Z,ZO,mu,row,row1);
+		//cout << "value of PrimRes "<< PrimRes << endl;
+		//cout << "value of DualRes "<< DualRes << endl;
+		//displayValues(Y,row*row1);
+		
+		
+		if ((verb == true) && ((iter%10) == 0))
 		{
-			mu = 2 * mu;
+			cout << "Iter "<<iter <<": PrimRes = "<<PrimRes <<", DualRes = "<<DualRes<<", mu = "<< mu <<endl; 
 		}
-		else if(DualRes > (10*PrimRes))
+
+		if((PrimRes < tol) && (DualRes < tol))
 		{
-			mu = mu/2;
+		break;
 		}
 		else
 		{
+			if(PrimRes > (10*DualRes))
+			{
+				mu = 2 * mu;
+			}
+			else if(DualRes > (10*PrimRes))
+			{
+				mu = mu/2;
+			}
+			else
+			{
+			}
 		}
 	}
 
