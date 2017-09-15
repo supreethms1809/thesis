@@ -308,10 +308,12 @@ void cpuInverseOfMatrix(float *matrix, int n)
 			{
 				for (int l = 0; l < (2 * n); l++)
 				{
+				
 				float tempMul, tempDiv;
-				tempMul = matrix[(2 * m*n) + l] * tempIni;
-				tempDiv = tempMul / matrix[(2 * m*n) + m];
-				matrix[(k * 2 * n) + l] = matrix[(k * 2 * n) + l] - tempDiv;
+				matrix[(k * 2 * n) + l] = matrix[(k * 2 * n) + l] -  (matrix[(2 * m*n) + l] * tempIni /  matrix[(2 * m*n) + m]);
+				//tempMul = matrix[(2 * m*n) + l] * tempIni;
+				//tempDiv = tempMul / matrix[(2 * m*n) + m];
+				//matrix[(k * 2 * n) + l] = matrix[(k * 2 * n) + l] - tempDiv;
 				}
 			}
 
@@ -627,6 +629,7 @@ int main(void)
 
 	TransposeOnCPU(B,B_transpose,row1,col);
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
+	//Zden
 
 	for(int iter = 0; iter < 10; iter++)
 	{
