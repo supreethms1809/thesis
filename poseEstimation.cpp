@@ -283,7 +283,7 @@ void cpuInverseOfMatrix(float *matrix, int n)
 			}
 			else
 			{
-			                                                                                                                                                                                                 for (int i = 0; i < (2 * n); i++)
+			        for (int i = 0; i < (2 * n); i++)
 				{
 				matrix[(m * 2 * n) + i] = matrix[((m + 1) * 2 * n) + i] + matrix[(m * 2 * n) + i];
 				}
@@ -310,10 +310,9 @@ void cpuInverseOfMatrix(float *matrix, int n)
 				{
 				
 				float tempMul, tempDiv;
-				matrix[(k * 2 * n) + l] = matrix[(k * 2 * n) + l] -  (matrix[(2 * m*n) + l] * tempIni /  matrix[(2 * m*n) + m]);
-				//tempMul = matrix[(2 * m*n) + l] * tempIni;
-				//tempDiv = tempMul / matrix[(2 * m*n) + m];
-				//matrix[(k * 2 * n) + l] = matrix[(k * 2 * n) + l] - tempDiv;
+				tempMul = matrix[(2 * m*n) + l] * tempIni;
+				tempDiv = tempMul / matrix[(2 * m*n) + m];
+				matrix[(k * 2 * n) + l] = matrix[(k * 2 * n) + l] - tempDiv;
 				}
 			}
 
@@ -549,16 +548,6 @@ void resCalc(float *PrimRes, float *DualRes, float *M, float *Z, float *ZO,float
 	
 	*PrimRes = febNorm(MminusZ,row,row1)/febNorm(ZO,row,row1);
 	*DualRes = mu * febNorm(ZminusZO,row,row1)/febNorm(ZO,row,row1);
-//	if(isnan(*PrimRes))
-//	{
-//	*PrimRes = 10000000.0;
-//	}
-//	if(isnan(*DualRes))
-//	{
-//	*DualRes = 10000000.0;
-//	}
-//	cout <<" value of PrimRes "<< *PrimRes <<endl;
-//	cout << "value of Dual Res "<< *DualRes << endl;
 	
 	delete[] MminusZ;
 	delete[] ZminusZO;
