@@ -1,5 +1,5 @@
 CC = icc
-OPT = -O3 -g -mkl -heap-arrays 
+OPT = -qopenmp -O3 -g -mkl -heap-arrays 
 
 SRCS = poseEstimation.cpp
 

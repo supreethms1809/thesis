@@ -425,7 +425,7 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 	float *vt1 = new float[ROW*COL];
 	float *Qtemp1 = new float [6];
 
-
+//#pragma omp parallel for
 	for(int i = 0;i < data_size;i++)
 	{
 		for(int j = 0;j<2;j++)
@@ -628,9 +628,10 @@ int main(void)
 	TransposeOnCPU(B,B_transpose,row1,col);
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
 
-	for(int iter = 0; iter < 500; iter++)
+	for(int iter = 0; iter < 10; iter++)
 	{
 		initialize(ZO,Z,row1,row);
+		displayValues(Z,row1*row);
 		calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 		calculateQ(Q,Z,Y,mu,row,row1);
 		//displayValues(Q,row*row1);
@@ -642,7 +643,7 @@ int main(void)
 		
 		//if ((verb == true) && ((iter%10) == 0))
 		//{
-			cout << "Iter "<<iter <<": PrimRes = "<<PrimRes <<", DualRes = "<<DualRes<<", mu = "<< mu <<endl; 
+			cout << "Iter "<< iter+1 <<": PrimRes = "<<PrimRes <<", DualRes = "<<DualRes<<", mu = "<< mu <<endl; 
 		//}
 
 		if((PrimRes < tol) && (DualRes < tol))
