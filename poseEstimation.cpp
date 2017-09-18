@@ -525,7 +525,7 @@ float febNorm(float *a, int row, int col)
 	{
 		for(int j=0;j<col;j++)
 		{
-		  sum +=(fabs(a[(i*col)+j]) * fabs(a[(i*col)+j]));
+		  sum +=(a[(i*col)+j]) * (a[(i*col)+j]);
 		}
 	}
 	norm=sqrt(sum);

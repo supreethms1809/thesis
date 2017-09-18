@@ -518,17 +518,30 @@ void updateDualvariable(double *Y,double mu,double *M,double *Z,int row,int row1
 
 double febNorm(double *a, int row, int col)
 {
-	double norm = 0.0f;
-	double sum = 0.0f;
-	for(int i=0;i<row;i++)
+	double norm = 0.0;
+	double sum = 0.0;
+	double *a_transpose = new double [col*row];
+	double *ata = new double [col*col];
+
+	TransposeOnCPU(a,a_transpose,row,col);
+        cpuTransMatrixMult(a_transpose, a, ata, col, row);
+
+	for(int i=0;i<col;i++)
 	{
 		for(int j=0;j<col;j++)
 		{
-		  sum +=(fabs(a[(i*col)+j]) * fabs(a[(i*col)+j]));
+//			sum += a[(i*col)+j] * a[(i*col)+j];
+			if(i==j)
+			{
+		  	sum +=(ata[(i*col)+j]);
+			}
 		}
 	}
-	norm=sqrt(sum);
-	return norm;
+	norm=sqrt(double(sum));
+
+	delete[] a_transpose;
+	delete[] ata;
+	return double(norm);
 }
 
 void resCalc(double *PrimRes, double *DualRes, double *M, double *Z, double *ZO,double mu, int row, int row1)
@@ -541,10 +554,15 @@ void resCalc(double *PrimRes, double *DualRes, double *M, double *Z, double *ZO,
 		for(int j = 0; j<row1 ; j++)
 		{
 			MminusZ[(i*row1)+j] = M[(i*row1)+j] - Z[(i*row1)+j];
+	//		cout << MminusZ[(i*row1)+j] << endl;
 			ZminusZO[(i*row1)+j] = Z[(i*row1)+j] - ZO[(i*row1)+j];
 		}
 	}
+	cout << febNorm(MminusZ,row,row1) << endl;
+	cout << febNorm(ZO,row,row1) << endl;
+//	cout << febNorm(ZminusZO,row,row1) << endl;
 	
+		
 	*PrimRes = febNorm(MminusZ,row,row1)/febNorm(ZO,row,row1);
 	*DualRes = mu * febNorm(ZminusZO,row,row1)/febNorm(ZO,row,row1);
 	
@@ -572,7 +590,7 @@ int main(void)
 	int lam =1;
 	bool verb = true;
 
-	items = readValues("exp.txt",xy,items);
+	items = readValues("messi2.txt",xy,items);
 	rowMean(xy, col, row, mean);
         Scalc(xy, col, row, mean);
         rowMean(xy, col, row, mean);
@@ -618,18 +636,18 @@ int main(void)
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
 	//Zden
 
-	for(int iter = 0; iter < 10; iter++)
+	for(int iter = 0; iter < 50; iter++)
 	{
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
 		calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 		calculateQ(Q,Z,Y,mu,row,row1);
-		//displayValues(Q,row*row1);
+		displayValues(Z,row*row1);
 
 		prox_2norm(Q,M,C,lam/mu,row,row1,data_size,lam);
 		updateDualvariable(Y,mu,M,Z,row,row1);
 		resCalc(&PrimRes,&DualRes,M,Z,ZO,mu,row,row1);
-		//displayValues(Y,row*row1);
+		//displayValues(M,row*row1);
 		
 		//if ((verb == true) && ((iter%10) == 0))
 		//{
