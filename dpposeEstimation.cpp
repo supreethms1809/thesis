@@ -459,7 +459,6 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 		//cout << "iteration i : "<< i << endl;
 		//print_matrix("U matrix",ROW,ROW,u);
 		//print_matrix("sigma matrix",1,COL,sigma);
-		//cout << "value of constant "<<constant<<endl;
 		//print_matrix("vt matrix",COL,COL,vt);
 		if(info > 0)
 		{
@@ -481,6 +480,9 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 			sigma[0] = sigma[0] - constant;
 			sigma[1] = sigma[1];
 		}
+
+		//print_matrix("sigma matrix in between",1,COL,sigma);
+		
 		for(int j = 0;j<ROW;j++)
 		{
 			for(int k =0;k<COL;k++)
@@ -494,11 +496,11 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 			{
 				if(j == k)
 				{
-				sigma1[(j*COL)+k] = sigma[j];
+				sigma1[(j*ROW)+k] = sigma[j];
 				}
 				else
 				{
-				sigma1[(j*COL)+k] = 0.0;
+				sigma1[(j*ROW)+k] = 0.0;
 				}
 			}
 		}	
@@ -547,8 +549,6 @@ double febNorm(double *a, int row, int col)
 
 	TransposeOnCPU(a,a_transpose,row,col);
         cpuTransMatrixMult(a_transpose, a, ata, col, row);
-//	dump_to_file("MminusZ.txt",MminusZ,row,row1);
-//	print_matrix("ata matrix",col,col,ata);
 	for(int i=0;i<col;i++)
 	{
 		for(int j=0;j<col;j++)
@@ -593,7 +593,7 @@ double febNorm1(double *a, int row, int col)
                         }
                 }
         }
-//      cout << "value of sum is "<<sum<<endl;
+        cout << "value of sum is "<<sum<<endl;
         norm=sqrt(double(sum));
 
         delete[] a_transpose;
@@ -694,7 +694,7 @@ int main(void)
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
 	//Zden
 
-	for(int iter = 0; iter < 500; iter++)
+	for(int iter = 0; iter < 8; iter++)
 	{
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
