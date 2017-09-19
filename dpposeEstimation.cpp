@@ -47,7 +47,10 @@ void dump_to_file(char *filename, double *matrix, int row, int col)
 	{
 		for(int j = 0;j<col ;j++)
 		{
-		fs << matrix[i*col+j] << "\t";
+		//if(i==j)
+		//{
+		fs << matrix[i*col+j] << "\n" ;
+		//}
 		}
 	fs << "\n";
 	}
@@ -453,8 +456,9 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 		//print_matrix("Qtemp matrix",ROW,COL,Qtemp);
 		info = LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
 
+		cout << "iteration i : "<< i << endl;
 		//print_matrix("U matrix",ROW,ROW,u);
-		//print_matrix("sigma matrix",1,COL,sigma);
+		print_matrix("sigma matrix",1,COL,sigma);
 		//print_matrix("vt matrix",COL,COL,vt);
 		if(info > 0)
 		{
@@ -570,6 +574,9 @@ double febNorm1(double *a, int row, int col)
 
         TransposeOnCPU(a,a_transpose,row,col);
         cpuTransMatrixMult(a_transpose, a, ata, col, row);
+        dump_to_file("a.txt",a,row,col);
+        dump_to_file("atranspose.txt",a_transpose,col,row);
+	
         dump_to_file("ata.txt",ata,col,col);
 //      print_matrix("ata matrix",col,col,ata);
         for(int i=0;i<col;i++)
@@ -579,7 +586,7 @@ double febNorm1(double *a, int row, int col)
 //                      sum += a[(i*col)+j] * a[(i*col)+j];
                         if(i==j)
                         {
-                        sum += double((ata[(i*col)+j]));
+                        sum += double(fabs(ata[(i*col)+j]));
                         }
                 }
         }
@@ -605,7 +612,7 @@ void resCalc(double *PrimRes, double *DualRes, double *M, double *Z, double *ZO,
 			ZminusZO[(i*row1)+j] = Z[(i*row1)+j] - ZO[(i*row1)+j];
 		}
 	}
-//	dump_to_file("MminusZ.txt",MminusZ,row,row1);	
+	dump_to_file("M.txt",M,row,row1);	
 //	cout << febNorm(MminusZ,row,row1) << endl;
 //	cout << febNorm(ZO,row,row1) << endl;
 //	cout << febNorm(ZminusZO,row,row1) << endl;
@@ -684,7 +691,7 @@ int main(void)
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
 	//Zden
 
-	for(int iter = 0; iter < 1; iter++)
+	for(int iter = 0; iter < 8; iter++)
 	{
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
