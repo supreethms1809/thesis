@@ -428,7 +428,7 @@ void calculateQ(double *Q, double *Z, double *Y,double mu, int row, int row1)
 
 }
 
-void prox_2norm(double *Q, double *M, double *C, double constant, int row, int col, int data_size,int lam)
+void prox_2norm(double *Q, double *M, double *C, double constant, int row, int col, int data_size)
 {
 	MKL_INT m = ROW, n = COL, lda = LDA, ldu = LDU, ldvt = LDVT, info;
 	double superb[min(ROW,COL)-1];
@@ -456,28 +456,29 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 		//print_matrix("Qtemp matrix",ROW,COL,Qtemp);
 		info = LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
 
-		cout << "iteration i : "<< i << endl;
+		//cout << "iteration i : "<< i << endl;
 		//print_matrix("U matrix",ROW,ROW,u);
-		print_matrix("sigma matrix",1,COL,sigma);
+		//print_matrix("sigma matrix",1,COL,sigma);
+		//cout << "value of constant "<<constant<<endl;
 		//print_matrix("vt matrix",COL,COL,vt);
 		if(info > 0)
 		{
 			cout << "The algorithm computing SVD failed to converge" << endl;
 		}
 		
-		if((sigma[0]+sigma[1]) <= lam )
+		if((sigma[0]+sigma[1]) <= constant )
 		{
 			sigma[0] = 0;
 			sigma[1] = 0;
 		}
-		else if ((sigma[0] - sigma[1]) <= lam)
+		else if ((sigma[0] - sigma[1]) <= constant)
 		{
-			sigma[0] = (sigma[0]+sigma[1]-lam)/2;
+			sigma[0] = ((sigma[0]+sigma[1])-constant)/2;
 			sigma[1] = sigma[0];
 		}
 		else
 		{
-			sigma[0] = sigma[0] - lam;
+			sigma[0] = sigma[0] - constant;
 			sigma[1] = sigma[1];
 		}
 		for(int j = 0;j<ROW;j++)
@@ -497,12 +498,13 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 				}
 				else
 				{
-				sigma1[(j*COL)+k] = 0.0f;
+				sigma1[(j*COL)+k] = 0.0;
 				}
 			}
 		}	
 		cpuMatrixMult(u,sigma1,Qtemp1,ROW,ROW,ROW);
 		cpuMatrixMult(Qtemp1,vt1,Qtemp1,ROW,ROW,COL);
+		//print_matrix("M",ROW,ROW,sigma1);
 		for(int j = 0;j<2;j++)
                 {
                         for(int k=0;k<3;k++)
@@ -510,6 +512,7 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
                         M[(3 * i) + (j*col) + k] = Qtemp1[(j * 3) + k];
                         }
                 }
+		
 
 		C[i] = sigma1[0];
 	}
@@ -691,7 +694,7 @@ int main(void)
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
 	//Zden
 
-	for(int iter = 0; iter < 8; iter++)
+	for(int iter = 0; iter < 500; iter++)
 	{
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
@@ -699,7 +702,7 @@ int main(void)
 		calculateQ(Q,Z,Y,mu,row,row1);
 		//displayValues(Z,row*row1);
 
-		prox_2norm(Q,M,C,lam/mu,row,row1,data_size,lam);
+		prox_2norm(Q,M,C,lam/mu,row,row1,data_size);
 		updateDualvariable(Y,mu,M,Z,row,row1);
 		resCalc(&PrimRes,&DualRes,M,Z,ZO,mu,row,row1);
 		//displayValues(M,row*row1);
