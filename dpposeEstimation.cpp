@@ -39,6 +39,20 @@ int readValues(char *text, double *variable, int i)
 	return i;
 }
 
+void dump_to_file(char *filename, double *matrix, int row, int col)
+{
+	ofstream fs;
+	fs.open(filename, ios::out);
+	for(int i = 0; i<row;i++)
+	{
+		for(int j = 0;j<col ;j++)
+		{
+		fs << matrix[i*col+j] << "\t";
+		}
+	fs << "\n";
+	}
+}
+
 void print_matrix( char *desc, MKL_INT m, MKL_INT n, double *a) 
 {
         MKL_INT i, j;
@@ -526,7 +540,8 @@ double febNorm(double *a, int row, int col)
 
 	TransposeOnCPU(a,a_transpose,row,col);
         cpuTransMatrixMult(a_transpose, a, ata, col, row);
-
+//	dump_to_file("MminusZ.txt",MminusZ,row,row1);
+//	print_matrix("ata matrix",col,col,ata);
 	for(int i=0;i<col;i++)
 	{
 		for(int j=0;j<col;j++)
@@ -538,11 +553,42 @@ double febNorm(double *a, int row, int col)
 			}
 		}
 	}
+//	cout << "value of sum is "<<sum<<endl;
 	norm=sqrt(double(sum));
 
 	delete[] a_transpose;
 	delete[] ata;
 	return double(norm);
+}
+
+double febNorm1(double *a, int row, int col)
+{
+        double norm = 0.0;
+        double sum = 0.0;
+        double *a_transpose = new double [col*row];
+        double *ata = new double [col*col];
+
+        TransposeOnCPU(a,a_transpose,row,col);
+        cpuTransMatrixMult(a_transpose, a, ata, col, row);
+        dump_to_file("ata.txt",ata,col,col);
+//      print_matrix("ata matrix",col,col,ata);
+        for(int i=0;i<col;i++)
+        {
+                for(int j=0;j<col;j++)
+                {
+//                      sum += a[(i*col)+j] * a[(i*col)+j];
+                        if(i==j)
+                        {
+                        sum += double((ata[(i*col)+j]));
+                        }
+                }
+        }
+//      cout << "value of sum is "<<sum<<endl;
+        norm=sqrt(double(sum));
+
+        delete[] a_transpose;
+        delete[] ata;
+        return double(norm);
 }
 
 void resCalc(double *PrimRes, double *DualRes, double *M, double *Z, double *ZO,double mu, int row, int row1)
@@ -559,12 +605,13 @@ void resCalc(double *PrimRes, double *DualRes, double *M, double *Z, double *ZO,
 			ZminusZO[(i*row1)+j] = Z[(i*row1)+j] - ZO[(i*row1)+j];
 		}
 	}
+//	dump_to_file("MminusZ.txt",MminusZ,row,row1);	
 //	cout << febNorm(MminusZ,row,row1) << endl;
 //	cout << febNorm(ZO,row,row1) << endl;
 //	cout << febNorm(ZminusZO,row,row1) << endl;
 	
 		
-	*PrimRes = febNorm(MminusZ,row,row1)/febNorm(ZO,row,row1);
+	*PrimRes = febNorm1(MminusZ,row,row1)/febNorm(ZO,row,row1);
 	*DualRes = mu * febNorm(ZminusZO,row,row1)/febNorm(ZO,row,row1);
 	
 	delete[] MminusZ;
@@ -637,7 +684,7 @@ int main(void)
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
 	//Zden
 
-	for(int iter = 0; iter < 500; iter++)
+	for(int iter = 0; iter < 1; iter++)
 	{
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
