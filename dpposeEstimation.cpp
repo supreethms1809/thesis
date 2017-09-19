@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <mkl.h>
 #include <mkl_lapack.h>
-#include <limits.h>
+#include <limits>
 
 #define LAPACK_ROW_MAJOR   101
 #define min(a,b) ((a)>(b)?(b):(a))
@@ -55,6 +55,7 @@ void print_matrix( char *desc, MKL_INT m, MKL_INT n, double *a)
 
 void displayValues(double *variable, int items)
 {
+	cout.precision(17);
 	for (int i =0; i < items; i++)
 	{
 		cout << "Value of variable :"<< variable[i] << endl;
@@ -533,7 +534,7 @@ double febNorm(double *a, int row, int col)
 //			sum += a[(i*col)+j] * a[(i*col)+j];
 			if(i==j)
 			{
-		  	sum +=(ata[(i*col)+j]);
+		  	sum += double((ata[(i*col)+j]));
 			}
 		}
 	}
@@ -558,8 +559,8 @@ void resCalc(double *PrimRes, double *DualRes, double *M, double *Z, double *ZO,
 			ZminusZO[(i*row1)+j] = Z[(i*row1)+j] - ZO[(i*row1)+j];
 		}
 	}
-	cout << febNorm(MminusZ,row,row1) << endl;
-	cout << febNorm(ZO,row,row1) << endl;
+//	cout << febNorm(MminusZ,row,row1) << endl;
+//	cout << febNorm(ZO,row,row1) << endl;
 //	cout << febNorm(ZminusZO,row,row1) << endl;
 	
 		
@@ -636,13 +637,13 @@ int main(void)
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
 	//Zden
 
-	for(int iter = 0; iter < 50; iter++)
+	for(int iter = 0; iter < 500; iter++)
 	{
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
 		calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 		calculateQ(Q,Z,Y,mu,row,row1);
-		displayValues(Z,row*row1);
+		//displayValues(Z,row*row1);
 
 		prox_2norm(Q,M,C,lam/mu,row,row1,data_size,lam);
 		updateDualvariable(Y,mu,M,Z,row,row1);

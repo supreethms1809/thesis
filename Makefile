@@ -1,6 +1,6 @@
 CC = icc
 #CC = gcc
-OPT = -qopenmp -O0 -g -mkl -heap-arrays 
+OPT = -qopenmp -O3 -g -mkl -heap-arrays -fp-model=precise 
 
 SRCS = dpposeEstimation.cpp
 
