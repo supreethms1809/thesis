@@ -11,7 +11,7 @@ EXE = dpestimation.exe
 #run:
 #	./estimation.exe
 
-all: dpposeEstimation.cpp
+all: dpposeEstimation.cpp 
 	$(CC) $(OPT) $(LIB) $(SRCS) -o $(EXE)
 
 clean: 
