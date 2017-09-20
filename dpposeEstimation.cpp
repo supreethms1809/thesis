@@ -228,6 +228,27 @@ void cpuMatrixMult(double *A, double *B, double *C, int row, int col,int col2)
 	//cout << "count =" << count << endl;
 }
 
+void cpuMatrixMult1(double *A, double *B, double *C, int row, int col,int col2)
+{
+        double fSum;
+        int count = 0;
+        for (int i = 0; i < row; i++)
+        {
+                for (int j = 0; j < col2; j++)
+                {
+                fSum = 0.0f;
+                        for (int k = 0; k < col; k++)
+                        {
+                        fSum += (A[(i*col) + k] * B[(k*col2) + j]);
+                        }
+                //cout << count<<"\t" <<"value of (i*row) + j \t"<< (i*row) + j <<"\t value of i and j"<<"\t"<<i<<" and "<<j<<"\t value of fsum" << fSum << endl;
+                count++;
+                C[(i*col2) + j] = fSum;
+                }
+        }
+        //cout << "count =" << count << endl;
+}
+
 void scalarToMatrixMultiply(double *Temp, double *M, double mu, int row, int col)
 {
 	for (int i = 0;i < row;i++)
@@ -441,7 +462,8 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 
 	double *sigma1 = new double [ROW*ROW];
 	double *vt1 = new double [ROW*COL];
-	double *Qtemp1 = new double [6];
+	double *Qtemp1 = new double [4];
+	double *Qtemp2 = new double [6];
 
 //#pragma omp parallel for
 	for(int i = 0;i < data_size;i++)
@@ -505,13 +527,18 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 			}
 		}	
 		cpuMatrixMult(u,sigma1,Qtemp1,ROW,ROW,ROW);
-		cpuMatrixMult(Qtemp1,vt1,Qtemp1,ROW,ROW,COL);
-		//print_matrix("M",ROW,ROW,sigma1);
+		//print_matrix("Qtemp1 before",ROW,ROW,Qtemp1);
+		cpuMatrixMult(Qtemp1,vt1,Qtemp2,ROW,ROW,COL);
+		//print_matrix("vt1 full matrix ",COL,COL,vt1);
+		//print_matrix("u",ROW,ROW,u);
+		//print_matrix("sigma1",ROW,ROW,sigma1);
+		//print_matrix("vt1",ROW,COL,vt1);
+		//print_matrix("Qtemp1",ROW,COL,Qtemp2);
 		for(int j = 0;j<2;j++)
                 {
                         for(int k=0;k<3;k++)
                         {
-                        M[(3 * i) + (j*col) + k] = Qtemp1[(j * 3) + k];
+                        M[(3 * i) + (j*col) + k] = Qtemp2[(j * 3) + k];
                         }
                 }
 		
@@ -524,6 +551,7 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 	delete[] u;
 	delete[] vt;
 	delete[] Qtemp1;
+	delete[] Qtemp2;
 	delete[] sigma1;
 	delete[] vt1;
 
@@ -593,7 +621,7 @@ double febNorm1(double *a, int row, int col)
                         }
                 }
         }
-        cout << "value of sum is "<<sum<<endl;
+//        cout << "value of sum is "<<sum<<endl;
         norm=sqrt(double(sum));
 
         delete[] a_transpose;
@@ -694,7 +722,7 @@ int main(void)
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
 	//Zden
 
-	for(int iter = 0; iter < 8; iter++)
+	for(int iter = 0; iter < 500; iter++)
 	{
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
