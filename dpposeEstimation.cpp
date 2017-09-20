@@ -454,13 +454,8 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 			Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
 			}
 		}
-		//print_matrix("Qtemp matrix",ROW,COL,Qtemp);
 		info = LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
 
-		//cout << "iteration i : "<< i << endl;
-		//print_matrix("U matrix",ROW,ROW,u);
-		//print_matrix("sigma matrix",1,COL,sigma);
-		//print_matrix("vt matrix",COL,COL,vt);
 		if(info > 0)
 		{
 			cout << "The algorithm computing SVD failed to converge" << endl;
@@ -482,7 +477,6 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 			sigma[1] = sigma[1];
 		}
 
-		//print_matrix("sigma matrix in between",1,COL,sigma);
 		
 		for(int j = 0;j<ROW;j++)
 		{
@@ -506,13 +500,7 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 			}
 		}	
 		cpuMatrixMult(u,sigma1,Qtemp1,ROW,ROW,ROW);
-		//print_matrix("Qtemp1 before",ROW,ROW,Qtemp1);
 		cpuMatrixMult(Qtemp1,vt1,Qtemp2,ROW,ROW,COL);
-		//print_matrix("vt1 full matrix ",COL,COL,vt1);
-		//print_matrix("u",ROW,ROW,u);
-		//print_matrix("sigma1",ROW,ROW,sigma1);
-		//print_matrix("vt1",ROW,COL,vt1);
-		//print_matrix("Qtemp1",ROW,COL,Qtemp2);
 		for(int j = 0;j<2;j++)
                 {
                         for(int k=0;k<3;k++)
@@ -560,14 +548,12 @@ double febNorm(double *a, int row, int col)
 	{
 		for(int j=0;j<col;j++)
 		{
-//			sum += a[(i*col)+j] * a[(i*col)+j];
 			if(i==j)
 			{
 		  	sum += double((ata[(i*col)+j]));
 			}
 		}
 	}
-//	cout << "value of sum is "<<sum<<endl;
 	norm=sqrt(double(sum));
 
 	delete[] a_transpose;
@@ -575,38 +561,10 @@ double febNorm(double *a, int row, int col)
 	return double(norm);
 }
 
-double febNorm1(double *a, int row, int col)
-{
-        double norm = 0.0;
-        double sum = 0.0;
-        double *a_transpose = new double [col*row];
-        double *ata = new double [col*col];
-
-        TransposeOnCPU(a,a_transpose,row,col);
-        cpuTransMatrixMult(a_transpose, a, ata, col, row);
         //dump_to_file("a.txt",a,row,col);
         //dump_to_file("atranspose.txt",a_transpose,col,row);
 	
         //dump_to_file("ata.txt",ata,col,col);
-//      print_matrix("ata matrix",col,col,ata);
-        for(int i=0;i<col;i++)
-        {
-                for(int j=0;j<col;j++)
-                {
-//                      sum += a[(i*col)+j] * a[(i*col)+j];
-                        if(i==j)
-                        {
-                        sum += double(fabs(ata[(i*col)+j]));
-                        }
-                }
-        }
-//        cout << "value of sum is "<<sum<<endl;
-        norm=sqrt(double(sum));
-
-        delete[] a_transpose;
-        delete[] ata;
-        return double(norm);
-}
 
 void resCalc(double *PrimRes, double *DualRes, double *M, double *Z, double *ZO,double mu, int row, int row1)
 {
@@ -618,17 +576,12 @@ void resCalc(double *PrimRes, double *DualRes, double *M, double *Z, double *ZO,
 		for(int j = 0; j<row1 ; j++)
 		{
 			MminusZ[(i*row1)+j] = M[(i*row1)+j] - Z[(i*row1)+j];
-	//		cout << MminusZ[(i*row1)+j] << endl;
 			ZminusZO[(i*row1)+j] = Z[(i*row1)+j] - ZO[(i*row1)+j];
 		}
 	}
-	//dump_to_file("M.txt",M,row,row1);	
-//	cout << febNorm(MminusZ,row,row1) << endl;
-//	cout << febNorm(ZO,row,row1) << endl;
-//	cout << febNorm(ZminusZO,row,row1) << endl;
 	
 		
-	*PrimRes = febNorm1(MminusZ,row,row1)/febNorm(ZO,row,row1);
+	*PrimRes = febNorm(MminusZ,row,row1)/febNorm(ZO,row,row1);
 	*DualRes = mu * febNorm(ZminusZO,row,row1)/febNorm(ZO,row,row1);
 	
 	delete[] MminusZ;
