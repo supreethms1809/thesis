@@ -7,7 +7,8 @@
 #include <mkl.h>
 #include <mkl_lapack.h>
 #include <limits>
-#include "ctime"
+#include <chrono>
+#include <ctime>
 
 #define LAPACK_ROW_MAJOR   101
 #define min(a,b) ((a)>(b)?(b):(a))
@@ -20,6 +21,7 @@
 
 using std::string;
 using namespace std;
+using namespace std::chrono;
 
 int readValues(char *text, double *variable, int i)
 {
@@ -659,7 +661,7 @@ int main(void)
 
 	for(int iter = 0; iter < 500; iter++)
 	{
-		t1 = clock();
+		high_resolution_clock::time_point t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
 		calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
@@ -694,8 +696,9 @@ int main(void)
 			{
 			}
 		}
-	t2 = clock();
-        cout << "Total time taken in msecs: "<< ((t2-t1)/double(CLOCKS_PER_SEC))*1000<<"ms" <<endl;
+		high_resolution_clock::time_point t2 = high_resolution_clock::now();
+		duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+		cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
 	}
 	
 	//end = clock();
