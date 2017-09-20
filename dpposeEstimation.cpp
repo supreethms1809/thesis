@@ -141,7 +141,7 @@ void initializeZero(double *variable, int col, int row)
 	{
 		for (int j = 0;j < col;j++)
 		{
-		variable[(i * col) + j] = 0.0f;
+		variable[(i * col) + j] = 0.0;
 		}
 	}
 }
@@ -186,7 +186,7 @@ void cpuTransMatrixMult(double *A, double *B, double *C, int row, int col)
 	{		      
 		for (int j = 0; j < row; j++)
 		{
-		fSum = 0.0f;
+		fSum = 0.0;
 			for (int k = 0; k < col; k++)
 			{
 			fSum += (A[(i*col) + k] * B[(k*row) + j]);
@@ -215,7 +215,7 @@ void cpuMatrixMult(double *A, double *B, double *C, int row, int col,int col2)
 	{
 		for (int j = 0; j < col2; j++)
 		{
-		fSum = 0.0f;
+		fSum = 0.0;
 			for (int k = 0; k < col; k++)
 			{
 			fSum += (A[(i*col) + k] * B[(k*col2) + j]);
@@ -262,7 +262,7 @@ void addScalarToDiagonal(double *Zden, double *BBt, double mu, int row, int col)
                         }
 			else
 			{
-			Zden[(i*col) + j] = BBt[(i*col) + j] + 0.0f;
+			Zden[(i*col) + j] = BBt[(i*col) + j] + 0.0;
 			}
 		}
 	}
@@ -275,12 +275,12 @@ void AugmentIdentity(double *matrix, double *augmatrix, int n)
 		for (int j = 0; j < n; j++)
 		{
 		augmatrix[(i * 2 * n) + j] = matrix[(i*n) + j];
-		augmatrix[(((2 * i) + 1)*n) + j] = 0.0f;
+		augmatrix[(((2 * i) + 1)*n) + j] = 0.0;
 		}
 	}
 	for (int i = 0; i < n; i++)
 	{
-	augmatrix[(((2 * i) + 1)*n) + i] = 1.0f;
+	augmatrix[(((2 * i) + 1)*n) + i] = 1.0;
 	}
 }
 
@@ -650,7 +650,7 @@ int main(void)
 	double *B_mean = new double [row1];
 	double *BBt = new double [row1*row1];
 	int items = 0;
-	double a = 0.0f;
+	double a = 0.0;
 	int B_items = 0;
 	int lam =1;
 	bool verb = true;
@@ -685,7 +685,7 @@ int main(void)
 	double *Y = new double [row*row1];
 	double *ZO = new double [row*row1];
 	double *Q = new double [row*row1];
-	double mu = 0.0f;
+	double mu = 0.0;
 	double PrimRes;
 	double DualRes;
 	
