@@ -228,27 +228,6 @@ void cpuMatrixMult(double *A, double *B, double *C, int row, int col,int col2)
 	//cout << "count =" << count << endl;
 }
 
-void cpuMatrixMult1(double *A, double *B, double *C, int row, int col,int col2)
-{
-        double fSum;
-        int count = 0;
-        for (int i = 0; i < row; i++)
-        {
-                for (int j = 0; j < col2; j++)
-                {
-                fSum = 0.0f;
-                        for (int k = 0; k < col; k++)
-                        {
-                        fSum += (A[(i*col) + k] * B[(k*col2) + j]);
-                        }
-                //cout << count<<"\t" <<"value of (i*row) + j \t"<< (i*row) + j <<"\t value of i and j"<<"\t"<<i<<" and "<<j<<"\t value of fsum" << fSum << endl;
-                count++;
-                C[(i*col2) + j] = fSum;
-                }
-        }
-        //cout << "count =" << count << endl;
-}
-
 void scalarToMatrixMultiply(double *Temp, double *M, double mu, int row, int col)
 {
 	for (int i = 0;i < row;i++)
