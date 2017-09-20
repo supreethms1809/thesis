@@ -605,10 +605,10 @@ double febNorm1(double *a, int row, int col)
 
         TransposeOnCPU(a,a_transpose,row,col);
         cpuTransMatrixMult(a_transpose, a, ata, col, row);
-        dump_to_file("a.txt",a,row,col);
-        dump_to_file("atranspose.txt",a_transpose,col,row);
+        //dump_to_file("a.txt",a,row,col);
+        //dump_to_file("atranspose.txt",a_transpose,col,row);
 	
-        dump_to_file("ata.txt",ata,col,col);
+        //dump_to_file("ata.txt",ata,col,col);
 //      print_matrix("ata matrix",col,col,ata);
         for(int i=0;i<col;i++)
         {
@@ -643,7 +643,7 @@ void resCalc(double *PrimRes, double *DualRes, double *M, double *Z, double *ZO,
 			ZminusZO[(i*row1)+j] = Z[(i*row1)+j] - ZO[(i*row1)+j];
 		}
 	}
-	dump_to_file("M.txt",M,row,row1);	
+	//dump_to_file("M.txt",M,row,row1);	
 //	cout << febNorm(MminusZ,row,row1) << endl;
 //	cout << febNorm(ZO,row,row1) << endl;
 //	cout << febNorm(ZminusZO,row,row1) << endl;
