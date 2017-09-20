@@ -7,6 +7,7 @@
 #include <mkl.h>
 #include <mkl_lapack.h>
 #include <limits>
+#include "timer.h"
 
 #define LAPACK_ROW_MAJOR   101
 #define min(a,b) ((a)>(b)?(b):(a))
@@ -607,7 +608,11 @@ int main(void)
 	int B_items = 0;
 	int lam =1;
 	bool verb = true;
+	double cpu_time_used = 0.0;
+	Timer tim;
 
+//	start = clock();
+	
 	items = readValues("messi2.txt",xy,items);
 	rowMean(xy, col, row, mean);
         Scalc(xy, col, row, mean);
@@ -656,6 +661,7 @@ int main(void)
 
 	for(int iter = 0; iter < 500; iter++)
 	{
+		tim.start();
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
 		calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
@@ -690,7 +696,13 @@ int main(void)
 			{
 			}
 		}
+	tim.stop();
+        cout << "Total time taken in msecs: "<< tim.elapsed() <<endl;
 	}
+	
+	//end = clock();
+	//cpu_time_used = double(end - start) / CLOCKS_PER_SEC;
+	//cout << "Total time taken in secs: "<< cpu_time_used <<endl;
 
 	delete[] xy;
         delete[] mean;
