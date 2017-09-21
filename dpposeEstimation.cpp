@@ -361,6 +361,7 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	double *Zden = new double [row1*row1];
 	double *Zdenaug = new double [row1*row1*row1*row1];
 	double *ZdenInverse = new double [row1*row1];
+	high_resolution_clock::time_point t1,t2,t3,t4;
 
 	//numerator
 	//temp = (W-E-T*ones(1,p))
@@ -372,6 +373,8 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 		}
 	}
 
+
+	
 	//temp2 = temp * B'
 	cpuMatrixMult(temp, B_transpose, temp2, row, col, row1);
 	//displayValues(temp2,row*row1);
@@ -387,18 +390,31 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	//denominator
 	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
 	//displayValues(Zden, row1*row1);
+	
+
 
 	//Inverse calculation via guass-jordon method
 	AugmentIdentity(Zden, Zdenaug, row1);
+	t1 = high_resolution_clock::now();	
 	cpuInverseOfMatrix(Zdenaug, row1);
+
 	//displayValues(Zdenaug, row1*row1);
 	Inverse(Zdenaug,ZdenInverse,row1);
 	//displayValues(ZdenInverse, row1*row1);
+	t2 = high_resolution_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
+	
 
+	t3 = high_resolution_clock::now();
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
         cpuMatrixMult(Znum, ZdenInverse, Z, row, row1, row1);	
 	//displayValues(Z,row*row1);
-
+	
+	t4 = high_resolution_clock::now();
+	duration<double> time_span1 = duration_cast<duration<double>>(t4 - t3);
+	cout << "Time in miliseconds for inverse section is : " << time_span1.count() * 1000 << " ms" << endl;
+	
 	delete [] temp;	
 	delete [] temp2;
 	delete [] temp3;
@@ -629,7 +645,7 @@ int main(void)
 	double PrimRes;
 	double DualRes;
 	
-	t3 = high_resolution_clock::now();
+	//t3 = high_resolution_clock::now();
 	
 	items = readValues("messi2.txt",xy,items);
 	rowMean(xy, col, row, mean);
@@ -659,23 +675,24 @@ int main(void)
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
 	//Zden
 	
-	t4 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t4 - t3);
-	cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
+	//t4 = high_resolution_clock::now();
+	//duration<double> time_span = duration_cast<duration<double>>(t4 - t3);
+	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
 	for(int iter = 0; iter < 500; iter++)
 	{
-		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
 		calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
+	//	t1 = high_resolution_clock::now();
 		calculateQ(Q,Z,Y,mu,row,row1);
+	//	t2 = high_resolution_clock::now();
 		//displayValues(Z,row*row1);
 
-		t1 = high_resolution_clock::now();
+		//t1 = high_resolution_clock::now();
 		prox_2norm(Q,M,C,lam/mu,row,row1,data_size);
-		t2 = high_resolution_clock::now();
+		//t2 = high_resolution_clock::now();
 		
 		updateDualvariable(Y,mu,M,Z,row,row1);
 		resCalc(&PrimRes,&DualRes,M,Z,ZO,mu,row,row1);
@@ -705,8 +722,8 @@ int main(void)
 			}
 		}
 		//t2 = high_resolution_clock::now();
-		duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-		cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
+	//	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	//	cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
 	}
 	
 	//end = clock();
