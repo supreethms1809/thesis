@@ -610,8 +610,26 @@ int main(void)
 	int B_items = 0;
 	int lam =1;
 	bool verb = true;
-	time_t t1,t2;
-
+	high_resolution_clock::time_point t1,t2,t3,t4;
+	const int data_size = row1/3;	
+	
+	//ssr2D3D_alm
+	//M => (2*384) = 0,  C ==> (1*384) = 0, E ==> (2*15) = 0, T ==> mean(W,2)
+	double *M = new double [row*row1];
+	double *C = new double [data_size];
+	double *E = new double [row*col];
+	double *T = new double [row];
+	
+	// auxiliary variables for ADMM
+	double *Z = new double [row*row1];
+	double *Y = new double [row*row1];
+	double *ZO = new double [row*row1];
+	double *Q = new double [row*row1];
+	double mu = 0.0;
+	double PrimRes;
+	double DualRes;
+	
+	t3 = high_resolution_clock::now();
 	
 	items = readValues("messi2.txt",xy,items);
 	rowMean(xy, col, row, mean);
@@ -623,30 +641,12 @@ int main(void)
 	B_items = readValues("exp1.txt", B, B_items);
 	rowMean(B,col1,row1,B_mean);
 	Scalc(B, col1,row1,B_mean);
-	const int data_size = row1/3;	
 	
-	//ssr2D3D_alm
-	//M => (2*384) = 0,  C ==> (1*384) = 0, E ==> (2*15) = 0, T ==> mean(W,2)
-	//cout << "value of data_size : "<< data_size << endl;	
-	double *M = new double [row*row1];
-	double *C = new double [data_size];
-	double *E = new double [row*col];
-	double *T = new double [row];
-
 	initializeZero(M, row1,row);
 	initializeZero(C, data_size, 1);
 	initializeZero(E,col,row);
 	rowMean(xy,col,row,T);
 
-	// auxiliary variables for ADMM
-	double *Z = new double [row*row1];
-	double *Y = new double [row*row1];
-	double *ZO = new double [row*row1];
-	double *Q = new double [row*row1];
-	double mu = 0.0;
-	double PrimRes;
-	double DualRes;
-	
 	initializeZero(Z,row1,row);
 	initializeZero(Y,row1,row);
 	
@@ -658,17 +658,25 @@ int main(void)
 	TransposeOnCPU(B,B_transpose,row1,col);
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
 	//Zden
+	
+	t4 = high_resolution_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t4 - t3);
+	cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
+	
 
 	for(int iter = 0; iter < 500; iter++)
 	{
-		high_resolution_clock::time_point t1 = high_resolution_clock::now();
+		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
 		calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 		calculateQ(Q,Z,Y,mu,row,row1);
 		//displayValues(Z,row*row1);
 
+		t1 = high_resolution_clock::now();
 		prox_2norm(Q,M,C,lam/mu,row,row1,data_size);
+		t2 = high_resolution_clock::now();
+		
 		updateDualvariable(Y,mu,M,Z,row,row1);
 		resCalc(&PrimRes,&DualRes,M,Z,ZO,mu,row,row1);
 		//displayValues(M,row*row1);
@@ -696,7 +704,7 @@ int main(void)
 			{
 			}
 		}
-		high_resolution_clock::time_point t2 = high_resolution_clock::now();
+		//t2 = high_resolution_clock::now();
 		duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 		cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
 	}
