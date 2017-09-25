@@ -289,6 +289,7 @@ void AugmentIdentity(double *matrix, double *augmatrix, int n)
 
 void cpuInverseOfMatrix(double *matrix, int n)
 {
+//#pragma omp parallel for 
 	for (int m = 0; m < n; m++)
 	{
 	//Checking if diagonal element is 0
@@ -402,8 +403,8 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	Inverse(Zdenaug,ZdenInverse,row1);
 	//displayValues(ZdenInverse, row1*row1);
 	t2 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-	cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
+	//duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
 	t3 = high_resolution_clock::now();
@@ -412,8 +413,8 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	//displayValues(Z,row*row1);
 	
 	t4 = high_resolution_clock::now();
-	duration<double> time_span1 = duration_cast<duration<double>>(t4 - t3);
-	cout << "Time in miliseconds for inverse section is : " << time_span1.count() * 1000 << " ms" << endl;
+	//duration<double> time_span1 = duration_cast<duration<double>>(t4 - t3);
+	//cout << "Time in miliseconds for inverse section is : " << time_span1.count() * 1000 << " ms" << endl;
 	
 	delete [] temp;	
 	delete [] temp2;
