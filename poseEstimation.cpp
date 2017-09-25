@@ -20,9 +20,9 @@
 using std::string;
 using namespace std;
 
-int readValues(char *text, double *variable, int i)
+int readValues(char *text, float *variable, int i)
 {
- 	double temp;
+ 	float temp;
 	//cout << "value of text " << text << endl;
 	ifstream myReadFile;
 	myReadFile.open(text, ios::in);
@@ -39,7 +39,7 @@ int readValues(char *text, double *variable, int i)
 	return i;
 }
 
-void dump_to_file(char *filename, double *matrix, int row, int col)
+void dump_to_file(char *filename, float *matrix, int row, int col)
 {
 	ofstream fs;
 	fs.open(filename, ios::out);
@@ -56,7 +56,7 @@ void dump_to_file(char *filename, double *matrix, int row, int col)
 	}
 }
 
-void print_matrix( char *desc, MKL_INT m, MKL_INT n, double *a) 
+void print_matrix( char *desc, MKL_INT m, MKL_INT n, float *a) 
 {
         MKL_INT i, j;
         printf( "\n %s\n", desc );
@@ -70,7 +70,7 @@ void print_matrix( char *desc, MKL_INT m, MKL_INT n, double *a)
 	}
 }
 
-void displayValues(double *variable, int items)
+void displayValues(float *variable, int items)
 {
 	cout.precision(17);
 	for (int i =0; i < items; i++)
@@ -79,7 +79,7 @@ void displayValues(double *variable, int items)
 	}
 }
 
-void rowMean(double *variable, int col, int row , double *mean)
+void rowMean(float *variable, int col, int row , float *mean)
 {
 	float sum;
 	for (int j = 0;j < row; j++)
@@ -94,7 +94,7 @@ void rowMean(double *variable, int col, int row , double *mean)
 	}
 }
 
-void Scalc(double *variable, int col, int row, double *mean)
+void Scalc(float *variable, int col, int row, float *mean)
 {
 	for (int j = 0;j < row;j++)
 	{
@@ -105,10 +105,10 @@ void Scalc(double *variable, int col, int row, double *mean)
 	}
 }
 
-double mean_of_std_deviation(double *variable, int col, int row, double *mean)
+float mean_of_std_deviation(float *variable, int col, int row, float *mean)
 {
-	double std[2];
-	double temp,a;
+	float std[2];
+	float temp,a;
 	for (int j = 0;j < row;j++)
 	{
 		temp = 0;
@@ -124,7 +124,7 @@ double mean_of_std_deviation(double *variable, int col, int row, double *mean)
 	return a;
 }
 
-void newScalc(double *variable, int col, int row, double a)
+void newScalc(float *variable, int col, int row, float a)
 {
 	for (int i = 0;i < row;i++)
 	{
@@ -135,7 +135,7 @@ void newScalc(double *variable, int col, int row, double a)
 	}
 }
 
-void initializeZero(double *variable, int col, int row)
+void initializeZero(float *variable, int col, int row)
 {
 	for (int i = 0;i < row;i++)
 	{
@@ -146,11 +146,11 @@ void initializeZero(double *variable, int col, int row)
 	}
 }
 
-double meanCalc(double *variable, int col, int row)
+float meanCalc(float *variable, int col, int row)
 {
-	double sum = 0;
-        double mean = 0;
-        double mu = 0;
+	float sum = 0;
+        float mean = 0;
+        float mu = 0;
 	for (int i = 0;i < row; i++)
 	{
 		for (int j = 0;j < col; j++)
@@ -166,7 +166,7 @@ double meanCalc(double *variable, int col, int row)
 	return mu;
 }
 
-void TransposeOnCPU(double *matrix, double *matrixTranspose, int row, int col)
+void TransposeOnCPU(float *matrix, float *matrixTranspose, int row, int col)
 {
 
 	for (int i = 0; i < row; i++)
@@ -179,9 +179,9 @@ void TransposeOnCPU(double *matrix, double *matrixTranspose, int row, int col)
 }
 
 
-void cpuTransMatrixMult(double *A, double *B, double *C, int row, int col)
+void cpuTransMatrixMult(float *A, float *B, float *C, int row, int col)
 {
-        double fSum;
+        float fSum;
 	for (int i = 0; i < row; i++)
 	{		      
 		for (int j = 0; j < row; j++)
@@ -196,7 +196,7 @@ void cpuTransMatrixMult(double *A, double *B, double *C, int row, int col)
 	}
 }
 
-void initialize(double *variable,double *variable2, int col, int row)
+void initialize(float *variable,float *variable2, int col, int row)
 {
 	for (int i = 0;i < row;i++)
 	{
@@ -207,9 +207,9 @@ void initialize(double *variable,double *variable2, int col, int row)
 	}
 }
 
-void cpuMatrixMult(double *A, double *B, double *C, int row, int col,int col2)
+void cpuMatrixMult(float *A, float *B, float *C, int row, int col,int col2)
 {
-	double fSum;
+	float fSum;
 	int count = 0;
 	for (int i = 0; i < row; i++)
 	{
@@ -228,7 +228,7 @@ void cpuMatrixMult(double *A, double *B, double *C, int row, int col,int col2)
 	//cout << "count =" << count << endl;
 }
 
-void scalarToMatrixMultiply(double *Temp, double *M, double mu, int row, int col)
+void scalarToMatrixMultiply(float *Temp, float *M, float mu, int row, int col)
 {
 	for (int i = 0;i < row;i++)
 	{		       
@@ -239,7 +239,7 @@ void scalarToMatrixMultiply(double *Temp, double *M, double mu, int row, int col
 	}
 }
 
-void sumOfMatrix(double *Znum,double *temp2, double *temp3, double *temp4, int row, int col)
+void sumOfMatrix(float *Znum,float *temp2, float *temp3, float *temp4, int row, int col)
 {
 	for (int i = 0;i < row;i++)
 	{
@@ -250,7 +250,7 @@ void sumOfMatrix(double *Znum,double *temp2, double *temp3, double *temp4, int r
 	}
 }
 
-void addScalarToDiagonal(double *Zden, double *BBt, double mu, int row, int col)
+void addScalarToDiagonal(float *Zden, float *BBt, float mu, int row, int col)
 {
 	for (int i = 0;i < row;i++)
 	{
@@ -268,7 +268,7 @@ void addScalarToDiagonal(double *Zden, double *BBt, double mu, int row, int col)
 	}
 }
 
-void AugmentIdentity(double *matrix, double *augmatrix, int n)
+void AugmentIdentity(float *matrix, float *augmatrix, int n)
 {
 	for (int i = 0; i < n; i++)
 	{
@@ -284,7 +284,7 @@ void AugmentIdentity(double *matrix, double *augmatrix, int n)
 	}
 }
 
-void cpuInverseOfMatrix(double *matrix, int n)
+void cpuInverseOfMatrix(float *matrix, int n)
 {
 	for (int m = 0; m < n; m++)
 	{
@@ -307,7 +307,7 @@ void cpuInverseOfMatrix(double *matrix, int n)
 			}
 		}
 		//Make the diagonal elements 1 along with the whole row(divide).
-		double initialValue = matrix[((2 * n) + 1)*m];
+		float initialValue = matrix[((2 * n) + 1)*m];
 		for (int j = 0; j < (2 * n); j++)
 		{
 		matrix[(m * 2 * n) + j] = matrix[(m * 2 * n) + j] / initialValue;
@@ -326,7 +326,7 @@ void cpuInverseOfMatrix(double *matrix, int n)
 				for (int l = 0; l < (2 * n); l++)
 				{
 				
-				double tempMul, tempDiv;
+				float tempMul, tempDiv;
 				tempMul = matrix[(2 * m*n) + l] * tempIni;
 				tempDiv = tempMul / matrix[(2 * m*n) + m];
 				matrix[(k * 2 * n) + l] = matrix[(k * 2 * n) + l] - tempDiv;
@@ -337,7 +337,7 @@ void cpuInverseOfMatrix(double *matrix, int n)
 	}
 }
 
-void Inverse(double *augmatrix, double *matrixInverse, int n)
+void Inverse(float *augmatrix, float *matrixInverse, int n)
 {
 	for (int i = 0;i < n;i++)
 	{
@@ -349,15 +349,15 @@ void Inverse(double *augmatrix, double *matrixInverse, int n)
 }
 
 																						
-void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *B_transpose, double mu, double *M, double *Y,const int row,const int col,const int row1)
+void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_transpose, float mu, float *M, float *Y,const int row,const int col,const int row1)
 {
-	double *temp = new double [row*col];
-	double *temp2 = new double [row*row1];
-	double *temp3 = new double [row*row1]; 
-	double *Znum = new double [row*row1];
-	double *Zden = new double [row1*row1];
-	double *Zdenaug = new double [row1*row1*row1*row1];
-	double *ZdenInverse = new double [row1*row1];
+	float *temp = new float [row*col];
+	float *temp2 = new float [row*row1];
+	float *temp3 = new float [row*row1]; 
+	float *Znum = new float [row*row1];
+	float *Zden = new float [row1*row1];
+	float *Zdenaug = new float [row1*row1*row1*row1];
+	float *ZdenInverse = new float [row1*row1];
 
 	//numerator
 	//temp = (W-E-T*ones(1,p))
@@ -406,7 +406,7 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 
 }
 
-void differenceOfMatrix(double *diffMatrix, double *matrix1, double *matrix2, int row, int col)
+void differenceOfMatrix(float *diffMatrix, float *matrix1, float *matrix2, int row, int col)
 {
         for (int i = 0;i < row;i++)
         {
@@ -417,9 +417,9 @@ void differenceOfMatrix(double *diffMatrix, double *matrix1, double *matrix2, in
         }
 }
 
-void calculateQ(double *Q, double *Z, double *Y,double mu, int row, int row1)
+void calculateQ(float *Q, float *Z, float *Y,float mu, int row, int row1)
 {
-	double *temp = new double [row*row1];
+	float *temp = new float [row*row1];
 
 	scalarToMatrixMultiply(temp, Y, 1/mu, row, row1);
 	differenceOfMatrix(Q, Z, temp, row, row1);
@@ -428,21 +428,21 @@ void calculateQ(double *Q, double *Z, double *Y,double mu, int row, int row1)
 
 }
 
-void prox_2norm(double *Q, double *M, double *C, double constant, int row, int col, int data_size)
+void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size)
 {
 	MKL_INT m = ROW, n = COL, lda = LDA, ldu = LDU, ldvt = LDVT, info;
-	double superb[min(ROW,COL)-1];
+	float superb[min(ROW,COL)-1];
 	//float s[COL], u[LDU*ROW], vt[LDVT*COL];
 	
-	double *sigma = new double [COL];
-	double *u = new double [LDU*ROW];
-	double *vt = new double [LDVT*COL];
-	double *Qtemp = new double [6];
+	float *sigma = new float [COL];
+	float *u = new float [LDU*ROW];
+	float *vt = new float [LDVT*COL];
+	float *Qtemp = new float [6];
 
-	double *sigma1 = new double [ROW*ROW];
-	double *vt1 = new double [ROW*COL];
-	double *Qtemp1 = new double [4];
-	double *Qtemp2 = new double [6];
+	float *sigma1 = new float [ROW*ROW];
+	float *vt1 = new float [ROW*COL];
+	float *Qtemp1 = new float [4];
+	float *Qtemp2 = new float [6];
 
 //#pragma omp parallel for
 	for(int i = 0;i < data_size;i++)
@@ -455,7 +455,7 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 			}
 		}
 		//print_matrix("Qtemp matrix",ROW,COL,Qtemp);
-		info = LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
+		info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
 
 		//cout << "iteration i : "<< i << endl;
 		//print_matrix("U matrix",ROW,ROW,u);
@@ -536,7 +536,7 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 
 }
 
-void updateDualvariable(double *Y,double mu,double *M,double *Z,int row,int row1)
+void updateDualvariable(float *Y,float mu,float *M,float *Z,int row,int row1)
 {
 	for(int i=0;i<row;i++)
 	{
@@ -547,12 +547,12 @@ void updateDualvariable(double *Y,double mu,double *M,double *Z,int row,int row1
 	}
 }
 
-double febNorm(double *a, int row, int col)
+float febNorm(float *a, int row, int col)
 {
-	double norm = 0.0;
-	double sum = 0.0;
-	double *a_transpose = new double [col*row];
-	double *ata = new double [col*col];
+	float norm = 0.0;
+	float sum = 0.0;
+	float *a_transpose = new float [col*row];
+	float *ata = new float [col*col];
 
 	TransposeOnCPU(a,a_transpose,row,col);
         cpuTransMatrixMult(a_transpose, a, ata, col, row);
@@ -563,24 +563,24 @@ double febNorm(double *a, int row, int col)
 //			sum += a[(i*col)+j] * a[(i*col)+j];
 			if(i==j)
 			{
-		  	sum += double((ata[(i*col)+j]));
+		  	sum += float((ata[(i*col)+j]));
 			}
 		}
 	}
 //	cout << "value of sum is "<<sum<<endl;
-	norm=sqrt(double(sum));
+	norm=sqrt(float(sum));
 
 	delete[] a_transpose;
 	delete[] ata;
-	return double(norm);
+	return float(norm);
 }
 
-double febNorm1(double *a, int row, int col)
+float febNorm1(float *a, int row, int col)
 {
-        double norm = 0.0;
-        double sum = 0.0;
-        double *a_transpose = new double [col*row];
-        double *ata = new double [col*col];
+        float norm = 0.0;
+        float sum = 0.0;
+        float *a_transpose = new float [col*row];
+        float *ata = new float [col*col];
 
         TransposeOnCPU(a,a_transpose,row,col);
         cpuTransMatrixMult(a_transpose, a, ata, col, row);
@@ -596,22 +596,22 @@ double febNorm1(double *a, int row, int col)
 //                      sum += a[(i*col)+j] * a[(i*col)+j];
                         if(i==j)
                         {
-                        sum += double(fabs(ata[(i*col)+j]));
+                        sum += float(fabs(ata[(i*col)+j]));
                         }
                 }
         }
 //        cout << "value of sum is "<<sum<<endl;
-        norm=sqrt(double(sum));
+        norm=sqrt(float(sum));
 
         delete[] a_transpose;
         delete[] ata;
-        return double(norm);
+        return float(norm);
 }
 
-void resCalc(double *PrimRes, double *DualRes, double *M, double *Z, double *ZO,double mu, int row, int row1)
+void resCalc(float *PrimRes, float *DualRes, float *M, float *Z, float *ZO,float mu, int row, int row1)
 {
-	double *MminusZ = new double [row*row1];
-	double *ZminusZO = new double [row*row1];
+	float *MminusZ = new float [row*row1];
+	float *ZminusZO = new float [row*row1];
 
 	for(int i = 0; i< row ;i++)
 	{
@@ -641,16 +641,16 @@ int main(void)
 	const int col = 15;
 	const int row1 = 384;
 	const int col1 = 15;
-	double tol = 1e-10;
+	float tol = 1e-10;
 
-	double *xy = new double [row*col];
-	double *mean = new double [row];
-	double *B = new double [row1*col1];
-	double *B_transpose = new double [col1*row1];
-	double *B_mean = new double [row1];
-	double *BBt = new double [row1*row1];
+	float *xy = new float [row*col];
+	float *mean = new float [row];
+	float *B = new float [row1*col1];
+	float *B_transpose = new float [col1*row1];
+	float *B_mean = new float [row1];
+	float *BBt = new float [row1*row1];
 	int items = 0;
-	double a = 0.0;
+	float a = 0.0;
 	int B_items = 0;
 	int lam =1;
 	bool verb = true;
@@ -670,10 +670,10 @@ int main(void)
 	//ssr2D3D_alm
 	//M => (2*384) = 0,  C ==> (1*384) = 0, E ==> (2*15) = 0, T ==> mean(W,2)
 	//cout << "value of data_size : "<< data_size << endl;	
-	double *M = new double [row*row1];
-	double *C = new double [data_size];
-	double *E = new double [row*col];
-	double *T = new double [row];
+	float *M = new float [row*row1];
+	float *C = new float [data_size];
+	float *E = new float [row*col];
+	float *T = new float [row];
 
 	initializeZero(M, row1,row);
 	initializeZero(C, data_size, 1);
@@ -681,13 +681,13 @@ int main(void)
 	rowMean(xy,col,row,T);
 
 	// auxiliary variables for ADMM
-	double *Z = new double [row*row1];
-	double *Y = new double [row*row1];
-	double *ZO = new double [row*row1];
-	double *Q = new double [row*row1];
-	double mu = 0.0;
-	double PrimRes;
-	double DualRes;
+	float *Z = new float [row*row1];
+	float *Y = new float [row*row1];
+	float *ZO = new float [row*row1];
+	float *Q = new float [row*row1];
+	float mu = 0.0;
+	float PrimRes;
+	float DualRes;
 	
 	initializeZero(Z,row1,row);
 	initializeZero(Y,row1,row);

@@ -2,17 +2,17 @@ CC = icc
 #CC = gcc
 OPT = -qopenmp -O3 -g -mkl -heap-arrays -ip -ipo -parallel -std=c++11
 
-SRCS = poseEstimation.cpp
+SRCS = dpposeEstimation.cpp
 
 LIB = 
 
-EXE = estimation.exe
+EXE = dpestimation.exe
 
 run: all
-	./estimation.exe
+	./dpestimation.exe
 
-all: poseEstimation.cpp 
+all: dpposeEstimation.cpp 
 	$(CC) $(OPT) $(LIB) $(SRCS) -o $(EXE)
 
 clean: 
-	rm ./estimation.exe    
+	rm ./dpestimation.exe    
