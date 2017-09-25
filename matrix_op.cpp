@@ -1,6 +1,3 @@
-#include "MRA.h"
-
-
 
 //Matrix Transpose
 void Transpose(double *matrix, double *matrixTranspose, int ny, int nx)
@@ -15,22 +12,6 @@ void Transpose(double *matrix, double *matrixTranspose, int ny, int nx)
 	}
 	
 }
-void Transpose(double **matrix, double **matrixTranspose, int ny, int nx)
-{
-	
-	for (int y = 0; y < ny; y++)
-	{
-		for (int x = 0; x < nx; x++)
-		{
-			matrixTranspose[x][y] = matrix[y][x];
-		}
-	}
-	
-}
-
-
-
-
 
 //Matrix Multiplication
 void MatrixMult(double *A, double *B, double *C,  int ny, int nx)
@@ -50,71 +31,39 @@ void MatrixMult(double *A, double *B, double *C,  int ny, int nx)
 		}
 	}
 }
-void MatrixMult(double **A, double **B, double **C, int rowA, int dim, int colB)//A(rowA*dim), B(dim*colB),C(rowA*colB)
-{
-	double fSum;
-
-	for (int i = 0; i < rowA; i++)
-	{
-		for (int j = 0; j < colB; j++)
-		{
-			fSum = 0.0f;
-			for (int k = 0; k < dim; k++)
-			{
-				fSum += (A[i][k]*B[k][j]);
-			}
-			C[i][j] = fSum;
-		}
-	}
-}
-
 
 //Matrix Inverse
-	//Det
+//Det
 double Determinant(double *a,int n)
 {
 	int i,j,j1,j2;
 	double det = 0;
-	double *m = NULL;
 
-	if (n < 1) 
-	{ /* Error */
 
-	} 
-	else if (n == 1) 
-	{ /* Shouldn't get used */
-	det = a[0];
-	} 
-	else if (n == 2) 
-	{    
-	det = a[0] * a[1] - a[2] * a[3];
-	} 
-	else 
-	{
 	      det = 0;
         for (j1=0;j1<n;j1++)
-		{
-		 m =(double **) malloc((n-1)*sizeof(double *));
-            
-		 for (i=0;i<n-1;i++)
-		    m[i] = (double *)malloc((n-1)*sizeof(double));
-		 for (i=1;i<n;i++)
-         {
-		    j2 = 0;
-		    for (j=0;j<n;j++)
-            {
-		       if (j == j1)
-		          continue;
-		       m[((i-1)*n)+j2] = a[(i*n)+j];
-		       j2++;
-		    }
-		 }
-		 det += pow(-1.0,j1+2.0) * a[(0*n)+j1] * Determinant(m,n-1);
-		 for (i=0;i<n-1;i++)
-		    free(m[i]);
-		 free(m);
+	{
+		
+	double *m = new double [(n-1)*(n-1)];		
+		for (i=1;i<n;i++)
+         	{
+			j2 = 0;
+			
+			for (j=0;j<n;j++)
+            		{
+				if (j == j1)
+		        	continue;
+		       		m[((i-1)*n)+j2] = a[(i*n)+j];
+		       		j2++;
+			}
 		}
+		
+		det += pow(-1.0,j1+2.0) * a[j1] * Determinant(m,n-1);
+	
+	//free the pointer
+	delete[] m;
 	}
+
 	return(det);
 }
 

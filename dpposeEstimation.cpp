@@ -352,6 +352,44 @@ void Inverse(double *augmatrix, double *matrixInverse, int n)
         }
 }
 
+//Determinant
+double Determinant(double *a,int n)
+{
+	cout << "time "<<endl;
+	int i,j,j1,j2;
+	double det = 0.0;
+
+        for (j1=0;j1<n;j1++)
+	{
+		
+	double *m = new double [(n-1)*(n-1)];		
+		for (i=1;i<n;i++)
+         	{
+			j2 = 0;
+			
+			for (j=0;j<n;j++)
+            		{
+				if (j == j1)
+				{
+		        	continue;
+				}
+				else
+				{
+		       		m[((i-1)*n)+j2] = a[(i*n)+j];
+		       		j2++;
+				}
+			}
+		}
+		
+		det += pow(-1.0,j1+2.0) * a[j1] * Determinant(m,n-1);
+	
+	//free the pointer
+	delete[] m;
+	}
+
+	return(det);
+}
+
 																						
 void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *B_transpose, double mu, double *M, double *Y,const int row,const int col,const int row1)
 {
@@ -362,6 +400,7 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	double *Zden = new double [row1*row1];
 	double *Zdenaug = new double [row1*row1*row1*row1];
 	double *ZdenInverse = new double [row1*row1];
+	double deter = 0.0;
 	high_resolution_clock::time_point t1,t2,t3,t4;
 
 	//numerator
@@ -392,7 +431,8 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
 	//displayValues(Zden, row1*row1);
 	
-
+	deter = Determinant(Zden,row1);
+	cout << "value of determinant "<< deter << endl;	
 
 	//Inverse calculation via guass-jordon method
 	AugmentIdentity(Zden, Zdenaug, row1);
@@ -681,7 +721,7 @@ int main(void)
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
-	for(int iter = 0; iter < 500; iter++)
+	for(int iter = 0; iter < 5; iter++)
 	{
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);

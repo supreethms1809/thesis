@@ -8,8 +8,8 @@ LIB =
 
 EXE = dpestimation.exe
 
-#run:
-#	./estimation.exe
+run: all
+	./dpestimation.exe
 
 all: dpposeEstimation.cpp 
 	$(CC) $(OPT) $(LIB) $(SRCS) -o $(EXE)
