@@ -431,8 +431,8 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
 	//displayValues(Zden, row1*row1);
 	
-	deter = Determinant(Zden,row1);
-	cout << "value of determinant "<< deter << endl;	
+	//deter = Determinant(Zden,row1);
+	//cout << "value of determinant "<< deter << endl;	
 
 	//Inverse calculation via guass-jordon method
 	AugmentIdentity(Zden, Zdenaug, row1);
@@ -721,7 +721,7 @@ int main(void)
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
-	for(int iter = 0; iter < 5; iter++)
+	for(int iter = 0; iter < 50; iter++)
 	{
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
