@@ -392,7 +392,22 @@ double Determinant(double *a,int n)
 	return(det);
 }
 
-																						
+lapack_int matInv(double *A, int n)
+{
+	int ipiv[n+1];
+	lapack_int ret;
+	
+	ret = LAPACKE_dgetrf(LAPACK_ROW_MAJOR,n,n,A,n,ipiv);
+	
+	if(ret != 0)
+	{
+		return ret;
+	}
+	
+	ret = LAPACKE_dgetri(LAPACK_ROW_MAJOR,n,A,n,ipiv);
+	return ret;
+
+}																						
 void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *B_transpose, double mu, double *M, double *Y,const int row,const int col,const int row1)
 {
 	double *temp = new double [row*col];
@@ -402,7 +417,7 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	double *Zden = new double [row1*row1];
 	double *Zdenaug = new double [row1*row1*row1*row1];
 	double *ZdenInverse = new double [row1*row1];
-	double deter = 0.0;
+	int status = 0;
 	high_resolution_clock::time_point t1,t2,t3,t4;
 
 	//numerator
@@ -433,28 +448,33 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
 	//displayValues(Zden, row1*row1);
 	
-	//deter = Determinant(Zden,row1);
-	//cout << "value of determinant "<< deter << endl;	
-
+	//t3 = high_resolution_clock::now();
+	status = matInv(Zden,row1);
+	//cout << "value of determinant "<< status << endl;	
+	//t4 = high_resolution_clock::now();
+	//duration<double> time_span1 = duration_cast<duration<double>>(t4 - t3);
+	//cout << "Time in miliseconds for inverse section is : " << time_span1.count() * 1000 << " ms" << endl;
+	
 	//Inverse calculation via guass-jordon method
-	AugmentIdentity(Zden, Zdenaug, row1);
-	t1 = high_resolution_clock::now();	
-	cpuInverseOfMatrix(Zdenaug, row1);
+	////AugmentIdentity(Zden, Zdenaug, row1);
+	////t1 = high_resolution_clock::now();	
+	////cpuInverseOfMatrix(Zdenaug, row1);
 
 	//displayValues(Zdenaug, row1*row1);
-	Inverse(Zdenaug,ZdenInverse,row1);
+	////Inverse(Zdenaug,ZdenInverse,row1);
 	//displayValues(ZdenInverse, row1*row1);
-	t2 = high_resolution_clock::now();
+	////t2 = high_resolution_clock::now();
 	//duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
-	t3 = high_resolution_clock::now();
+	////t3 = high_resolution_clock::now();
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
-        cpuMatrixMult(Znum, ZdenInverse, Z, row, row1, row1);	
+        cpuMatrixMult(Znum, Zden, Z, row, row1, row1);	
+        ////cpuMatrixMult(Znum, ZdenInverse, Z, row, row1, row1);	
 	//displayValues(Z,row*row1);
 	
-	t4 = high_resolution_clock::now();
+	//t4 = high_resolution_clock::now();
 	//duration<double> time_span1 = duration_cast<duration<double>>(t4 - t3);
 	//cout << "Time in miliseconds for inverse section is : " << time_span1.count() * 1000 << " ms" << endl;
 	
@@ -689,6 +709,7 @@ int main(void)
 	double DualRes;
 	
 	//t3 = high_resolution_clock::now();
+	t1 = high_resolution_clock::now();
 	
 	items = readValues("messi2.txt",xy,items);
 	rowMean(xy, col, row, mean);
@@ -723,8 +744,9 @@ int main(void)
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
-	for(int iter = 0; iter < 50; iter++)
+	for(int iter = 0; iter < 500; iter++)
 	{
+		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
 		calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
@@ -765,13 +787,14 @@ int main(void)
 			}
 		}
 		//t2 = high_resolution_clock::now();
-	//	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-	//	cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
+		//duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+		//cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
+
 	}
+	t2 = high_resolution_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
 	
-	//end = clock();
-	//cpu_time_used = double(end - start) / CLOCKS_PER_SEC;
-	//cout << "Total time taken in secs: "<< cpu_time_used <<endl;
 
 	delete[] xy;
         delete[] mean;
