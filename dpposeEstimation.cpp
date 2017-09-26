@@ -322,7 +322,7 @@ void cpuInverseOfMatrix(double *matrix, int col)
 		for (int k = 0; k < col; k++)
 		{
 			float tempIni;
-			tempIni = matrix[m + (k * 2 * col)];
+			tempIni = matrix[m + (k * (2 * col))];
 			if (k == m)
 			{
 			//Just a loop to do nothing
@@ -333,9 +333,9 @@ void cpuInverseOfMatrix(double *matrix, int col)
 				{
 				
 				double tempMul, tempDiv;
-				tempMul = matrix[(2 * m * col) + l] * tempIni;
-				tempDiv = tempMul / matrix[(2 * m * col) + m];
-				matrix[(k * 2 * col) + l] = matrix[(k * 2 * col) + l] - tempDiv;
+				tempMul = matrix[(m * (2 * col)) + l] * tempIni;
+				tempDiv = tempMul / matrix[(m * (2 * col)) + m];
+				matrix[(k * 2 * col) + l] = matrix[(k * (2 * col)) + l] - tempDiv;
 				}
 			}
 
