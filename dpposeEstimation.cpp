@@ -287,53 +287,55 @@ void AugmentIdentity(double *matrix, double *augmatrix, int n)
 	}
 }
 
-void cpuInverseOfMatrix(double *matrix, int n)
+void cpuInverseOfMatrix(double *matrix, int col)
 {
 //#pragma omp parallel for 
-	for (int m = 0; m < n; m++)
+	for (int m = 0; m < col; m++)
 	{
-	//Checking if diagonal element is 0
-		if (matrix[((2 * n) + 1)*m] == 0)
+		//Checking if diagonal element is 0
+		if (matrix[((2 * col) + 1)*m] == 0)
 		{
-                	if (m == (n - 1))
+			//checking if the row is last row. If it is last row add the previous row to make it non zero
+                	if (m == (col - 1))
 			{
-				for (int i = 0; i < (2 * n); i++)
+				for (int i = 0; i < (2 * col); i++)
 				{					
-				matrix[(m * 2 * n) + i] = matrix[((m - 1) * 2 * n) + i] + matrix[(m * 2 * n) + i];
+				matrix[(m * (2 * col)) + i] = matrix[((m - 1) * (2 * col)) + i] + matrix[(m * (2 * col)) + i];
 				}
 			}
-			else
+			else	//if it is not last row, add the next row.
 			{
-			        for (int i = 0; i < (2 * n); i++)
+			        for (int i = 0; i < (2 * col); i++)
 				{
-				matrix[(m * 2 * n) + i] = matrix[((m + 1) * 2 * n) + i] + matrix[(m * 2 * n) + i];
+				matrix[(m * 2 * col) + i] = matrix[((m + 1) * 2 * col) + i] + matrix[(m * 2 * col) + i];
 				}
 			}
 		}
 		//Make the diagonal elements 1 along with the whole row(divide).
-		double initialValue = matrix[((2 * n) + 1)*m];
-		for (int j = 0; j < (2 * n); j++)
+		double initialValue = matrix[((2 * col) + 1)*m];
+		for (int j = 0; j < (2 * col); j++)
 		{
-		matrix[(m * 2 * n) + j] = matrix[(m * 2 * n) + j] / initialValue;
+		matrix[(m * (2 * col)) + j] = matrix[(m * (2 * col)) + j] / initialValue;
 		}
+
 		//Making the elements of the row to zero
-		for (int k = 0; k < n; k++)
+		for (int k = 0; k < col; k++)
 		{
 			float tempIni;
-			tempIni = matrix[m + (k * 2 * n)];
+			tempIni = matrix[m + (k * 2 * col)];
 			if (k == m)
 			{
 			//Just a loop to do nothing
 			}
 			else
 			{
-				for (int l = 0; l < (2 * n); l++)
+				for (int l = 0; l < (2 * col); l++)
 				{
 				
 				double tempMul, tempDiv;
-				tempMul = matrix[(2 * m*n) + l] * tempIni;
-				tempDiv = tempMul / matrix[(2 * m*n) + m];
-				matrix[(k * 2 * n) + l] = matrix[(k * 2 * n) + l] - tempDiv;
+				tempMul = matrix[(2 * m * col) + l] * tempIni;
+				tempDiv = tempMul / matrix[(2 * m * col) + m];
+				matrix[(k * 2 * col) + l] = matrix[(k * 2 * col) + l] - tempDiv;
 				}
 			}
 
