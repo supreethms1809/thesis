@@ -750,11 +750,13 @@ int main(void)
 	double DualRes;
 
 	//allocate precomputed Zden
+	double *Zden = new double [row1*row1];
 	double *Zden1 = new double [row1*row1];
 	double *Zden2 = new double [row1*row1];
 	double *Zden3 = new double [row1*row1];
 	double *Zden4 = new double [row1*row1];
         int status = 0;
+	double mu_orig = 0.0;	
 	double mu1 = 0.0;
 	double mu2 = 0.0;
 	double mu3 = 0.0;
@@ -788,20 +790,29 @@ int main(void)
 	//cout << "value of mu is " << mu << endl;
 
 	//Precompute mu
+	mu_orig = mu;
 	mu1 = mu * 2;
 	mu2 = mu1 * 2;
 	mu3 = mu / 2;
 	mu4 = mu3 / 2;
 
+	addScalarToDiagonal(Zden,BBt,mu_orig,row1,row1);
 	addScalarToDiagonal(Zden1,BBt,mu1,row1,row1);
 	addScalarToDiagonal(Zden2,BBt,mu2,row1,row1);
 	addScalarToDiagonal(Zden3,BBt,mu3,row1,row1);
 	addScalarToDiagonal(Zden4,BBt,mu4,row1,row1);
 				
+	status = matInv(Zden,row1);
 	status = matInv(Zden1,row1);
 	status = matInv(Zden2,row1);
 	status = matInv(Zden3,row1);
 	status = matInv(Zden4,row1);	
+	
+	calculateZ_preZden(Z, Zden,xy, E, T, B_transpose,mu_orig,M,Y,row,col,row1);
+	calculateZ_preZden(Z, Zden1,xy, E, T, B_transpose,mu1,M,Y,row,col,row1);
+	calculateZ_preZden(Z, Zden2,xy, E, T, B_transpose,mu2,M,Y,row,col,row1);
+	calculateZ_preZden(Z, Zden3,xy, E, T, B_transpose,mu3,M,Y,row,col,row1);
+	calculateZ_preZden(Z, Zden4,xy, E, T, B_transpose,mu4,M,Y,row,col,row1);
 
 	TransposeOnCPU(B,B_transpose,row1,col);
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
