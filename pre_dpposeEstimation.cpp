@@ -468,11 +468,13 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	//duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
-
+ 	dump_to_file("Zden_old.txt",Zden,row1,row1);		
 	////t3 = high_resolution_clock::now();
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
         cpuMatrixMult(Znum, Zden, Z, row, row1, row1);	
-        ////cpuMatrixMult(Znum, ZdenInverse, Z, row, row1, row1);	
+       
+        
+	////cpuMatrixMult(Znum, ZdenInverse, Z, row, row1, row1);	
 	//displayValues(Z,row*row1);
 	
 	//t4 = high_resolution_clock::now();
@@ -523,6 +525,7 @@ void calculateZ_preZden(double *Z,double *Zden,double *xy, double *E, double *T,
 
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
         cpuMatrixMult(Znum, Zden, Z, row, row1, row1);
+        dump_to_file("Z_pre_den.txt",Zden,row1,row1);
         //displayValues(Zden, row1*row1);
 
 	delete [] temp;
@@ -792,6 +795,11 @@ int main(void)
 	mu = meanCalc(xy,col,row);
 	//cout << "value of mu is " << mu << endl;
 
+        //calculation of BBt
+        TransposeOnCPU(B,B_transpose,row1,col);
+        cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
+        //Zden
+
 	//Precompute mu
 	mu_orig = mu;
 	mu1 = mu * 2;
@@ -804,23 +812,14 @@ int main(void)
 	addScalarToDiagonal(Zden2,BBt,mu2,row1,row1);
 	addScalarToDiagonal(Zden3,BBt,mu3,row1,row1);
 	addScalarToDiagonal(Zden4,BBt,mu4,row1,row1);
-				
+ 	
+	//dump_to_file("Z_old.txt",Z,row1,row1);				
+
 	status = matInv(Zden,row1);
 	status = matInv(Zden1,row1);
 	status = matInv(Zden2,row1);
 	status = matInv(Zden3,row1);
 	status = matInv(Zden4,row1);	
-	
-	//calculateZ_preZden(Z, Zden,xy, E, T, B_transpose,mu_orig,M,Y,row,col,row1);
-	//calculateZ_preZden(Z, Zden1,xy, E, T, B_transpose,mu1,M,Y,row,col,row1);
-	//calculateZ_preZden(Z, Zden2,xy, E, T, B_transpose,mu2,M,Y,row,col,row1);
-	//calculateZ_preZden(Z, Zden3,xy, E, T, B_transpose,mu3,M,Y,row,col,row1);
-	//calculateZ_preZden(Z, Zden4,xy, E, T, B_transpose,mu4,M,Y,row,col,row1);
-
-	//calculation of BBt
-	TransposeOnCPU(B,B_transpose,row1,col);
-	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
-	//Zden
 	
 	//t4 = high_resolution_clock::now();
 	//duration<double> time_span = duration_cast<duration<double>>(t4 - t3);
@@ -841,33 +840,33 @@ int main(void)
 		//pre_computed part
 		if(mu = mu_orig)
 		{
-			cout << "coming inside 1"<<endl;
+			//cout << "coming inside 1"<<endl;
 			calculateZ_preZden(Z, Zden,xy, E, T, B_transpose,mu_orig,M,Y,row,col,row1);
-		//	displayValues(Zden,row1*row1);	
+			//calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 		}
 		else if(mu = mu1)
 		{
-			cout << "coming inside 2"<<endl;
+			//cout << "coming inside 2"<<endl;
 			calculateZ_preZden(Z, Zden1,xy, E, T, B_transpose,mu1,M,Y,row,col,row1);
 		}
 		else if(mu = mu2)
 		{
-			cout << "coming inside 3"<<endl;
+			//cout << "coming inside 3"<<endl;
 			calculateZ_preZden(Z, Zden2,xy, E, T, B_transpose,mu2,M,Y,row,col,row1);	
 		}
 		else if(mu = mu3)
 		{
-			cout << "coming inside 4"<<endl;
+			//cout << "coming inside 4"<<endl;
 			calculateZ_preZden(Z, Zden3,xy, E, T, B_transpose,mu3,M,Y,row,col,row1);
 		}
 		else if(mu = mu4)
 		{
-			cout << "coming inside 5"<<endl;
+			//cout << "coming inside 5"<<endl;
 			calculateZ_preZden(Z, Zden4,xy, E, T, B_transpose,mu4,M,Y,row,col,row1);
 		}
 		else
 		{
-			cout << "coming inside 6"<<endl;
+			//cout << "coming inside 6"<<endl;
 			calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 		}
 
