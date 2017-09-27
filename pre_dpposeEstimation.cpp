@@ -491,6 +491,8 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 
 void calculateZ_preZden(double *Z,double *Zden,double *xy, double *E, double *T, double *B_transpose, double mu, double *M, double *Y,const int row,const int col,const int row1)
 {
+	//calculateZ_preZden(Z, Zden, xy, E, T, B_transpose,mu_orig,M,Y,row,col,row1);
+
         double *temp = new double [row*col];
         double *temp2 = new double [row*row1];
         double *temp3 = new double [row*row1];
@@ -521,7 +523,7 @@ void calculateZ_preZden(double *Z,double *Zden,double *xy, double *E, double *T,
 
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
         cpuMatrixMult(Znum, Zden, Z, row, row1, row1);
-        displayValues(Zden, row1*row1);
+        //displayValues(Zden, row1*row1);
 
 	delete [] temp;
         delete [] temp2;
