@@ -826,40 +826,36 @@ int main(void)
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
-	for(int iter = 0; iter < 6; iter++)
+	for(int iter = 0; iter < 500; iter++)
 	{
 		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
 //		calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
-			
-		//cout << "value of mu_orig "<<mu_orig<<endl;
-		//cout << "value of mu1 "<<mu1<<endl;
-		//cout << "value of mu2 "<<mu2<<endl;	
 
 		//pre_computed part
-		if(mu = mu_orig)
+		if(mu == mu_orig)
 		{
 			//cout << "coming inside 1"<<endl;
 			calculateZ_preZden(Z, Zden,xy, E, T, B_transpose,mu_orig,M,Y,row,col,row1);
 			//calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 		}
-		else if(mu = mu1)
+		else if(mu == mu1)
 		{
 			//cout << "coming inside 2"<<endl;
 			calculateZ_preZden(Z, Zden1,xy, E, T, B_transpose,mu1,M,Y,row,col,row1);
 		}
-		else if(mu = mu2)
+		else if(mu == mu2)
 		{
 			//cout << "coming inside 3"<<endl;
 			calculateZ_preZden(Z, Zden2,xy, E, T, B_transpose,mu2,M,Y,row,col,row1);	
 		}
-		else if(mu = mu3)
+		else if(mu == mu3)
 		{
 			//cout << "coming inside 4"<<endl;
 			calculateZ_preZden(Z, Zden3,xy, E, T, B_transpose,mu3,M,Y,row,col,row1);
 		}
-		else if(mu = mu4)
+		else if(mu == mu4)
 		{
 			//cout << "coming inside 5"<<endl;
 			calculateZ_preZden(Z, Zden4,xy, E, T, B_transpose,mu4,M,Y,row,col,row1);
@@ -869,12 +865,11 @@ int main(void)
 			//cout << "coming inside 6"<<endl;
 			calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 		}
-
 	//	t1 = high_resolution_clock::now();
 		calculateQ(Q,Z,Y,mu,row,row1);
 	//	t2 = high_resolution_clock::now();
 		//displayValues(Z,row*row1);
-
+	
 		//t1 = high_resolution_clock::now();
 		prox_2norm(Q,M,C,lam/mu,row,row1,data_size);
 		//t2 = high_resolution_clock::now();
