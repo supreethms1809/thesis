@@ -521,6 +521,7 @@ void calculateZ_preZden(double *Z,double *Zden,double *xy, double *E, double *T,
 
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
         cpuMatrixMult(Znum, Zden, Z, row, row1, row1);
+        displayValues(Zden, row1*row1);
 
 	delete [] temp;
         delete [] temp2;
@@ -808,12 +809,13 @@ int main(void)
 	status = matInv(Zden3,row1);
 	status = matInv(Zden4,row1);	
 	
-	calculateZ_preZden(Z, Zden,xy, E, T, B_transpose,mu_orig,M,Y,row,col,row1);
-	calculateZ_preZden(Z, Zden1,xy, E, T, B_transpose,mu1,M,Y,row,col,row1);
-	calculateZ_preZden(Z, Zden2,xy, E, T, B_transpose,mu2,M,Y,row,col,row1);
-	calculateZ_preZden(Z, Zden3,xy, E, T, B_transpose,mu3,M,Y,row,col,row1);
-	calculateZ_preZden(Z, Zden4,xy, E, T, B_transpose,mu4,M,Y,row,col,row1);
+	//calculateZ_preZden(Z, Zden,xy, E, T, B_transpose,mu_orig,M,Y,row,col,row1);
+	//calculateZ_preZden(Z, Zden1,xy, E, T, B_transpose,mu1,M,Y,row,col,row1);
+	//calculateZ_preZden(Z, Zden2,xy, E, T, B_transpose,mu2,M,Y,row,col,row1);
+	//calculateZ_preZden(Z, Zden3,xy, E, T, B_transpose,mu3,M,Y,row,col,row1);
+	//calculateZ_preZden(Z, Zden4,xy, E, T, B_transpose,mu4,M,Y,row,col,row1);
 
+	//calculation of BBt
 	TransposeOnCPU(B,B_transpose,row1,col);
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
 	//Zden
@@ -823,12 +825,50 @@ int main(void)
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
-	for(int iter = 0; iter < 500; iter++)
+	for(int iter = 0; iter < 1; iter++)
 	{
 		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
-		calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
+//		calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
+			
+		//cout << "value of mu_orig "<<mu_orig<<endl;
+		//cout << "value of mu1 "<<mu1<<endl;
+		//cout << "value of mu2 "<<mu2<<endl;	
+
+		//pre_computed part
+		if(mu = mu_orig)
+		{
+			cout << "coming inside 1"<<endl;
+			calculateZ_preZden(Z, Zden,xy, E, T, B_transpose,mu_orig,M,Y,row,col,row1);
+		//	displayValues(Zden,row1*row1);	
+		}
+		else if(mu = mu1)
+		{
+			cout << "coming inside 2"<<endl;
+			calculateZ_preZden(Z, Zden1,xy, E, T, B_transpose,mu1,M,Y,row,col,row1);
+		}
+		else if(mu = mu2)
+		{
+			cout << "coming inside 3"<<endl;
+			calculateZ_preZden(Z, Zden2,xy, E, T, B_transpose,mu2,M,Y,row,col,row1);	
+		}
+		else if(mu = mu3)
+		{
+			cout << "coming inside 4"<<endl;
+			calculateZ_preZden(Z, Zden3,xy, E, T, B_transpose,mu3,M,Y,row,col,row1);
+		}
+		else if(mu = mu4)
+		{
+			cout << "coming inside 5"<<endl;
+			calculateZ_preZden(Z, Zden4,xy, E, T, B_transpose,mu4,M,Y,row,col,row1);
+		}
+		else
+		{
+			cout << "coming inside 6"<<endl;
+			calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
+		}
+
 	//	t1 = high_resolution_clock::now();
 		calculateQ(Q,Z,Y,mu,row,row1);
 	//	t2 = high_resolution_clock::now();
@@ -889,6 +929,11 @@ int main(void)
 	delete[] Y;
 	delete[] ZO;
 	delete[] Q;
+	delete[] Zden;
+	delete[] Zden1;
+	delete[] Zden2;
+	delete[] Zden3;
+	delete[] Zden4;
 
 }
 
