@@ -707,6 +707,12 @@ int main(void)
 	double mu = 0.0;
 	double PrimRes;
 	double DualRes;
+
+	//allocate precomputed Zden
+	double *Zden1 = new double [row1*row1];
+	double *Zden2 = new double [row1*row1];
+	double *Zden3 = new double [row1*row1];
+	double *Zden4 = new double [row1*row1];
 	
 	//t3 = high_resolution_clock::now();
 	t1 = high_resolution_clock::now();
@@ -734,6 +740,14 @@ int main(void)
 	
 	mu = meanCalc(xy,col,row);
 	//cout << "value of mu is " << mu << endl;
+
+	//Precompute mu
+	mu1 = mu * 2;
+	mu2 = mu1 * 2;
+	mu3 = mu / 2;
+	mu4 = mu3 / 2;
+
+			
 
 	TransposeOnCPU(B,B_transpose,row1,col);
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
