@@ -468,7 +468,7 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	//duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
- 	dump_to_file("Zden_old.txt",Zden,row1,row1);		
+ 	//dump_to_file("Zden_old.txt",Zden,row1,row1);		
 	////t3 = high_resolution_clock::now();
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
         cpuMatrixMult(Znum, Zden, Z, row, row1, row1);	
@@ -525,7 +525,7 @@ void calculateZ_preZden(double *Z,double *Zden,double *xy, double *E, double *T,
 
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
         cpuMatrixMult(Znum, Zden, Z, row, row1, row1);
-        dump_to_file("Z_pre_den.txt",Zden,row1,row1);
+        //dump_to_file("Z_pre_den.txt",Zden,row1,row1);
         //displayValues(Zden, row1*row1);
 
 	delete [] temp;
@@ -826,7 +826,7 @@ int main(void)
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
-	for(int iter = 0; iter < 1; iter++)
+	for(int iter = 0; iter < 6; iter++)
 	{
 		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
