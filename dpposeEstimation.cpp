@@ -407,7 +407,8 @@ lapack_int matInv(double *A, int n)
 	ret = LAPACKE_dgetri(LAPACK_ROW_MAJOR,n,A,n,ipiv);
 	return ret;
 
-}																						
+}	
+																					
 void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *B_transpose, double mu, double *M, double *Y,const int row,const int col,const int row1)
 {
 	double *temp = new double [row*col];
@@ -747,7 +748,15 @@ int main(void)
 	mu3 = mu / 2;
 	mu4 = mu3 / 2;
 
-			
+	addScalarToDiagonal(Zden1,BBt,mu1,row1,row1);
+	addScalarToDiagonal(Zden2,BBt,mu2,row1,row1);
+	addScalarToDiagonal(Zden3,BBt,mu3,row1,row1);
+	addScalarToDiagonal(Zden4,BBt,mu4,row1,row1);
+				
+	status = matInv(Zden1,row1);
+	status = matInv(Zden2,row1);
+	status = matInv(Zden3,row1);
+	status = matInv(Zden4,row1);	
 
 	TransposeOnCPU(B,B_transpose,row1,col);
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
