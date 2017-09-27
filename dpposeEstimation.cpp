@@ -711,7 +711,7 @@ int main(void)
 	//t3 = high_resolution_clock::now();
 	t1 = high_resolution_clock::now();
 	
-	items = readValues("messi3.txt",xy,items);
+	items = readValues("messi2.txt",xy,items);
 	rowMean(xy, col, row, mean);
         Scalc(xy, col, row, mean);
         rowMean(xy, col, row, mean);
