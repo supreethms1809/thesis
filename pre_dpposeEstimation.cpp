@@ -769,7 +769,7 @@ int main(void)
 	double mu4 = 0.0;
 	
 	//t3 = high_resolution_clock::now();
-	//t1 = high_resolution_clock::now();
+	t1 = high_resolution_clock::now();
 	
 	items = readValues("messi2.txt",xy,items);
 	rowMean(xy, col, row, mean);
@@ -800,7 +800,7 @@ int main(void)
         cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
         //Zden
 	
-	t3 = high_resolution_clock::now();
+	//t3 = high_resolution_clock::now();
 
 	//Precompute mu
 	mu_orig = mu;
@@ -823,14 +823,14 @@ int main(void)
 	status = matInv(Zden3,row1);
 	status = matInv(Zden4,row1);	
 	
-	t4 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t4 - t3);
-	cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
+	//t4 = high_resolution_clock::now();
+	//duration<double> time_span = duration_cast<duration<double>>(t4 - t3);
+	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
 	for(int iter = 0; iter < 500; iter++)
 	{
-		t1 = high_resolution_clock::now();
+		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
 //		calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
@@ -903,14 +903,14 @@ int main(void)
 			{
 			}
 		}
-		t2 = high_resolution_clock::now();
-		duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-		cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
+		//t2 = high_resolution_clock::now();
+		//duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+		//cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
 
 	}
-	//t2 = high_resolution_clock::now();
-	//duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-	//cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
+	t2 = high_resolution_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
 	
 
 	delete[] xy;
