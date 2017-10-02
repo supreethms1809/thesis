@@ -723,7 +723,7 @@ int main(void)
 	const int col = 15;
 	const int row1 = 384;
 	const int col1 = 15;
-	double tol = 1e-10;
+	double tol = 1e-04;
 
 	double *xy = new double [row*col];
 	double *mean = new double [row];
