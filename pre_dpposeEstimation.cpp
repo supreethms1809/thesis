@@ -719,8 +719,8 @@ void resCalc(double *PrimRes, double *DualRes, double *M, double *Z, double *ZO,
 
 int main(void)
 {
-	int iter_num = 10;
-	high_resolution_clock::time_point t1[50],t2[50],t3,t4;
+	const int iter_num = 10;
+	high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4;
 	for(int p = 0;p<iter_num;p++)
 	{	//t3 = high_resolution_clock::now();
 
@@ -940,7 +940,7 @@ int main(void)
 	//cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
 	}	
 	duration<double> time_span;
-	for(int p=0;p<50;p++)
+	for(int p=0;p<iter_num;p++)
 	{
 		time_span += duration_cast<duration<double>>(t2[p] - t1[p]);
 	}	
