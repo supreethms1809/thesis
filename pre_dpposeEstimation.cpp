@@ -719,6 +719,12 @@ void resCalc(double *PrimRes, double *DualRes, double *M, double *Z, double *ZO,
 
 int main(void)
 {
+	int iter_num = 10;
+	high_resolution_clock::time_point t1[50],t2[50],t3,t4;
+	for(int p = 0;p<iter_num;p++)
+	{	//t3 = high_resolution_clock::now();
+
+	
 	const int row = 2;
 	const int col = 15;
 	const int row1 = 384;
@@ -736,7 +742,7 @@ int main(void)
 	int B_items = 0;
 	int lam =1;
 	bool verb = true;
-	high_resolution_clock::time_point t1,t2,t3,t4;
+
 	const int data_size = row1/3;	
 	
 	//ssr2D3D_alm
@@ -768,8 +774,7 @@ int main(void)
 	double mu3 = 0.0;
 	double mu4 = 0.0;
 	
-	//t3 = high_resolution_clock::now();
-	t1 = high_resolution_clock::now();
+	t1[p] = high_resolution_clock::now();
 	
 	items = readValues("messi2.txt",xy,items);
 	rowMean(xy, col, row, mean);
@@ -908,10 +913,7 @@ int main(void)
 		//cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
 
 	}
-	t2 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-	cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
-	
+	t2[p] = high_resolution_clock::now();
 
 	delete[] xy;
         delete[] mean;
@@ -933,5 +935,15 @@ int main(void)
 	delete[] Zden3;
 	delete[] Zden4;
 
+
+	//duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	//cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
+	}	
+	duration<double> time_span;
+	for(int p=0;p<50;p++)
+	{
+		time_span += duration_cast<duration<double>>(t2[p] - t1[p]);
+	}	
+	cout << "Time in miliseconds: "<< (time_span.count()/iter_num) * 1000 << " ms"<<endl; 
 }
 
