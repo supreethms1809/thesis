@@ -287,53 +287,55 @@ void AugmentIdentity(float *matrix, float *augmatrix, int n)
 	}
 }
 
-void cpuInverseOfMatrix(float *matrix, int n)
+void cpuInverseOfMatrix(float *matrix, int col)
 {
 //#pragma omp parallel for 
-	for (int m = 0; m < n; m++)
+	for (int m = 0; m < col; m++)
 	{
-	//Checking if diagonal element is 0
-		if (matrix[((2 * n) + 1)*m] == 0)
+		//Checking if diagonal element is 0
+		if (matrix[((2 * col) + 1)*m] == 0)
 		{
-                	if (m == (n - 1))
+			//checking if the row is last row. If it is last row add the previous row to make it non zero
+                	if (m == (col - 1))
 			{
-				for (int i = 0; i < (2 * n); i++)
+				for (int i = 0; i < (2 * col); i++)
 				{					
-				matrix[(m * 2 * n) + i] = matrix[((m - 1) * 2 * n) + i] + matrix[(m * 2 * n) + i];
+				matrix[(m * (2 * col)) + i] = matrix[((m - 1) * (2 * col)) + i] + matrix[(m * (2 * col)) + i];
 				}
 			}
-			else
+			else	//if it is not last row, add the next row.
 			{
-			        for (int i = 0; i < (2 * n); i++)
+			        for (int i = 0; i < (2 * col); i++)
 				{
-				matrix[(m * 2 * n) + i] = matrix[((m + 1) * 2 * n) + i] + matrix[(m * 2 * n) + i];
+				matrix[(m * 2 * col) + i] = matrix[((m + 1) * 2 * col) + i] + matrix[(m * 2 * col) + i];
 				}
 			}
 		}
 		//Make the diagonal elements 1 along with the whole row(divide).
-		float initialValue = matrix[((2 * n) + 1)*m];
-		for (int j = 0; j < (2 * n); j++)
+		float initialValue = matrix[((2 * col) + 1)*m];
+		for (int j = 0; j < (2 * col); j++)
 		{
-		matrix[(m * 2 * n) + j] = matrix[(m * 2 * n) + j] / initialValue;
+		matrix[(m * (2 * col)) + j] = matrix[(m * (2 * col)) + j] / initialValue;
 		}
+
 		//Making the elements of the row to zero
-		for (int k = 0; k < n; k++)
+		for (int k = 0; k < col; k++)
 		{
 			float tempIni;
-			tempIni = matrix[m + (k * 2 * n)];
+			tempIni = matrix[m + (k * (2 * col))];
 			if (k == m)
 			{
 			//Just a loop to do nothing
 			}
 			else
 			{
-				for (int l = 0; l < (2 * n); l++)
+				for (int l = 0; l < (2 * col); l++)
 				{
 				
 				float tempMul, tempDiv;
-				tempMul = matrix[(2 * m*n) + l] * tempIni;
-				tempDiv = tempMul / matrix[(2 * m*n) + m];
-				matrix[(k * 2 * n) + l] = matrix[(k * 2 * n) + l] - tempDiv;
+				tempMul = matrix[(m * (2 * col)) + l] * tempIni;
+				tempDiv = tempMul / matrix[(m * (2 * col)) + m];
+				matrix[(k * 2 * col) + l] = matrix[(k * (2 * col)) + l] - tempDiv;
 				}
 			}
 
@@ -390,7 +392,23 @@ float Determinant(float *a,int n)
 	return(det);
 }
 
-																						
+lapack_int matInv(float *A, int n)
+{
+	int ipiv[n+1];
+	lapack_int ret;
+	
+	ret = LAPACKE_dgetrf(LAPACK_ROW_MAJOR,n,n,A,n,ipiv);
+	
+	if(ret != 0)
+	{
+		return ret;
+	}
+	
+	ret = LAPACKE_dgetri(LAPACK_ROW_MAJOR,n,A,n,ipiv);
+	return ret;
+
+}	
+																					
 void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_transpose, float mu, float *M, float *Y,const int row,const int col,const int row1)
 {
 	float *temp = new float [row*col];
@@ -400,7 +418,7 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 	float *Zden = new float [row1*row1];
 	float *Zdenaug = new float [row1*row1*row1*row1];
 	float *ZdenInverse = new float [row1*row1];
-	float deter = 0.0;
+	int status = 0;
 	high_resolution_clock::time_point t1,t2,t3,t4;
 
 	//numerator
@@ -431,28 +449,33 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
 	//displayValues(Zden, row1*row1);
 	
-	//deter = Determinant(Zden,row1);
-	//cout << "value of determinant "<< deter << endl;	
-
+	//t3 = high_resolution_clock::now();
+	status = matInv(Zden,row1);
+	//cout << "value of determinant "<< status << endl;	
+	//t4 = high_resolution_clock::now();
+	//duration<float> time_span1 = duration_cast<duration<float>>(t4 - t3);
+	//cout << "Time in miliseconds for inverse section is : " << time_span1.count() * 1000 << " ms" << endl;
+	
 	//Inverse calculation via guass-jordon method
-	AugmentIdentity(Zden, Zdenaug, row1);
-	t1 = high_resolution_clock::now();	
-	cpuInverseOfMatrix(Zdenaug, row1);
+	////AugmentIdentity(Zden, Zdenaug, row1);
+	////t1 = high_resolution_clock::now();	
+	////cpuInverseOfMatrix(Zdenaug, row1);
 
 	//displayValues(Zdenaug, row1*row1);
-	Inverse(Zdenaug,ZdenInverse,row1);
+	////Inverse(Zdenaug,ZdenInverse,row1);
 	//displayValues(ZdenInverse, row1*row1);
-	t2 = high_resolution_clock::now();
+	////t2 = high_resolution_clock::now();
 	//duration<float> time_span = duration_cast<duration<float>>(t2 - t1);
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
-	t3 = high_resolution_clock::now();
+	////t3 = high_resolution_clock::now();
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
-        cpuMatrixMult(Znum, ZdenInverse, Z, row, row1, row1);	
+        cpuMatrixMult(Znum, Zden, Z, row, row1, row1);	
+        ////cpuMatrixMult(Znum, ZdenInverse, Z, row, row1, row1);	
 	//displayValues(Z,row*row1);
 	
-	t4 = high_resolution_clock::now();
+	//t4 = high_resolution_clock::now();
 	//duration<float> time_span1 = duration_cast<duration<float>>(t4 - t3);
 	//cout << "Time in miliseconds for inverse section is : " << time_span1.count() * 1000 << " ms" << endl;
 	
@@ -463,6 +486,46 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 	delete [] Zden;
 	delete [] Zdenaug;
 	delete [] ZdenInverse;
+
+}
+
+void calculateZ_preZden(float *Z,float *Zden,float *xy, float *E, float *T, float *B_transpose, float mu, float *M, float *Y,const int row,const int col,const int row1)
+{
+        float *temp = new float [row*col];
+        float *temp2 = new float [row*row1];
+        float *temp3 = new float [row*row1];
+        float *Znum = new float [row*row1];
+        int status = 0;
+        high_resolution_clock::time_point t1,t2,t3,t4;
+
+        //numerator
+        //temp = (W-E-T*ones(1,p))
+        for (int i = 0;i < row;i++)
+        {
+                for (int j = 0;j < col;j++)
+                {
+                temp[(i*col) + j] = xy[(i*col) + j] - E[(i*col) + j] - T[i];
+                }
+        }
+        //temp2 = temp * B'
+        cpuMatrixMult(temp, B_transpose, temp2, row, col, row1);
+        //displayValues(temp2,row*row1);
+
+        //temp3 = mu*M
+        scalarToMatrixMultiply(temp3, M, mu, row, row1);
+        //displayValues(temp3, row*row1);
+
+        //Znum = ((W-E-T*ones(1,p))*B'+mu*M+Y) 
+        sumOfMatrix(Znum,temp2, temp3, Y, row, row1);
+        //displayValues(Znum, row*row1);
+
+	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
+        cpuMatrixMult(Znum, Zden, Z, row, row1, row1);
+
+	delete [] temp;
+        delete [] temp2;
+        delete [] temp3;
+        delete [] Znum;
 
 }
 
@@ -514,7 +577,7 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 			Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
 			}
 		}
-		info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
+		info = LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
 
 		if(info > 0)
 		{
@@ -650,11 +713,17 @@ void resCalc(float *PrimRes, float *DualRes, float *M, float *Z, float *ZO,float
 
 int main(void)
 {
+	const int iter_num = 100;
+	high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4;
+	for(int p = 0;p<iter_num;p++)
+	{	//t3 = high_resolution_clock::now();
+
+
 	const int row = 2;
 	const int col = 15;
 	const int row1 = 384;
 	const int col1 = 15;
-	float tol = 1e-10;
+	float tol = 1e-04;
 
 	float *xy = new float [row*col];
 	float *mean = new float [row];
@@ -667,7 +736,6 @@ int main(void)
 	int B_items = 0;
 	int lam =1;
 	bool verb = true;
-	high_resolution_clock::time_point t1,t2,t3,t4;
 	const int data_size = row1/3;	
 	
 	//ssr2D3D_alm
@@ -685,8 +753,9 @@ int main(void)
 	float mu = 0.0;
 	float PrimRes;
 	float DualRes;
-	
+
 	//t3 = high_resolution_clock::now();
+	t1[p] = high_resolution_clock::now();
 	
 	items = readValues("messi2.txt",xy,items);
 	rowMean(xy, col, row, mean);
@@ -721,8 +790,9 @@ int main(void)
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
-	for(int iter = 0; iter < 5; iter++)
+	for(int iter = 0; iter < 500; iter++)
 	{
+		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
 		//displayValues(Z,row1*row);
 		calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
@@ -763,13 +833,15 @@ int main(void)
 			}
 		}
 		//t2 = high_resolution_clock::now();
-	//	duration<float> time_span = duration_cast<duration<float>>(t2 - t1);
-	//	cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
+		//duration<float> time_span = duration_cast<duration<float>>(t2 - t1);
+		//cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
+
 	}
+	t2[p] = high_resolution_clock::now();
+	//t2 = high_resolution_clock::now();
+	//duration<float> time_span = duration_cast<duration<float>>(t2 - t1);
+	//cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
 	
-	//end = clock();
-	//cpu_time_used = float(end - start) / CLOCKS_PER_SEC;
-	//cout << "Total time taken in secs: "<< cpu_time_used <<endl;
 
 	delete[] xy;
         delete[] mean;
@@ -786,5 +858,12 @@ int main(void)
 	delete[] ZO;
 	delete[] Q;
 
+	}	
+	duration<float> time_span;
+	for(int p=0;p<iter_num;p++)
+	{
+		time_span += duration_cast<duration<float>>(t2[p] - t1[p]);
+	}	
+	cout << "Time in miliseconds: "<< (time_span.count()/iter_num) * 1000 << " ms"<<endl; 
 }
 
