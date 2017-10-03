@@ -416,8 +416,6 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	double *temp3 = new double [row*row1]; 
 	double *Znum = new double [row*row1];
 	double *Zden = new double [row1*row1];
-	double *Zdenaug = new double [row1*row1*row1*row1];
-	double *ZdenInverse = new double [row1*row1];
 	int status = 0;
 	high_resolution_clock::time_point t1,t2,t3,t4;
 
@@ -484,8 +482,6 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	delete [] temp3;
 	delete [] Znum;
 	delete [] Zden;
-	delete [] Zdenaug;
-	delete [] ZdenInverse;
 
 }
 
