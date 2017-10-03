@@ -397,14 +397,14 @@ lapack_int matInv(float *A, int n)
 	int ipiv[n+1];
 	lapack_int ret;
 	
-	ret = LAPACKE_dgetrf(LAPACK_ROW_MAJOR,n,n,A,n,ipiv);
+	ret = LAPACKE_sgetrf(LAPACK_ROW_MAJOR,n,n,A,n,ipiv);
 	
 	if(ret != 0)
 	{
 		return ret;
 	}
 	
-	ret = LAPACKE_dgetri(LAPACK_ROW_MAJOR,n,A,n,ipiv);
+	ret = LAPACKE_sgetri(LAPACK_ROW_MAJOR,n,A,n,ipiv);
 	return ret;
 
 }	
@@ -416,8 +416,6 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 	float *temp3 = new float [row*row1]; 
 	float *Znum = new float [row*row1];
 	float *Zden = new float [row1*row1];
-	float *Zdenaug = new float [row1*row1*row1*row1];
-	float *ZdenInverse = new float [row1*row1];
 	int status = 0;
 	high_resolution_clock::time_point t1,t2,t3,t4;
 
@@ -484,8 +482,6 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 	delete [] temp3;
 	delete [] Znum;
 	delete [] Zden;
-	delete [] Zdenaug;
-	delete [] ZdenInverse;
 
 }
 
@@ -577,7 +573,7 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 			Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
 			}
 		}
-		info = LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
+		info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
 
 		if(info > 0)
 		{
@@ -843,20 +839,20 @@ int main(void)
 	//cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
 	
 
-	delete[] xy;
-        delete[] mean;
-	delete[] B;
-	delete[] B_transpose;
-	delete[] B_mean;
-	delete[] BBt;
-	delete[] M;
-	delete[] C;
-	delete[] E;
-	delete[] T;
-	delete[] Z;
-	delete[] Y;
-	delete[] ZO;
-	delete[] Q;
+	delete xy;
+        delete mean;
+	delete B;
+	delete B_transpose;
+	delete B_mean;
+	delete BBt;
+	delete M;
+	delete C;
+	delete E;
+	delete T;
+	delete Z;
+	delete Y;
+	delete ZO;
+	delete Q;
 
 	}	
 	duration<float> time_span;
