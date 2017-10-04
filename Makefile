@@ -1,18 +1,20 @@
-CC = icc
+CC = nvcc
 #CC = gcc
-OPT = -qopenmp -O3 -g -mkl -heap-arrays -ip -ipo -parallel -std=c++11
+OPT = -O3 -g -std=c++11
 
-SRCS = dpposeEstimation.cpp
+SRCS = cuda_dpposeEstimation.cu 
 
-LIB = 
+LIB = /home/sureshm/magma-2.2.0/include/
 
-EXE = dpestimation.exe
+LIN = /home/sureshm/magma-2.2.0/lib/
+
+EXE = cuda_dpestimation.exe
 
 run: all
-	./dpestimation.exe
+	./cuda_dpestimation.exe
 
-all: dpposeEstimation.cpp 
-	$(CC) $(OPT) $(LIB) $(SRCS) -o $(EXE)
+all: cuda_dpposeEstimation.cu
+	$(CC) $(OPT) -I $(LIB) -L $(LIN) $(SRCS) -o $(EXE)
 
 clean: 
-	rm ./dpestimation.exe    
+	rm ./cuda_dpestimation.exe    

@@ -9,6 +9,12 @@
 #include <limits>
 #include <chrono>
 #include <ctime>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <algorithm>
+#include "magma_v2.h"
+#include "magma_lapack.h"
 
 #define LAPACK_ROW_MAJOR   101
 #define min(a,b) ((a)>(b)?(b):(a))
@@ -573,7 +579,7 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 			Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
 			}
 		}
-		info = LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
+		info = magma_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
 
 		if(info > 0)
 		{
