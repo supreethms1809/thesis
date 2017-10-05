@@ -13,8 +13,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <algorithm>
-#include "magma_v2.h"
-#include "magma_lapack.h"
+#include "magma.h"
 
 #define LAPACK_ROW_MAJOR   101
 #define min(a,b) ((a)>(b)?(b):(a))
