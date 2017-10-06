@@ -13,9 +13,9 @@
 #include <cublas.h>
 
 // Prototypes
-int* cudaSgetrf(unsigned int n, float *dA);
-void cudaSgetri(unsigned int n, float *dA, int *pivots);
-void cudaStrtri(unsigned int n, float *dA);
+int* cudaSgetrf(unsigned int n, double *dA);
+void cudaSgetri(unsigned int n, double *dA, int *pivots);
+void cudaStrtri(unsigned int n, double *dA);
 
 
 
@@ -23,19 +23,19 @@ void cudaStrtri(unsigned int n, float *dA);
 ** cudaInvertMatrix
 ** Inverts a square matrix in place
 ** n - matrix dimension
-** A - pointer to array of floats representing the matrix in column-major order
+** A - pointer to array of doubles representing the matrix in column-major order
 */
 
-extern "C" void cudaInvertMatrix(unsigned int n, float *A)
+extern "C" void cudaInvertMatrix(unsigned int n, double *A)
 {
 	
 int *pivots;
-float *dA;
+double *dA;
 
 cublasInit();
 
-cublasAlloc(n * n, sizeof(float), (void**)&dA);
-cublasSetMatrix(n, n, sizeof(float), A, n, dA, n);
+cublasAlloc(n * n, sizeof(double), (void**)&dA);
+cublasSetMatrix(n, n, sizeof(double), A, n, dA, n);
 
 // Perform LU factorization
 pivots = cudaSgetrf(n, dA);
@@ -43,7 +43,7 @@ pivots = cudaSgetrf(n, dA);
 // Perform inversion on factorized matrix
 cudaSgetri(n, dA, pivots);
 
-cublasGetMatrix(n, n, sizeof(float), dA, n, A, n);
+cublasGetMatrix(n, n, sizeof(double), dA, n, A, n);
 
 cublasFree(dA);
 cublasShutdown();
@@ -58,11 +58,11 @@ cublasShutdown();
 ** Uses the unblocked BLAS2 approach
 */
 
-int *cudaSgetrf(unsigned int n, float *dA)
+int *cudaSgetrf(unsigned int n, double *dA)
 {
 
 int i, pivot, *pivots;
-float *offset, factor;
+double *offset, factor;
 
 pivots = (int *) calloc(n, sizeof(int));
 
@@ -73,16 +73,16 @@ pivots = (int *) calloc(n, sizeof(int));
 	for(i = 0; i < n - 1; i++) 
 	{
 		offset = dA + i*n + i;
-		pivot = i - 1 + cublasIsamax(n - i, offset, 1);
+		pivot = i - 1 + cublasIdamax(n - i, offset, 1);
 
 			if(pivot != i) 
 			{
 				pivots[i] = pivot;
-				cublasSswap(n, dA + pivot, n, dA + i, n);
+				cublasDswap(n, dA + pivot, n, dA + i, n);
 			}
-		cublasGetVector(1, sizeof(float), offset, 1, &factor, 1);
-		cublasSscal(n - i - 1, 1 / factor, offset + 1, 1);
-		cublasSger(n - i - 1, n - i - 1, -1.0f, offset + 1, 1, offset + n, n, offset + n + 1, n);
+		cublasGetVector(1, sizeof(double), offset, 1, &factor, 1);
+		cublasDscal(n - i - 1, 1 / factor, offset + 1, 1);
+		cublasDger(n - i - 1, n - i - 1, -1.0f, offset + 1, 1, offset + n, n, offset + n + 1, n);
 	}
 
 return pivots;
@@ -95,25 +95,25 @@ return pivots;
 ** Computes the inverse of an LU-factorized square matrix
 */
 
-void cudaSgetri(unsigned int n, float *dA, int *pivots)
+void cudaSgetri(unsigned int n, double *dA, int *pivots)
 {
 
 int i;
-float *dWork, *offset;
+double *dWork, *offset;
 
 // Perform inv(U)
 cudaStrtri(n, dA);
 
 // Solve inv(A)*L = inv(U)
-cublasAlloc(n - 1, sizeof(float), (void**)&dWork);
+cublasAlloc(n - 1, sizeof(double), (void**)&dWork);
 
 	for(i = n - 1; i > 0; --i) 
 	{
 
 		offset = dA + (i - 1)*n + i;
-		cudaMemcpy(dWork, offset, (n - 1) * sizeof(float), cudaMemcpyDeviceToDevice);
-		cublasSscal(n - i, 0, offset, 1);
-		cublasSgemv('n', n, n - i, -1.0f, dA + i*n, n, dWork, 1, 1.0f, dA + (i-1)*n, 1);
+		cudaMemcpy(dWork, offset, (n - 1) * sizeof(double), cudaMemcpyDeviceToDevice);
+		cublasDscal(n - i, 0, offset, 1);
+		cublasDgemv('n', n, n - i, -1.0f, dA + i*n, n, dWork, 1, 1.0f, dA + (i-1)*n, 1);
 
 	}
 
@@ -124,7 +124,7 @@ cublasFree(dWork);
 	{
 		if(i != pivots[i])
 		{
-			cublasSswap(n, dA + i*n, 1, dA + pivots[i]*n, 1);
+			cublasDswap(n, dA + i*n, 1, dA + pivots[i]*n, 1);
 		}
 	}
 }
@@ -136,21 +136,21 @@ cublasFree(dWork);
 ** Computes the inverse of an upper triangular matrix in place
 ** Uses the unblocked BLAS2 approach
 */
-void cudaStrtri(unsigned int n, float *dA)
+void cudaStrtri(unsigned int n, double *dA)
 {
 
 int i;
-float factor, *offset;
+double factor, *offset;
 
 	for(i = 0; i < n; ++i) 
 	{
 
 		offset = dA + i*n;
-		cublasGetVector(1, sizeof(float), offset + i, 1, &factor, 1);
+		cublasGetVector(1, sizeof(double), offset + i, 1, &factor, 1);
 		factor = 1 / factor;
-		cublasSetVector(1, sizeof(float), &factor, 1, offset + i, 1);
-		cublasStrmv('u', 'n', 'n', i, dA, n, offset, 1);
-		cublasSscal(i, -1 * factor, offset, 1);
+		cublasSetVector(1, sizeof(double), &factor, 1, offset + i, 1);
+		cublasDtrmv('u', 'n', 'n', i, dA, n, offset, 1);
+		cublasDscal(i, -1 * factor, offset, 1);
 
 	}
 

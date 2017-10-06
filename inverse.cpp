@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <math.h>
 #include <iostream>
+#include <chrono>
+#include <ctime>
 #include "mkl_cblas.h"
 #include "mkl_lapacke.h"
 
 using namespace std;
+using namespace std::chrono;
 // inplace inverse n x n matrix A.
 // matrix A is Column Major (i.e. firts line, second line ... *not* C[][] order)
 // returns:
@@ -12,6 +15,7 @@ using namespace std;
 //   ret < 0 illegal argument value
 //   ret > 0 singular matrix
 
+extern "C" void cudaInvertMatrix(unsigned int n, double *A);
 
 void ludcmp_sup(double *A,int n)
 {
@@ -143,7 +147,7 @@ delete[] vv;
 }
 
 
-
+/*
 lapack_int matInv(double *A, unsigned n)
 {
     int ipiv[n+1];
@@ -172,6 +176,7 @@ for (int i=0; i<9; i++) {
                        ipiv);
     return ret;
 }
+*/
 
 int main()
 {
@@ -190,7 +195,7 @@ int main()
         0.162608,   0.227770,   0.533074,   0.807075,   0.180335,
         0.517006,   0.315992,   0.914848,   0.460825,   0.731980
     };
-*/
+
 
    double A[] = {
         1,   2,   3, 
@@ -202,18 +207,33 @@ int main()
         4,   5,   6, 
         7,   8,   10
     };
+	*/
+	high_resolution_clock::time_point t3,t4;	
+	const int n =384;
+	double *B = new double [n*n];
+	for(int i =0;i<n;i++)
+	{
+		for(int j = 0;j<n;j++)
+		{
+			B[(i*n)+j] = i*j/fabs(i-j);
+		}
+	}
 
+    //for (int i=0; i<9; i++) {
+    //   if ((i%3) == 0) putchar('\n');
+    //    printf("%+12.8f ",A[i]);
+    //}
+    //putchar('\n');
 
-    for (int i=0; i<9; i++) {
-        if ((i%3) == 0) putchar('\n');
-        printf("%+12.8f ",A[i]);
-    }
-    putchar('\n');
+	//matInv(A,3);
+	t3 = high_resolution_clock::now();
+	cudaInvertMatrix(n,B);
+        t4 = high_resolution_clock::now(); 
+        duration<double> time_span = duration_cast<duration<double>>(t4 - t3);    
+        cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 
-    matInv(A,3);
-    ludcmp(B,3);
-
-	for (int i=0; i<9; i++) {
+	delete[] B;
+	/*for (int i=0; i<9; i++) {
         if ((i%3) == 0) putchar('\n');
         printf("%+12.8f ",B[i]);
     }
@@ -225,4 +245,5 @@ int main()
         printf("%+12.8f ",A[i]);
     }
     putchar('\n');
+*/
 }
