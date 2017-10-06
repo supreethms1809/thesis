@@ -14,6 +14,7 @@
 #include <ctype.h>
 #include <algorithm>
 #include "magma.h"
+#include "magma_v2.h"
 
 #define LAPACK_ROW_MAJOR   101
 #define min(a,b) ((a)>(b)?(b):(a))
@@ -578,7 +579,7 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 			Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
 			}
 		}
-		info = magma_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
+		info = LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
 
 		if(info > 0)
 		{

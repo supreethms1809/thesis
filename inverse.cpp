@@ -12,6 +12,60 @@ using namespace std;
 //   ret < 0 illegal argument value
 //   ret > 0 singular matrix
 
+
+void ludcmp_sup(double *A,int n)
+{
+	int i,j,k;
+
+	
+	for(i=0;i<n;i++)
+	{
+		double sum = 0.0;
+		for(j = 0; j < i;j++)
+		{
+			cout << "second : i = "<< i << "\t" << "j = "<<j<<endl;
+			sum = A[(i*n)+j];
+		
+			for(k = 0;k<(j-1);k++)
+			{
+				cout << "coming inside second k : " << k <<" and i = " << i <<endl;
+				sum -= A[(i*n)+k] * A[(k*n)+j] ;
+			}	
+		
+			A[(i*n)+j] = sum;///A[(j*n)+n];
+		}
+
+		for(j=i;j<n;j++)
+		{
+			cout << "first : i = "<< i << "\t" << "j = "<<j<<endl;
+			sum = A[(i*n)+j];
+			cout << "sum before "<< sum <<endl;	
+			for(k = 0;k<i;k++)
+			{
+				cout << "coming inside first k : " <<k<<endl;
+				sum -= A[(i*n)+k] * A[(k*n)+j];
+			}	
+			cout << "sum after "<< sum <<endl;
+			A[(i*n)+j] = sum;
+		}
+		cout << endl<<endl;
+		for (int ii=0; ii<9; ii++) 
+		{
+        	if ((ii%3) == 0) putchar('\n');
+        	printf("%+12.8f ",A[ii]);
+		}
+		cout << endl<<endl;
+
+		//if(i > 0)
+		//{
+		//}
+
+			cout << "next iteration "<< endl;		
+
+	}
+
+}
+
 void ludcmp(double *a,int n)
 {
 int i,imax,j,k;
@@ -36,12 +90,12 @@ float *vv = new float[n];
 		}
 		vv[i]=1.0/big;
 	}
-	for (j=0;j<n;j++) 
+	for (i=0;i<n;i++) 
 	{
-		for (i=0;i<j;i++) 
+		for (j=0;j<i;j++) 
 		{
 			sum=a[(i*n)+j];
-				for (k=0;k<i;k++)
+				for (k=0;k<(j-1);k++)
 				{
 				 sum -= a[(i*n)+k]*a[(k*n)+j];
 				}
@@ -49,35 +103,37 @@ float *vv = new float[n];
 		}
 		big=0.0;
 
-		for (i=j;i<n;i++) 
+		for (j=i;j<n;j++) 
 		{
 		sum=a[(i*n)+j];
-			for (k=0;k<j;k++)
+			for (k=0;k<i;k++)
 			{
 			sum -= a[(i*n)+k]*a[(k*n)+j];
 			}
 		a[(i*n)+j]=sum;
-			if ( (dum=vv[i]*fabs(sum)) >= big)
+			if ( (dum=vv[j]*fabs(sum)) >= big)
 			{
 			big=dum;
-			imax=i;
+			imax=j;
 			}
 		}
-		if (j != imax) 
+
+	
+		if (i != imax) 
 		{
 			for (k=0;k<n;k++) 
 			{
 			dum=a[(imax*n)+k];
-			a[(imax*n)+k]=a[(j*n)+k];
-			a[(j*n)+k]=dum;
+			a[(imax*n)+k]=a[(i*n)+k];
+			a[(i*n)+k]=dum;
 			}
-			vv[imax]=vv[j];
+			vv[imax]=vv[i];
 		}
 		//if (a[(j*n)+j] == 0.0) a[(j*n)+j]=TINY;
-		if (j != n) 
+		if (i != n) 
 		{
-			dum=1.0/(a[(j*n)+j]);
-			for (i=j+1;i<n;i++) 
+			dum=1.0/(a[(i*n)+i]);
+			for (j=i;j<n;j++) 
 			{
 			a[(i*n)+j] *= dum;
 			}
@@ -86,39 +142,6 @@ float *vv = new float[n];
 delete[] vv;
 }
 
-/*
-void ludcmp(double *A,int n)
-{
-	int i,imax,j,k;
-	double big,dum,sum,temp;
-
-	for(j=0;j<n;j++)
-	{
-		for(i=0;i<j;i++)
-		{
-			sum = A[(i*n)+j];
-			for(k = 1;k<i;k++)
-			{
-				sum -= A[(i*n)+k] * A[(k*n)+j];
-			}	
-			A[(i*n)+j] = sum;
-		}
-		big = 0.0;
-		for(i=j; i<n;i++)
-		{
-			sum = A[(i*n)+j];
-			for(k = 1;k<j;k++)
-			{
-				sum -= A[(i*n)+k] * A[(k*n)+j];
-			}	
-			A[(i*n)+j] = sum;
-		}
-		if(())
-	}	
-	if()
-
-}
-*/
 
 
 lapack_int matInv(double *A, unsigned n)
