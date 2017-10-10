@@ -770,7 +770,7 @@ int main(void)
 	double mu3 = 0.0;
 	double mu4 = 0.0;
 	
-	t1[p] = high_resolution_clock::now();
+	//t1[p] = high_resolution_clock::now();
 	
 	items = readValues("messi2.txt",xy,items);
 	rowMean(xy, col, row, mean);
@@ -828,7 +828,8 @@ int main(void)
 	//duration<double> time_span = duration_cast<duration<double>>(t4 - t3);
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
-
+	
+	t1[p] = high_resolution_clock::now();
 	for(int iter = 0; iter < 500; iter++)
 	{
 		//t1 = high_resolution_clock::now();
@@ -868,6 +869,7 @@ int main(void)
 			cout << "coming inside 6****************************************************************"<<endl;
 			calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 		}
+		
 	//	t1 = high_resolution_clock::now();
 		calculateQ(Q,Z,Y,mu,row,row1);
 	//	t2 = high_resolution_clock::now();

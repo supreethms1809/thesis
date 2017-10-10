@@ -400,10 +400,12 @@ double Determinant(double *a,int n)
 
 lapack_int matInv(double *A, int n)
 {
+	magma_init();
 	int ipiv[n+1];
-	lapack_int ret;
+	magma_int_t ret;
 	
-	ret = LAPACKE_dgetrf(LAPACK_ROW_MAJOR,n,n,A,n,ipiv);
+	magma_dgetrf_gpu(n,n,A,n,ipiv,&ret);
+	//ret = LAPACKE_dgetrf(LAPACK_ROW_MAJOR,n,n,A,n,ipiv);
 	
 	if(ret != 0)
 	{
@@ -412,6 +414,7 @@ lapack_int matInv(double *A, int n)
 	
 	ret = LAPACKE_dgetri(LAPACK_ROW_MAJOR,n,A,n,ipiv);
 	return ret;
+	magma_finalize();
 
 }	
 																					
@@ -569,7 +572,7 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 	double *Qtemp1 = new double [4];
 	double *Qtemp2 = new double [6];
 
-//#pragma omp parallel for
+//#pragma omp parallel for private(sigma,sigma1,u,vt)
 	for(int i = 0;i < data_size;i++)
 	{
 		for(int j = 0;j<2;j++)
@@ -715,7 +718,7 @@ void resCalc(double *PrimRes, double *DualRes, double *M, double *Z, double *ZO,
 
 int main(void)
 {
-	const int iter_num = 100;
+	const int iter_num = 10;
 	high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4;
 	for(int p = 0;p<iter_num;p++)
 	{	//t3 = high_resolution_clock::now();
