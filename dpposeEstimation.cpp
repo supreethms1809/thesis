@@ -398,13 +398,15 @@ lapack_int matInv(double *A, int n)
 	lapack_int ret;
 	
 	ret = LAPACKE_dgetrf(LAPACK_ROW_MAJOR,n,n,A,n,ipiv);
-	
+	dump_to_file("Adgetrf.txt_mkl",A,n,n);
 	if(ret != 0)
 	{
 		return ret;
 	}
 	
 	ret = LAPACKE_dgetri(LAPACK_ROW_MAJOR,n,A,n,ipiv);
+	
+	dump_to_file("inverse_A_mkl",A,n,n);
 	return ret;
 
 }	
@@ -709,7 +711,7 @@ void resCalc(double *PrimRes, double *DualRes, double *M, double *Z, double *ZO,
 
 int main(void)
 {
-	const int iter_num = 100;
+	const int iter_num = 1;
 	high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4;
 	for(int p = 0;p<iter_num;p++)
 	{	//t3 = high_resolution_clock::now();
@@ -786,7 +788,7 @@ int main(void)
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
-	for(int iter = 0; iter < 500; iter++)
+	for(int iter = 0; iter < 1; iter++)
 	{
 		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);

@@ -398,23 +398,26 @@ double Determinant(double *a,int n)
 	return(det);
 }
 
-lapack_int matInv(double *A, int n)
+magma_int_t matInv(double *A, int n)
 {
-	magma_init();
-	int ipiv[n+1];
-	magma_int_t ret;
 	
-	magma_dgetrf_gpu(n,n,A,n,ipiv,&ret);
+	magma_int_t ipiv[n];
+	magma_int_t ret,lwork,ldwork;
+	
+	ldwork = n * magma_get_dgetri_nb(n);
+	double *dwork = new double [ldwork];
+
+
+	magma_dgetrf(n,n,A,n,ipiv,&ret);
 	//ret = LAPACKE_dgetrf(LAPACK_ROW_MAJOR,n,n,A,n,ipiv);
-	
-	if(ret != 0)
-	{
-		return ret;
-	}
-	
-	ret = LAPACKE_dgetri(LAPACK_ROW_MAJOR,n,A,n,ipiv);
+		dump_to_file("A.txt_dgetrf_magma",A,n,n);
+
+	magma_dgetri_gpu( n, A, n, ipiv, dwork, ldwork, &ret );	
+	//ret = LAPACKE_dgetri(LAPACK_ROW_MAJOR,n,A,n,ipiv);
+
+		dump_to_file("inverseA_magma",A,n,n);
 	return ret;
-	magma_finalize();
+
 
 }	
 																					
@@ -425,7 +428,7 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	double *temp3 = new double [row*row1]; 
 	double *Znum = new double [row*row1];
 	double *Zden = new double [row1*row1];
-	int status = 0;
+	magma_int_t status = 0;
 	high_resolution_clock::time_point t1,t2,t3,t4;
 
 	//numerator
@@ -718,12 +721,12 @@ void resCalc(double *PrimRes, double *DualRes, double *M, double *Z, double *ZO,
 
 int main(void)
 {
-	const int iter_num = 10;
+	const int iter_num = 1;
 	high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4;
 	for(int p = 0;p<iter_num;p++)
 	{	//t3 = high_resolution_clock::now();
 
-
+	magma_init();
 	const int row = 2;
 	const int col = 15;
 	const int row1 = 384;
@@ -795,7 +798,7 @@ int main(void)
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
-	for(int iter = 0; iter < 500; iter++)
+	for(int iter = 0; iter < 1; iter++)
 	{
 		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
@@ -862,7 +865,7 @@ int main(void)
 	delete[] Y;
 	delete[] ZO;
 	delete[] Q;
-
+	magma_finalize();
 	}	
 	duration<double> time_span;
 	for(int p=0;p<iter_num;p++)
