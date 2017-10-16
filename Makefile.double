@@ -15,4 +15,4 @@ all: dpposeEstimation.cpp
 	$(CC) $(OPT) $(LIB) $(SRCS) -o $(EXE)
 
 clean: 
-	rm ./dpestimation.exe    
+	rm ./dpestimation.exe

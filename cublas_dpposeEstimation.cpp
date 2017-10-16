@@ -18,6 +18,7 @@
 #define LDU ROW
 #define LDVT COL
 
+extern void invert(double* src, double* dst, int n);
 
 using std::string;
 using namespace std;
@@ -185,6 +186,7 @@ void TransposeOnCPU(double *matrix, double *matrixTranspose, int row, int col)
 void cpuTransMatrixMult(double *A, double *B, double *C, int row, int col)
 {
         double fSum;
+	cout << "coming inside cpu transmult row and col "<<row << "and "<<col<<endl;
 	for (int i = 0; i < row; i++)
 	{		      
 		for (int j = 0; j < row; j++)
@@ -450,7 +452,8 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	//displayValues(Zden, row1*row1);
 	
 	//t3 = high_resolution_clock::now();
-	status = matInv(Zden,row1);
+//	//status = matInv(Zden,row1);
+	invert(Zden,Zden,row1);
 	//cout << "value of determinant "<< status << endl;	
 	//t4 = high_resolution_clock::now();
 	//duration<double> time_span1 = duration_cast<duration<double>>(t4 - t3);
@@ -664,7 +667,9 @@ double febNorm(double *a, int row, int col)
 	double *ata = new double [col*col];
 
 	TransposeOnCPU(a,a_transpose,row,col);
+	cout << "after transpose in norm "<<endl;
         cpuTransMatrixMult(a_transpose, a, ata, col, row);
+	cout << "after multiplication in norm "<<endl;
 	for(int i=0;i<col;i++)
 	{
 		for(int j=0;j<col;j++)
@@ -788,7 +793,7 @@ int main(void)
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
-	for(int iter = 0; iter < 1; iter++)
+	for(int iter = 0; iter < 10; iter++)
 	{
 		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
@@ -802,7 +807,9 @@ int main(void)
 		//t1 = high_resolution_clock::now();
 		prox_2norm(Q,M,C,lam/mu,row,row1,data_size);
 		//t2 = high_resolution_clock::now();
-		
+
+		dump_to_file("M_after_gpu.txt",M,row,row1);
+
 		updateDualvariable(Y,mu,M,Z,row,row1);
 		resCalc(&PrimRes,&DualRes,M,Z,ZO,mu,row,row1);
 		//displayValues(M,row*row1);
