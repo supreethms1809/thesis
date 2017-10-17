@@ -186,7 +186,7 @@ void TransposeOnCPU(double *matrix, double *matrixTranspose, int row, int col)
 void cpuTransMatrixMult(double *A, double *B, double *C, int row, int col)
 {
         double fSum;
-	cout << "coming inside cpu transmult row and col "<<row << "and "<<col<<endl;
+//	cout << "coming inside cpu transmult row and col "<<row << "and "<<col<<endl;
 	for (int i = 0; i < row; i++)
 	{		      
 		for (int j = 0; j < row; j++)
@@ -451,13 +451,13 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
 	//displayValues(Zden, row1*row1);
 	
-	//t3 = high_resolution_clock::now();
+	t3 = high_resolution_clock::now();
 //	//status = matInv(Zden,row1);
 	invert(Zden,Zden,row1);
 	//cout << "value of determinant "<< status << endl;	
-	//t4 = high_resolution_clock::now();
-	//duration<double> time_span1 = duration_cast<duration<double>>(t4 - t3);
-	//cout << "Time in miliseconds for inverse section is : " << time_span1.count() * 1000 << " ms" << endl;
+	t4 = high_resolution_clock::now();
+	duration<double> time_span1 = duration_cast<duration<double>>(t4 - t3);
+	cout << "Time in miliseconds for inverse section is : " << time_span1.count() * 1000 << " ms" << endl;
 	
 	//Inverse calculation via guass-jordon method
 	////AugmentIdentity(Zden, Zdenaug, row1);
@@ -658,7 +658,7 @@ void updateDualvariable(double *Y,double mu,double *M,double *Z,int row,int row1
 		}
 	}
 }
-
+/*
 double febNorm(double *a, int row, int col)
 {
 	double norm = 0.0;
@@ -685,6 +685,22 @@ double febNorm(double *a, int row, int col)
 	delete[] a_transpose;
 	delete[] ata;
 	return double(norm);
+}
+*/
+
+double febNorm(double *a, int row, int col)
+{       
+        double norm = 0.0;
+        double sum = 0.0;
+        for(int i=0;i<row;i++)
+        {       
+                for(int j=0;j<col;j++)
+                { 
+                  sum +=(a[(i*col)+j]) * (a[(i*col)+j]);
+                }
+        }
+        norm=sqrt(sum);
+        return norm;
 }
 
         //dump_to_file("a.txt",a,row,col);
@@ -793,7 +809,7 @@ int main(void)
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
-	for(int iter = 0; iter < 10; iter++)
+	for(int iter = 0; iter < 500; iter++)
 	{
 		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
