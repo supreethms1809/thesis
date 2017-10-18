@@ -71,6 +71,9 @@ void cpuInverseOfMatrix(double *matrix,double *iden_mat, int col)
 				}
 			}
 		}
+	}
+	for(int m=0;m<col;m++)
+	{
 		//Make the diagonal elements 1 along with the whole row(divide).
 		double initialValue = matrix[((col) + 1)*m];
 		for (int j = 0; j < (col); j++)
@@ -78,11 +81,15 @@ void cpuInverseOfMatrix(double *matrix,double *iden_mat, int col)
 		matrix[(m * (col)) + j] = matrix[(m * (col)) + j] / initialValue;
 		iden_mat[(m * (col)) + j] = iden_mat[(m * (col)) + j] / initialValue;
 		}
+
+		double tempDen;
+		tempDen = matrix[(m * (col)) + m];
+		
 		//Making the elements of the row to zero
 		for (int k = 0; k < col; k++)
 		{
 			double tempIni,tempIni1;
-			tempIni = matrix[m + (k * (col))];
+			tempIni = matrix[m + (k * (col))]/tempDen;
 			if (k == m)
 			{
 			//Just a loop to do nothing
@@ -92,17 +99,17 @@ void cpuInverseOfMatrix(double *matrix,double *iden_mat, int col)
 				for (int l = 0; l < (col); l++)
 				{
 				
-				double tempMul, tempDiv, tempMul1, tempDiv1;
-				tempMul = matrix[(m * ( col)) + l] * tempIni;
-				tempMul1 = iden_mat[(m*col)+l] * tempIni;
+				//double tempMul, tempDiv, tempMul1, tempDiv1;
+				//tempMul = matrix[(m * ( col)) + l] * tempIni;
+				//tempMul1 = iden_mat[(m*col)+l] * tempIni;
 				
 			
-				tempDiv = tempMul / matrix[(m * (col)) + m];
-				tempDiv1 = tempMul1 / matrix[(m * (col)) + m];
+				//tempDiv = tempMul / matrix[(m * (col)) + m];
+				//tempDiv1 = tempMul1 / matrix[(m * (col)) + m];
 				
 
-				matrix[(k * col) + l] = matrix[(k * (col)) + l] - tempDiv;
-				iden_mat[(k*col)+l] = iden_mat[(k*col)+l] - tempDiv1;
+				matrix[(k * col) + l] = matrix[(k * (col)) + l] - (matrix[(m * ( col)) + l] * tempIni);
+				iden_mat[(k*col)+l] = iden_mat[(k*col)+l] - (iden_mat[(m*col)+l] * tempIni);
 				}
                         }
 
