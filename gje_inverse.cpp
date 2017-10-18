@@ -73,20 +73,16 @@ void cpuInverseOfMatrix(double *matrix,double *iden_mat, int col)
 		}
 		//Make the diagonal elements 1 along with the whole row(divide).
 		double initialValue = matrix[((col) + 1)*m];
-		cout << "value of initial value is :" << initialValue << endl;
 		for (int j = 0; j < (col); j++)
 		{
 		matrix[(m * (col)) + j] = matrix[(m * (col)) + j] / initialValue;
 		iden_mat[(m * (col)) + j] = iden_mat[(m * (col)) + j] / initialValue;
 		}
-		print_matrix("Intemediate",matrix,col,col);
-		print_matrix("Inter identity",iden_mat,col,col);
 		//Making the elements of the row to zero
 		for (int k = 0; k < col; k++)
 		{
 			double tempIni,tempIni1;
 			tempIni = matrix[m + (k * (col))];
-			cout << "k = "<<k<<"\t tempIni =  "<<tempIni <<endl;
 			if (k == m)
 			{
 			//Just a loop to do nothing
@@ -97,23 +93,16 @@ void cpuInverseOfMatrix(double *matrix,double *iden_mat, int col)
 				{
 				
 				double tempMul, tempDiv, tempMul1, tempDiv1;
-				cout << "m = "<<m<<" l = "<<l<<" \t value of m*col+l "<< (m * ( col)) + l << "  \t matrix value "<< matrix[(m * ( col)) + l] << endl;
 				tempMul = matrix[(m * ( col)) + l] * tempIni;
 				tempMul1 = iden_mat[(m*col)+l] * tempIni;
 				
-				cout <<	"tempMul"<<tempMul<<endl;
 			
 				tempDiv = tempMul / matrix[(m * (col)) + m];
 				tempDiv1 = tempMul1 / matrix[(m * (col)) + m];
 				
-				cout <<"tempDiv" << matrix[(m * (col)) + m] <<endl;				
-				cout <<"tempDiv - Identity" << iden_mat[(m * (col)) + m] <<endl;				
 
 				matrix[(k * col) + l] = matrix[(k * (col)) + l] - tempDiv;
-				cout << "value inside :" <<matrix[(k*col)+l]<<endl;
-				
 				iden_mat[(k*col)+l] = iden_mat[(k*col)+l] - tempDiv1;
-				cout << "value of identity  :" << iden_mat[(k*col)+l]<<endl;
 				}
                         }
 
