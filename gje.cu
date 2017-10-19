@@ -28,6 +28,60 @@ using namespace std;
         }                                                                     \
 }
 
+__global__ void nodiag_normalize(double *A, double *I, int n, int i){
+	int x = blockIdx.x * blockDim.x + threadIdx.x;
+	int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+	if (x < n && y < n)
+	if (x == i && x!=y){
+		I[x*n + y] /= A[i*n + i];
+		A[x*n + y] /= A[i*n + i];
+	}
+	
+}
+
+__global__ void diag_normalize(double *A, double *I, int n, int i){
+	int x = blockIdx.x * blockDim.x + threadIdx.x;
+	int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+	if (x < n && y < n)
+	if (x == y && x == i){
+		I[x*n + y] /= A[i*n + i];
+		A[x*n + y] /= A[i*n + i];
+	}
+
+}
+
+__global__ void gaussjordan(double *A, double *I, int n, int i)
+{
+	int x = blockIdx.x * blockDim.x + threadIdx.x;
+	int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+	if (x < n && y < n){
+		if (x != i){
+			I[x*n + y] -= I[i*n + y] * A[x*n + i];
+			if (y != i){
+				A[x*n + y] -= A[i*n + y] * A[x*n + i];
+			}	 
+		}
+	}
+
+}
+
+__global__ void set_zero(double *A, double *I, int n, int i){
+	int x = blockIdx.x * blockDim.x + threadIdx.x;
+	int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+	if (x < n && y < n){
+		if (x != i){
+			if (y == i){
+				A[x*n + y] = 0;
+			}
+		}
+	}
+}
+
+
 __global__ void check_diag_zero(double *d_m , double *d_i , const int n)
 {
 	int col = threadIdx.x + (blockIdx.x*blockDim.x);	
@@ -115,21 +169,29 @@ __host__ void gpuInverseOfMatrix(double *h_matrix,double *h_iden_mat, int col)
 	dim3 block(dimx,dimy);
 	dim3 grid((col+block.x-1)/block.x,(col+block.y-1)/block.y);
 
-	cout << "\t2D Grid Dimension" << endl;
-	cout << "\tNumber of Blocks along X dimension: " << grid.x << endl;
-	cout << "\tNumber of Blocks along Y dimension: " << grid.y << endl;
-	cout << "\t2D Block Dimension" << endl;
-	cout << "\tNumber of threads along X dimension: " << block.x << endl;
-	cout << "\tNumber of threads along Y dimension: " << block.y << endl;
+//	cout << "\t2D Grid Dimension" << endl;
+//	cout << "\tNumber of Blocks along X dimension: " << grid.x << endl;
+//	cout << "\tNumber of Blocks along Y dimension: " << grid.y << endl;
+//	cout << "\t2D Block Dimension" << endl;
+//	cout << "\tNumber of threads along X dimension: " << block.x << endl;
+//	cout << "\tNumber of threads along Y dimension: " << block.y << endl;
 
 	CHECK(cudaEventRecord(kernel_start));
-	check_diag_zero << <grid, block >> >(d_matrix, d_iden_mat,col);
-	CHECK(cudaThreadSynchronize());
-	for(int i = 0; i < col; i++)
+	for (int i = 0; i<col; i++)
 	{
-		NaiveInverse << <grid, block >> >(d_matrix, d_iden_mat,col,i);		
-	}	
-	CHECK(cudaThreadSynchronize());
+		nodiag_normalize << <grid, block >> >(d_matrix, d_iden_mat, col, i);
+		diag_normalize << <grid, block >> >(d_matrix, d_iden_mat, col, i);
+		gaussjordan << <grid, block >> >(d_matrix, d_iden_mat, col, i);
+		set_zero << <grid, block >> >(d_matrix, d_iden_mat, col, i);
+	}
+
+//	check_diag_zero << <grid, block >> >(d_matrix, d_iden_mat,col);
+//	CHECK(cudaThreadSynchronize());
+//	for(int i = 0; i < col; i++)
+//	{
+//		NaiveInverse << <grid, block >> >(d_matrix, d_iden_mat,col,i);		
+//	}	
+//	CHECK(cudaThreadSynchronize());
 	CHECK(cudaEventRecord(kernel_stop));
 	CHECK(cudaEventSynchronize(kernel_stop));
 
@@ -145,62 +207,4 @@ __host__ void gpuInverseOfMatrix(double *h_matrix,double *h_iden_mat, int col)
 }
 
 
-void cpuInverseOfMatrix1(double *matrix,double *iden_mat, int col)
-{
-	for (int m = 0; m < col; m++)
-	{
-		//Checking if diagonal element is 0
-		if (matrix[((col) + 1)*m] == 0)
-		{
-			//checking if the row is last row. If it is last row add the previous row to make it non zero
-                	if (m == (col - 1))
-			{
-				for (int i = 0; i < (col); i++)
-				{					
-				matrix[(m * (col)) + i] = matrix[((m - 1) * (col)) + i] + matrix[(m * (col)) + i];
-				iden_mat[(m * (col)) + i] = iden_mat[((m - 1) * (col)) + i] + iden_mat[(m * (col)) + i];
-				}
-			}
-			else	//if it is not last row, add the next row.
-			{
-			        for (int i = 0; i < (col); i++)
-				{
-				matrix[(m * col) + i] = matrix[((m + 1) * col) + i] + matrix[(m * col) + i];
-				iden_mat[(m * col) + i] = iden_mat[((m + 1) * col) + i] + iden_mat[(m * col) + i];
-				}
-			}
-		}
-	}
-	for(int m=0;m<col;m++)
-	{
-		//Make the diagonal elements 1 along with the whole row(divide).
-		double initialValue = matrix[((col) + 1)*m];
-		
-		for (int j = 0; j < (col); j++)
-		{
-		matrix[(m * (col)) + j] = matrix[(m * (col)) + j] / initialValue;
-		iden_mat[(m * (col)) + j] = iden_mat[(m * (col)) + j] / initialValue;
-		}
-
-		double tempDen;
-		tempDen = matrix[(m * (col)) + m];
-
-	
-		//Making the elements of the row to zero
-		for (int k = 0; k < col; k++)
-		{	
-			double tempIni;
-			tempIni = matrix[m + (k * (col))]/tempDen;
-			if (k != m)
-			{
-				for (int l = 0; l < (col); l++)
-				{
-				matrix[(k * col) + l] = matrix[(k * (col)) + l] - (matrix[(m * ( col)) + l] * tempIni);
-				iden_mat[(k*col)+l] = iden_mat[(k*col)+l] - (iden_mat[(m*col)+l] * tempIni);
-				}
-                        }
-
-                }
-        }
-}
 

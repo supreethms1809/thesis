@@ -9,10 +9,6 @@
 #include <limits>
 #include <chrono>
 #include <ctime>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <algorithm>
 
 #define LAPACK_ROW_MAJOR   101
 #define min(a,b) ((a)>(b)?(b):(a))
@@ -26,6 +22,8 @@
 using std::string;
 using namespace std;
 using namespace std::chrono;
+
+extern void gpuInverseOfMatrix(double *h_matrix,double *h_iden_mat, int col);
 
 int readValues(char *text, double *variable, int i)
 {
@@ -275,21 +273,6 @@ void addScalarToDiagonal(double *Zden, double *BBt, double mu, int row, int col)
 	}
 }
 
-void AugmentIdentity(double *matrix, double *augmatrix, int n)
-{
-	for (int i = 0; i < n; i++)
-	{
-		for (int j = 0; j < n; j++)
-		{
-		augmatrix[(i * 2 * n) + j] = matrix[(i*n) + j];
-		augmatrix[(((2 * i) + 1)*n) + j] = 0.0;
-		}
-	}
-	for (int i = 0; i < n; i++)
-	{
-	augmatrix[(((2 * i) + 1)*n) + i] = 1.0;
-	}
-}
 
 void cpuInverseOfMatrix(double *matrix, int col)
 {
@@ -347,71 +330,43 @@ void cpuInverseOfMatrix(double *matrix, int col)
 	}
 }
 
-void Inverse(double *augmatrix, double *matrixInverse, int n)
+void eye(double *I, int m, int n)
 {
-	for (int i = 0;i < n;i++)
-	{
-		for (int j = 0;j < n;j++)
-		{
-		matrixInverse[(i*n) + j] = augmatrix[(i*2*n)+n+j];
-		}
+        for(int i=0;i<n;i++)
+        {
+                for(int j=0;j<n;j++)
+                {
+                        if(i==j)
+                        {
+                                I[i*n+j] = 1.0;
+                        }
+                        else
+                        {
+                                I[i*n+j] = 0.0;
+                        }
+                }
         }
 }
-
-//Determinant
-double Determinant(double *a,int n)
-{
-	cout << "time "<<endl;
-	int i,j,j1,j2;
-	double det = 0.0;
-
-        for (j1=0;j1<n;j1++)
-	{
-		
-	double *m = new double [(n-1)*(n-1)];		
-		for (i=1;i<n;i++)
-         	{
-			j2 = 0;
-			
-			for (j=0;j<n;j++)
-            		{
-				if (j == j1)
-				{
-		        	continue;
-				}
-				else
-				{
-		       		m[((i-1)*n)+j2] = a[(i*n)+j];
-		       		j2++;
-				}
-			}
-		}
-		
-		det += pow(-1.0,j1+2.0) * a[j1] * Determinant(m,n-1);
-	
-	//free the pointer
-	delete[] m;
-	}
-
-	return(det);
-}
-
+/*
 lapack_int matInv(double *A, int n)
 {
 	int ipiv[n+1];
 	lapack_int ret;
 	
 	ret = LAPACKE_dgetrf(LAPACK_ROW_MAJOR,n,n,A,n,ipiv);
-	
+	dump_to_file("Adgetrf.txt_mkl",A,n,n);
 	if(ret != 0)
 	{
 		return ret;
 	}
 	
 	ret = LAPACKE_dgetri(LAPACK_ROW_MAJOR,n,A,n,ipiv);
+	
+	dump_to_file("inverse_A_mkl",A,n,n);
 	return ret;
 
-}	
+}
+*/	
 																					
 void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *B_transpose, double mu, double *M, double *Y,const int row,const int col,const int row1)
 {
@@ -420,6 +375,7 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	double *temp3 = new double [row*row1]; 
 	double *Znum = new double [row*row1];
 	double *Zden = new double [row1*row1];
+	double *ZdenInv = new double [row1*row1];
 	int status = 0;
 	high_resolution_clock::time_point t1,t2,t3,t4;
 
@@ -452,7 +408,11 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	//displayValues(Zden, row1*row1);
 	
 	//t3 = high_resolution_clock::now();
-	status = matInv(Zden,row1);
+	//dump_to_file("Zden",Zden,row1,row1);
+	eye(ZdenInv,row1,row1);
+	gpuInverseOfMatrix(Zden,ZdenInv,row1);
+	dump_to_file("inverse_cuda",ZdenInv,row1,row1);
+//	status = matInv(Zden,row1);
 	//cout << "value of determinant "<< status << endl;	
 	//t4 = high_resolution_clock::now();
 	//duration<double> time_span1 = duration_cast<duration<double>>(t4 - t3);
@@ -473,7 +433,7 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 
 	////t3 = high_resolution_clock::now();
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
-        cpuMatrixMult(Znum, Zden, Z, row, row1, row1);	
+        cpuMatrixMult(Znum, ZdenInv, Z, row, row1, row1);	
         ////cpuMatrixMult(Znum, ZdenInverse, Z, row, row1, row1);	
 	//displayValues(Z,row*row1);
 	
@@ -486,6 +446,7 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	delete [] temp3;
 	delete [] Znum;
 	delete [] Zden;
+	delete [] ZdenInv;
 
 }
 
@@ -577,7 +538,7 @@ void prox_2norm(double *Q, double *M, double *C, double constant, int row, int c
 			Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
 			}
 		}
-		info = magma_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
+		info = LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
 
 		if(info > 0)
 		{
@@ -713,7 +674,7 @@ void resCalc(double *PrimRes, double *DualRes, double *M, double *Z, double *ZO,
 
 int main(void)
 {
-	const int iter_num = 100;
+	const int iter_num = 1;
 	high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4;
 	for(int p = 0;p<iter_num;p++)
 	{	//t3 = high_resolution_clock::now();
@@ -790,7 +751,7 @@ int main(void)
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
-	for(int iter = 0; iter < 500; iter++)
+	for(int iter = 0; iter < 1; iter++)
 	{
 		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);

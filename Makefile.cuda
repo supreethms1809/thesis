@@ -1,20 +1,30 @@
-CC = nvcc
-#CC = gcc
-OPT = -O3 -g -std=c++11
+# compiler option
+CC = icpc
+NVCC = nvcc 
 
-SRCS = cuda_dpposeEstimation.cu 
+OPT = -qopenmp -O3 -g -mkl -heap-arrays -parallel -std=c++11
 
-LIB = /home/sureshm/magma-2.2.0/include/
+CUDA_PATH = /usr/local/cuda-9.0
 
-LIN = /home/sureshm/magma-2.2.0/lib/
+INCLUDES := -I$(CUDA_PATH)/include
+LIBS := -L$(CUDA_PATH)/lib64/
 
-EXE = cuda_dpestimation.exe
+INC = 
+
+SRCS = cuda_dpposeEstimation.cpp
+
+LIB = 
+
+OBJ = cuda_dpposeEstimation.o gje.o
+
+EXE = cuda_dpposeEstimation
 
 run: all
-	./cuda_dpestimation.exe
+	./cuda_dpposeEstimation
 
-all: cuda_dpposeEstimation.cu
-	$(CC) $(OPT) -I $(LIB) -L $(LIN) $(SRCS) -o $(EXE)
-
+all:
+	$(NVCC) -O3 -g -arch=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart gje.cu -c
+	$(CC) -I$(INC) $(OPT) $(SRCS) $(LIB) -c  -lm
+	$(CC) $(OBJ) -o $(EXE) $(LIBS) $(OPT) -lcudart -lm 
 clean: 
-	rm ./cuda_dpestimation.exe    
+	rm ./cuda_dpposeEstimation

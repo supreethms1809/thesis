@@ -11,20 +11,20 @@ LIBS := -L$(CUDA_PATH)/lib64/
 
 INC = 
 
-SRCS = gje_inverse.cpp
+SRCS = cuda_dpposeEstimation.cpp
 
 LIB = 
 
-OBJ = gje_inverse.o gje.o
+OBJ = cuda_dpposeEstimation.o gje.o
 
-EXE = gje
+EXE = cuda_dpposeEstimation
 
 run: all
-	./gje
+	./cuda_dpposeEstimation
 
 all:
 	$(NVCC) -O3 -g -arch=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart gje.cu -c
 	$(CC) -I$(INC) $(OPT) $(SRCS) $(LIB) -c  -lm
 	$(CC) $(OBJ) -o $(EXE) $(LIBS) $(OPT) -lcudart -lm 
 clean: 
-	rm ./gje
+	rm ./cuda_dpposeEstimation
