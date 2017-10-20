@@ -54,7 +54,7 @@ void dump_to_file(char *filename, double *matrix, int row, int col)
 		{
 		//if(i==j)
 		//{
-		fs << matrix[i*col+j] << "\n" ;
+		fs << matrix[i*col+j] << "\t" ;
 		//}
 		}
 	fs << "\n";
@@ -347,7 +347,7 @@ void eye(double *I, int m, int n)
                 }
         }
 }
-/*
+
 lapack_int matInv(double *A, int n)
 {
 	int ipiv[n+1];
@@ -366,7 +366,7 @@ lapack_int matInv(double *A, int n)
 	return ret;
 
 }
-*/	
+	
 																					
 void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *B_transpose, double mu, double *M, double *Y,const int row,const int col,const int row1)
 {
@@ -412,6 +412,7 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	eye(ZdenInv,row1,row1);
 	gpuInverseOfMatrix(Zden,ZdenInv,row1);
 	dump_to_file("inverse_cuda",ZdenInv,row1,row1);
+	dump_to_file("inverse_cuda_orig",Zden,row1,row1);
 //	status = matInv(Zden,row1);
 	//cout << "value of determinant "<< status << endl;	
 	//t4 = high_resolution_clock::now();
@@ -419,18 +420,6 @@ void calculateZ(double *Z,double *BBt,double *xy, double *E, double *T, double *
 	//cout << "Time in miliseconds for inverse section is : " << time_span1.count() * 1000 << " ms" << endl;
 	
 	//Inverse calculation via guass-jordon method
-	////AugmentIdentity(Zden, Zdenaug, row1);
-	////t1 = high_resolution_clock::now();	
-	////cpuInverseOfMatrix(Zdenaug, row1);
-
-	//displayValues(Zdenaug, row1*row1);
-	////Inverse(Zdenaug,ZdenInverse,row1);
-	//displayValues(ZdenInverse, row1*row1);
-	////t2 = high_resolution_clock::now();
-	//duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
-	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
-	
-
 	////t3 = high_resolution_clock::now();
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
         cpuMatrixMult(Znum, ZdenInv, Z, row, row1, row1);	
@@ -619,7 +608,7 @@ void updateDualvariable(double *Y,double mu,double *M,double *Z,int row,int row1
 	}
 }
 
-double febNorm(double *a, int row, int col)
+/*double febNorm(double *a, int row, int col)
 {
 	double norm = 0.0;
 	double sum = 0.0;
@@ -643,6 +632,22 @@ double febNorm(double *a, int row, int col)
 	delete[] a_transpose;
 	delete[] ata;
 	return double(norm);
+}
+*/
+
+double febNorm(double *a, int row, int col)
+{
+        double norm = 0.0;
+        double sum = 0.0;
+        for(int i=0;i<row;i++)
+        {
+                for(int j=0;j<col;j++)
+                {
+                  sum +=(a[(i*col)+j]) * (a[(i*col)+j]);
+                }
+        }
+        norm=sqrt(sum);
+        return norm;
 }
 
         //dump_to_file("a.txt",a,row,col);

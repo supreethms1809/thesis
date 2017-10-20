@@ -837,7 +837,6 @@ int main(void)
 	//t2 = high_resolution_clock::now();
 	//duration<float> time_span = duration_cast<duration<float>>(t2 - t1);
 	//cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
-	
 
 	delete xy;
         delete mean;

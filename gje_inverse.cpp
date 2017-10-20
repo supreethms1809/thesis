@@ -108,15 +108,16 @@ void cpuInverseOfMatrix(double *matrix,double *iden_mat, int col)
 
 int main(void)
 {
-	const int n = 5;
-	//double a[n*n] = {0,3,4,1,3,10,4,9,16};
-	double a[n*n] = {
+	const int n = 3;
+	double a[n*n] = {0,3,4,1,3,10,4,9,16};
+/*	double a[n*n] = {
         0.378589,   0.971711,   0.016087,   0.037668,   0.312398,
         0.756377,   0.345708,   0.922947,   0.846671,   0.856103,
         0.732510,   0.108942,   0.476969,   0.398254,   0.507045,
         0.162608,   0.227770,   0.533074,   0.807075,   0.180335,
         0.517006,   0.315992,   0.914848,   0.460825,   0.731980
     };
+*/
 	double *I = new double [n*n];
 
 	eye(I,n,n);
@@ -131,19 +132,21 @@ int main(void)
 	print_matrix("Inverse - Identity",a,n,n);
 	print_matrix("Inverse ",I,n,n);
 
-	//double h_a[n*n] = {0,3,4,1,3,10,4,9,16};
-	double h_a[n*n] = {
+	double h_a[n*n] = {0,3,4,1,3,10,4,9,16};
+/*	double h_a[n*n] = {
         0.378589,   0.971711,   0.016087,   0.037668,   0.312398,
         0.756377,   0.345708,   0.922947,   0.846671,   0.856103,
         0.732510,   0.108942,   0.476969,   0.398254,   0.507045,
         0.162608,   0.227770,   0.533074,   0.807075,   0.180335,
         0.517006,   0.315992,   0.914848,   0.460825,   0.731980
     };
+*/
         double *h_I = new double [n*n];
 
         eye(h_I,n,n);
 	
 	gpuInverseOfMatrix(h_a,h_I,n);
+    	cout << endl << endl;
 	
 	cout << "GPU inverse "<<endl<<endl;
 	print_matrix("h_a ",h_a,n,n);

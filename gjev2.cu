@@ -28,79 +28,6 @@ using namespace std;
         }                                                                     \
 }
 
-__global__ void nodiag_normalize(double *A, double *I, int n, int i)
-{
-	int x = blockIdx.x * blockDim.x + threadIdx.x;
-	int y = blockIdx.y * blockDim.y + threadIdx.y;
-	double temp = A[i*n + i];
-
-	if (x < n && y < n)
-	{
-		if (x == i && x!=y)
-		{
-			//I[x*n + y] /= A[i*n + i];
-			//A[x*n + y] /= A[i*n + i];
-			I[x*n + y] /= temp;
-			A[x*n + y] /= temp;
-		}
-	}
-	
-}
-
-__global__ void diag_normalize(double *A, double *I, int n, int i)
-{
-	int x = blockIdx.x * blockDim.x + threadIdx.x;
-	int y = blockIdx.y * blockDim.y + threadIdx.y;
-
-	double temp = A[i*n + i];
-	if (x < n && y < n)
-	{
-		if (x == y && x == i)
-		{
-			//I[x*n + y] /= A[i*n + i];
-			//A[x*n + y] /= A[i*n + i];
-			I[x*n + y] /= temp;
-			A[x*n + y] /= temp;
-		}
-	}
-}
-
-__global__ void gaussjordan(double *A, double *I, int n, int i)
-{
-	int x = blockIdx.x * blockDim.x + threadIdx.x;
-	int y = blockIdx.y * blockDim.y + threadIdx.y;
-
-	if (x < n && y < n)
-	{
-		if (x != i)
-		{
-			I[x*n + y] -= I[i*n + y] * A[x*n + i];
-			if (y != i)
-			{
-				A[x*n + y] -= A[i*n + y] * A[x*n + i];
-			}	 
-		}
-	}
-
-}
-
-__global__ void set_zero(double *A, double *I, int n, int i)
-{
-	int x = blockIdx.x * blockDim.x + threadIdx.x;
-	int y = blockIdx.y * blockDim.y + threadIdx.y;
-
-	if (x < n && y < n)
-	{
-		if (x != i)
-		{
-			if (y == i)
-			{
-				A[x*n + y] = 0;
-			}
-		}
-	}
-}
-
 
 __global__ void check_diag_zero(double *d_m , double *d_i , const int n)
 {
@@ -109,7 +36,6 @@ __global__ void check_diag_zero(double *d_m , double *d_i , const int n)
 
 	if(row < n && col<n)
 	{
-	//	printf("value : %f ",d_m[(n + 1)*row]);
 		//Checking if diagonal element is 0
                 if (d_m[(n + 1)*row] == 0)
                 {
@@ -129,35 +55,64 @@ __global__ void check_diag_zero(double *d_m , double *d_i , const int n)
 	}
 }
 
-
-__global__ void NaiveInverse(double *d_m, double *d_i, const int n, const int i)
+__global__ void fixRow(double *d_m, double *d_I,  int n, int i)
 {
-	int col = threadIdx.x + (blockIdx.x*blockDim.x);
-        int row = threadIdx.y + (blockIdx.y*blockDim.y);
-	if(row < n && col<n)
-        {
-		//Make the diagonal elements 1 along with the whole row(divide).
-		double initialValue = d_m[(n + 1)*i];
-		
-		d_m[(i * n) + col] = d_m[(i * n) + col] / initialValue;
-		d_i[(i * n) + col] = d_i[(i * n) + col] / initialValue;
-
-		double tempDen;
-		tempDen = d_m[(i * n) + i];
-
+	__shared__ double Ri[384];
+	__shared__ double Ii[384];
+	__shared__ double Aii;
+	int colId = threadIdx.x;
 	
-		//Making the elements of the row to zero
-		double tempIni;
-		tempIni = d_m[i + (col * n)]/tempDen;
-		if (col != i)
-		{
-			for (int l = 0; l < n; l++)
-			{
-			d_m[(col * n)+l] = d_m[(col * n)+l] - (d_m[(i * n)+l] * tempIni);
-			d_i[(col * n)+l] = d_i[(col * n)+l] - (d_i[(i * n)+l] * tempIni);
-			}
-		}
+	Ri[colId] = d_m[n*i+colId];
+	Ii[colId] = d_I[n*i+colId];
+	Aii = d_m[n*i+i];
+	__syncthreads();
+	
+	Ri[colId] = Ri[colId] / Aii;
+	Ii[colId] = Ii[colId] / Aii;
+	d_m[n*i+colId] = Ri[colId];
+	d_I[n*i+colId] = Ii[colId];
 
+}
+
+__global__ void fixColumn(double *d_m, double *d_I, const int n, const int colId)
+{
+	int i = threadIdx.x;
+	int j = blockIdx.x;
+	
+	__shared__ double col[384];
+	__shared__ double Icol[384];
+
+	__shared__ double AColIdj;
+
+	__shared__ double colj[384];
+	__shared__ double Icolj[384];
+
+	if(i < n && j < n)
+	{
+	col[i] = d_m[i*n+colId];
+	Icol[i] = d_I[i*n+colId];
+//	printf("threadId = %d\n",i);
+//	printf("blockId = %d\n",j);
+	//if(col[i] != 0)
+	//{
+		colj[i] = d_m[i*n+j];
+		Icolj[i] = d_I[i*n+j];
+		AColIdj = d_m[colId * n +j];
+		//AColIdj = d_m[colId + n *j];
+		__syncthreads();
+		if(j != colId)
+		{
+		Icolj[i] = Icolj[i] - AColIdj * Icol[i];
+		if(i != colId)
+		{
+			colj[i] = colj[i] - AColIdj * col[i];
+
+		}
+		}
+		d_m[i*n+j] = colj[i];
+		d_I[i*n+j] = Icolj[i];
+	
+	//}
 	}
 }
 
@@ -183,11 +138,21 @@ __host__ void gpuInverseOfMatrix(double *h_matrix,double *h_iden_mat, int col)
 	CHECK(cudaMemcpy(d_matrix, h_matrix, MatSizeInBytes, cudaMemcpyHostToDevice));
 	CHECK(cudaMemcpy(d_iden_mat, h_iden_mat, MatSizeInBytes, cudaMemcpyHostToDevice));
 
-	//1D grid and 1D block
-	int dimx = 32;
-	int dimy = 32;
-	dim3 block(dimx,dimy);
-	dim3 grid((col+block.x-1)/block.x,(col+block.y-1)/block.y);
+	//2D grid and 2D block
+	int dimx1 = 32;
+	int dimy1 = 32;
+	dim3 block1(dimx1,dimy1);
+	dim3 grid1((col+block1.x-1)/block1.x,(col+block1.y-1)/block1.y);
+
+        int dimx2 = col;
+        int dimy2 = 1;
+        dim3 block2(dimx2,dimy2);                                                           
+        dim3 grid2(1,1); 
+
+        int dimx3 = col;
+        int dimy3 = 1;
+        dim3 block3(dimx3,dimy3);                                                           
+        dim3 grid3(col,1); 
 
 //	cout << "\t2D Grid Dimension" << endl;
 //	cout << "\tNumber of Blocks along X dimension: " << grid.x << endl;
@@ -197,12 +162,11 @@ __host__ void gpuInverseOfMatrix(double *h_matrix,double *h_iden_mat, int col)
 //	cout << "\tNumber of threads along Y dimension: " << block.y << endl;
 
 	CHECK(cudaEventRecord(kernel_start));
+	check_diag_zero << <grid1, block1 >> >(d_matrix, d_iden_mat, col);
 	for (int i = 0; i<col; i++)
 	{
-		nodiag_normalize << <grid, block >> >(d_matrix, d_iden_mat, col, i);
-		diag_normalize << <grid, block >> >(d_matrix, d_iden_mat, col, i);
-		gaussjordan << <grid, block >> >(d_matrix, d_iden_mat, col, i);
-		//set_zero << <grid, block >> >(d_matrix, d_iden_mat, col, i);
+		fixRow << <grid2, block2 >> >(d_matrix, d_iden_mat, col, i);
+		fixColumn << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
 	}
 
 //	check_diag_zero << <grid, block >> >(d_matrix, d_iden_mat,col);
@@ -215,7 +179,7 @@ __host__ void gpuInverseOfMatrix(double *h_matrix,double *h_iden_mat, int col)
 	CHECK(cudaEventRecord(kernel_stop));
 	CHECK(cudaEventSynchronize(kernel_stop));
 
-	//CHECK(cudaMemcpy(h_matrix, d_matrix, MatSizeInBytes, cudaMemcpyDeviceToHost));
+	CHECK(cudaMemcpy(h_matrix, d_matrix, MatSizeInBytes, cudaMemcpyDeviceToHost));
 	CHECK(cudaMemcpy(h_iden_mat, d_iden_mat, MatSizeInBytes, cudaMemcpyDeviceToHost));
 
 	CHECK(cudaFree(d_matrix));
