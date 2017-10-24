@@ -1,5 +1,5 @@
 # compiler option
-CC = icc
+CC = icpc
 NVCC = nvcc 
 
 OPT = -qopenmp -O3 -g -mkl -heap-arrays -parallel -std=c++11
@@ -11,20 +11,20 @@ LIBS := -L$(CUDA_PATH)/lib64/
 
 INC = 
 
-SRCS = cuda_dpposeEstimation.cpp
+SRCS = gje_inverse.cpp
 
 LIB = 
 
-OBJ = cuda_dpposeEstimation.o gjev2.o
+OBJ = gje_inverse.o gjev2.o
 
-EXE = cuda_dpposeEstimation
+EXE = gjev2
 
 run: all
-	./cuda_dpposeEstimation
+	./gjev2
 
 all:
 	$(NVCC) -O3 -g -arch=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart gjev2.cu -c
 	$(CC) -I$(INC) $(OPT) $(SRCS) $(LIB) -c  -lm
 	$(CC) $(OBJ) -o $(EXE) $(LIBS) $(OPT) -lcudart -lm 
 clean: 
-	rm ./cuda_dpposeEstimation
+	rm ./gjev2

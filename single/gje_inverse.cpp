@@ -15,9 +15,9 @@ using namespace std;
 using namespace std::chrono;
 using std::string;
 
-extern void gpuInverseOfMatrix(double *h_matrix,double *h_iden_mat, int col);
+extern void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col);
 
-void print_matrix(string desc,double *a, int m, int n)
+void print_matrix(string desc,float *a, int m, int n)
 {
 	cout << desc << endl;
     	for(int i=0; i<n; i++)
@@ -30,7 +30,7 @@ void print_matrix(string desc,double *a, int m, int n)
     	}
 }
 
-void eye(double *I, int m, int n)
+void eye(float *I, int m, int n)
 {
 	for(int i=0;i<n;i++)
 	{
@@ -48,7 +48,7 @@ void eye(double *I, int m, int n)
 	}
 }
 
-void cpuInverseOfMatrix(double *matrix,double *iden_mat, int col)
+void cpuInverseOfMatrix(float *matrix,float *iden_mat, int col)
 {
 	for (int m = 0; m < col; m++)
 	{
@@ -77,7 +77,7 @@ void cpuInverseOfMatrix(double *matrix,double *iden_mat, int col)
 	for(int m=0;m<col;m++)
 	{
 		//Make the diagonal elements 1 along with the whole row(divide).
-		double initialValue = matrix[((col) + 1)*m];
+		float initialValue = matrix[((col) + 1)*m];
 		
 		for (int j = 0; j < (col); j++)
 		{
@@ -85,13 +85,13 @@ void cpuInverseOfMatrix(double *matrix,double *iden_mat, int col)
 		iden_mat[(m * (col)) + j] = iden_mat[(m * (col)) + j] / initialValue;
 		}
 
-		double tempDen;
+		float tempDen;
 		tempDen = matrix[(m * (col)) + m];
 	
 		//Making the elements of the row to zero
 		for (int k = 0; k < col; k++)
 		{	
-			double tempIni,tempIni1;
+			float tempIni,tempIni1;
 			tempIni = matrix[m + (k * (col))]/tempDen;
 			if (k != m)
 			{
@@ -109,8 +109,8 @@ void cpuInverseOfMatrix(double *matrix,double *iden_mat, int col)
 int main(void)
 {
 	const int n = 5;
-//	double a[n*n] = {0,3,4,1,3,10,4,9,16};
-	double a[n*n] = {
+//	float a[n*n] = {0,3,4,1,3,10,4,9,16};
+	float a[n*n] = {
         0.378589,   0.971711,   0.016087,   0.037668,   0.312398,
         0.756377,   0.345708,   0.922947,   0.846671,   0.856103,
         0.732510,   0.108942,   0.476969,   0.398254,   0.507045,
@@ -118,7 +118,7 @@ int main(void)
         0.517006,   0.315992,   0.914848,   0.460825,   0.731980
     };
 
-	double *I = new double [n*n];
+	float *I = new float [n*n];
 
 	eye(I,n,n);
 	print_matrix("Input",a,n,n);
@@ -132,8 +132,8 @@ int main(void)
 	print_matrix("Inverse - Identity",a,n,n);
 	print_matrix("Inverse ",I,n,n);
 
-//	double h_a[n*n] = {0,3,4,1,3,10,4,9,16};
-	double h_a[n*n] = {
+//	float h_a[n*n] = {0,3,4,1,3,10,4,9,16};
+	float h_a[n*n] = {
         0.378589,   0.971711,   0.016087,   0.037668,   0.312398,
         0.756377,   0.345708,   0.922947,   0.846671,   0.856103,
         0.732510,   0.108942,   0.476969,   0.398254,   0.507045,
@@ -141,7 +141,7 @@ int main(void)
         0.517006,   0.315992,   0.914848,   0.460825,   0.731980
     };
 
-        double *h_I = new double [n*n];
+        float *h_I = new float [n*n];
 
         eye(h_I,n,n);
 	

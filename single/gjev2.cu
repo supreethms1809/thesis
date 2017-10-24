@@ -31,7 +31,7 @@ using namespace std;
 }
 
 
-__global__ void check_diag_zero(double *d_m , double *d_i , const int n)
+__global__ void check_diag_zero(float *d_m , float *d_i , const int n)
 {
 	int col = threadIdx.x + (blockIdx.x*blockDim.x);	
 	int row = threadIdx.y + (blockIdx.y*blockDim.y);
@@ -57,11 +57,14 @@ __global__ void check_diag_zero(double *d_m , double *d_i , const int n)
 	}
 }
 
-__global__ void fixRow(double *d_m, double *d_I,  int n, int i)
+
+/*
+/////////////////////////////////////////method 1 - not working ///////////////////////////////////////////
+__global__ void fixRow(float *d_m, float *d_I,  int n, int i)
 {
-	__shared__ double Ri[384];
-	__shared__ double Ii[384];
-	__shared__ double Aii;
+	__shared__ float Ri[384];
+	__shared__ float Ii[384];
+	__shared__ float Aii;
 	int colId = threadIdx.x;
 	
 	Ri[colId] = d_m[n*i+colId];
@@ -76,18 +79,18 @@ __global__ void fixRow(double *d_m, double *d_I,  int n, int i)
 
 }
 
-__global__ void fixColumn(double *d_m, double *d_I, const int n, const int colId)
+__global__ void fixColumn(float *d_m, float *d_I, const int n, const int colId)
 {
 	int i = threadIdx.x;
 	int j = blockIdx.x;
 	
-	__shared__ double col[384];
-	__shared__ double Icol[384];
+	__shared__ float col[384];
+	__shared__ float Icol[384];
 
-	__shared__ double AColIdj;
+	__shared__ float AColIdj;
 
-	__shared__ double colj[384];
-	__shared__ double Icolj[384];
+	__shared__ float colj[384];
+	__shared__ float Icolj[384];
 
 	if(i < n && j < n)
 	{
@@ -117,24 +120,27 @@ __global__ void fixColumn(double *d_m, double *d_I, const int n, const int colId
 	//}
 	}
 }
+*/
 
-__global__ void nodiag_normalize(double *A, double *I, int n, int i)
+/*
+///////////////////////////////////method 2 - working /////////////////////////////////
+__global__ void nodiag_normalize(float *A, float *I, int n, int i)
 {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	int tx = threadIdx.x;
 	int ty = threadIdx.y;
 
-	double temp = A[i*n + i];
-	__shared__ double col[TILE_WIDTH][TILE_WIDTH];
-	__shared__ double Icol[TILE_WIDTH][TILE_WIDTH];
+	float temp = A[i*n + i];
+	__shared__ float col[TILE_WIDTH][TILE_WIDTH+2];
+	__shared__ float Icol[TILE_WIDTH][TILE_WIDTH+2];
 
 	if (x < n && y < n)
 	{
 		Icol[ty][tx] = I[x*n + y];
 		col[ty][tx] = A[x*n + y];
 		__syncthreads();
-		if (x == i && x!=y)
+		if (x == i && x != y)
 		{
 			//I[x*n + y] /= A[i*n + i];
 			//A[x*n + y] /= A[i*n + i];
@@ -145,22 +151,22 @@ __global__ void nodiag_normalize(double *A, double *I, int n, int i)
 		}
 		I[x*n + y] = Icol[ty][tx];
 		A[x*n + y] = col[ty][tx];
-
+		__syncthreads();
 	}
 	
 }
 
-__global__ void diag_normalize(double *A, double *I, int n, int i)
+__global__ void diag_normalize(float *A, float *I, int n, int i)
 {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	int tx = threadIdx.x;
 	int ty = threadIdx.y;
 
-	__shared__ double col[TILE_WIDTH][TILE_WIDTH];
-	__shared__ double Icol[TILE_WIDTH][TILE_WIDTH];
+	__shared__ float col[TILE_WIDTH][TILE_WIDTH+2];
+	__shared__ float Icol[TILE_WIDTH][TILE_WIDTH+2];
 
-	double temp = A[i*n + i];
+	float temp = A[i*n + i];
 	if (x < n && y < n)
 	{
 		Icol[ty][tx] = I[x*n + y];
@@ -184,15 +190,15 @@ __global__ void diag_normalize(double *A, double *I, int n, int i)
 }
 
 
-__global__ void gaussjordan(double *A, double *I, int n, int i)
+__global__ void gaussjordan_old(float *A, float *I, int n, int i)
 {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	int tx = threadIdx.x;
 	int ty = threadIdx.y;
-	__shared__ double col[TILE_WIDTH][TILE_WIDTH];
-	__shared__ double Icol[TILE_WIDTH][TILE_WIDTH];
-	double A_temp = A[x*n + i];
+	__shared__ float col[TILE_WIDTH][TILE_WIDTH+2];
+	__shared__ float Icol[TILE_WIDTH][TILE_WIDTH+2];
+	float A_temp = A[x*n + i];
 	
 	if (x < n && y < n)
 	{
@@ -215,12 +221,47 @@ __global__ void gaussjordan(double *A, double *I, int n, int i)
 	}
 
 }
+*/
 
-
-__host__ void gpuInverseOfMatrix(double *h_matrix,double *h_iden_mat, int col)
+/*
+//////////////////////////////method 3 - not working///////////////////////////
+ __global__ void gaussjordan(float *A,  float *I,int n, int i)
 {
-	double *d_matrix,*d_iden_mat;
-	const int MatSizeInBytes = col*col*sizeof(double);
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    float P;
+
+    if(x<n && y<n)
+        if(x>i)
+	{ // this limits operation to rows below the pivot point
+            P=A[x*n+i]/A[i*n+i];
+            I[x*n+y] -= I[i*n+y]*P;  // apply for every row member
+            if(y>=i)
+		{ //limits  to row members to the right of the pivot
+                A[x*n+y] -= A[i*n+y]*P;  // apply only to members right of pivot
+		}
+        }
+ }
+
+ __global__ void dev(float *d_A,  float *dI, int h)
+{
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if(x<h && y<h)
+        if(d_A[x*h+x]!=0){
+            dI[x*h+y]  /= d_A[x*h+x];
+            d_A[x*h+y] /= d_A[x*h+x];
+        }
+    __syncthreads();
+
+}
+*/
+
+__host__ void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col)
+{
+	float *d_matrix,*d_iden_mat;
+	const int MatSizeInBytes = col*col*sizeof(float);
 
 	cudaError_t cudaSetDevice(int device);
         cudaSetDevice(0);
@@ -249,8 +290,8 @@ __host__ void gpuInverseOfMatrix(double *h_matrix,double *h_iden_mat, int col)
         dim3 block2(dimx2,dimy2);                                                           
         dim3 grid2(1,1); 
 
-        int dimx3 = 16;
-        int dimy3 = 16;
+        int dimx3 = 32;
+        int dimy3 = 32;
         dim3 block3(dimx3,dimy3);                                                           
 	dim3 grid3((col+block3.x-1)/block3.x,(col+block3.y-1)/block3.y);
 
@@ -271,20 +312,16 @@ __host__ void gpuInverseOfMatrix(double *h_matrix,double *h_iden_mat, int col)
 	//}
 	for (int i = 0; i<col; i++)
 	{
-		nodiag_normalize << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
-		diag_normalize << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
+		//nodiag_normalize << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
+		//diag_normalize << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
+		//CHECK(cudaThreadSynchronize());
 		gaussjordan << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
 		//set_zero << <grid, block >> >(d_matrix, d_iden_mat, col, i);
 	}
 
 
-//	check_diag_zero << <grid, block >> >(d_matrix, d_iden_mat,col);
-//	CHECK(cudaThreadSynchronize());
-//	for(int i = 0; i < col; i++)
-//	{
-//		NaiveInverse << <grid, block >> >(d_matrix, d_iden_mat,col,i);		
-//	}	
-//	CHECK(cudaThreadSynchronize());
+		dev << <grid3, block3 >> >(d_matrix, d_iden_mat, col);
+	CHECK(cudaThreadSynchronize());
 	CHECK(cudaEventRecord(kernel_stop));
 	CHECK(cudaEventSynchronize(kernel_stop));
 
