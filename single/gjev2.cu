@@ -122,7 +122,7 @@ __global__ void fixColumn(float *d_m, float *d_I, const int n, const int colId)
 }
 */
 
-/*
+
 ///////////////////////////////////method 2 - working /////////////////////////////////
 __global__ void nodiag_normalize(float *A, float *I, int n, int i)
 {
@@ -221,7 +221,7 @@ __global__ void gaussjordan_old(float *A, float *I, int n, int i)
 	}
 
 }
-*/
+
 
 /*
 //////////////////////////////method 3 - not working///////////////////////////
@@ -312,15 +312,15 @@ __host__ void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col)
 	//}
 	for (int i = 0; i<col; i++)
 	{
-		//nodiag_normalize << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
-		//diag_normalize << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
+		nodiag_normalize << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
+		diag_normalize << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
 		//CHECK(cudaThreadSynchronize());
-		gaussjordan << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
+		gaussjordan_old << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
 		//set_zero << <grid, block >> >(d_matrix, d_iden_mat, col, i);
 	}
 
 
-		dev << <grid3, block3 >> >(d_matrix, d_iden_mat, col);
+		//dev << <grid3, block3 >> >(d_matrix, d_iden_mat, col);
 	CHECK(cudaThreadSynchronize());
 	CHECK(cudaEventRecord(kernel_stop));
 	CHECK(cudaEventSynchronize(kernel_stop));
