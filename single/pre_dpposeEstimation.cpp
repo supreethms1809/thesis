@@ -882,7 +882,7 @@ void resCalc(float *PrimRes, float *DualRes, float *M, float *Z, float *ZO,float
 
 int main(void)
 {
-	const int iter_num = 50;
+	const int iter_num = 110;
 	high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4;
 	for(int p = 0;p<iter_num;p++)
 	{	//t3 = high_resolution_clock::now();
@@ -1052,7 +1052,7 @@ int main(void)
 		
 		//if ((verb == true) && ((iter%10) == 0))
 		//{
-			cout << "Iter "<< iter+1 <<": PrimRes = "<<PrimRes <<", DualRes = "<<DualRes<<", mu = "<< mu <<endl; 
+		//	cout << "Iter "<< iter+1 <<": PrimRes = "<<PrimRes <<", DualRes = "<<DualRes<<", mu = "<< mu <<endl; 
 		//}
 
 		if((PrimRes < tol) && (DualRes < tol))

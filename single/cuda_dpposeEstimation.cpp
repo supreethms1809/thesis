@@ -661,32 +661,20 @@ void updateDualvariable(float *Y,float mu,float *M,float *Z,int row,int row1)
 	}
 }
 
-/*float febNorm(float *a, int row, int col)
+float febNorm_diff(float *a, float *b, int row, int col)
 {
-	float norm = 0.0;
-	float sum = 0.0;
-	float *a_transpose = new float [col*row];
-	float *ata = new float [col*col];
-
-	TransposeOnCPU(a,a_transpose,row,col);
-        cpuTransMatrixMult(a_transpose, a, ata, col, row);
-	for(int i=0;i<col;i++)
-	{
-		for(int j=0;j<col;j++)
-		{
-			if(i==j)
-			{
-		  	sum += float((ata[(i*col)+j]));
-			}
-		}
-	}
-	norm=sqrt(float(sum));
-
-	delete[] a_transpose;
-	delete[] ata;
-	return float(norm);
+        float norm = 0.0;
+        float sum = 0.0;
+        for(int i=0;i<row;i++)
+        {
+                for(int j=0;j<col;j++)
+                {
+                  sum +=(a[(i*col)+j] - b[(i*col)+j]) * (a[(i*col)+j] - b[(i*col)+j]);
+                }
+        }
+        norm=sqrt(sum);
+        return norm;
 }
-*/
 
 float febNorm(float *a, int row, int col)
 {
@@ -710,24 +698,26 @@ float febNorm(float *a, int row, int col)
 
 void resCalc(float *PrimRes, float *DualRes, float *M, float *Z, float *ZO,float mu, int row, int row1)
 {
-	float *MminusZ = new float [row*row1];
-	float *ZminusZO = new float [row*row1];
+//	float *MminusZ = new float [row*row1];
+//	float *ZminusZO = new float [row*row1];
 
-	for(int i = 0; i< row ;i++)
-	{
-		for(int j = 0; j<row1 ; j++)
-		{
-			MminusZ[(i*row1)+j] = M[(i*row1)+j] - Z[(i*row1)+j];
-			ZminusZO[(i*row1)+j] = Z[(i*row1)+j] - ZO[(i*row1)+j];
-		}
-	}
-	
+//	for(int i = 0; i< row ;i++)
+//	{
+//		for(int j = 0; j<row1 ; j++)
+//		{
+//			MminusZ[(i*row1)+j] = M[(i*row1)+j] - Z[(i*row1)+j];
+//			ZminusZO[(i*row1)+j] = Z[(i*row1)+j] - ZO[(i*row1)+j];
+//		}
+//	}
+
+	*PrimRes = febNorm_diff(M,Z,row,row1)/febNorm(ZO,row,row1);
+	*DualRes = mu * febNorm_diff(Z,ZO,row,row1)/febNorm(ZO,row,row1);
 		
-	*PrimRes = febNorm(MminusZ,row,row1)/febNorm(ZO,row,row1);
-	*DualRes = mu * febNorm(ZminusZO,row,row1)/febNorm(ZO,row,row1);
+//	*PrimRes = febNorm(MminusZ,row,row1)/febNorm(ZO,row,row1);
+//	*DualRes = mu * febNorm(ZminusZO,row,row1)/febNorm(ZO,row,row1);
 	
-	delete[] MminusZ;
-	delete[] ZminusZO;
+//	delete[] MminusZ;
+//	delete[] ZminusZO;
 }
 
 int main(void)
@@ -809,7 +799,7 @@ int main(void)
 	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 
-	for(int iter = 0; iter < 500; iter++)
+	for(int iter = 0; iter < 238; iter++)
 	{
 		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);

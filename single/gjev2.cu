@@ -58,7 +58,7 @@ __global__ void check_diag_zero(float *d_m , float *d_i , const int n)
 }
 
 
-/*
+
 /////////////////////////////////////////method 1 - not working ///////////////////////////////////////////
 __global__ void fixRow(float *d_m, float *d_I,  int n, int i)
 {
@@ -120,9 +120,9 @@ __global__ void fixColumn(float *d_m, float *d_I, const int n, const int colId)
 	//}
 	}
 }
-*/
 
 
+/*
 ///////////////////////////////////method 2 - working /////////////////////////////////
 __global__ void nodiag_normalize(float *A, float *I, int n, int i)
 {
@@ -221,7 +221,7 @@ __global__ void gaussjordan_old(float *A, float *I, int n, int i)
 	}
 
 }
-
+*/
 
 /*
 //////////////////////////////method 3 - not working///////////////////////////
@@ -289,6 +289,12 @@ __host__ void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col)
         int dimy2 = 1;
         dim3 block2(dimx2,dimy2);                                                           
         dim3 grid2(1,1); 
+	
+	int dimx_fixcol = col;
+        int dimy_fixcol = 1;
+        dim3 block_fixcol(dimx_fixcol,dimy_fixcol);                                                           
+        dim3 grid_fixcol(col,1); 
+
 
         int dimx3 = 32;
         int dimy3 = 32;
@@ -304,20 +310,21 @@ __host__ void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col)
 
 	CHECK(cudaEventRecord(kernel_start));
 	check_diag_zero << <grid3, block3 >> >(d_matrix, d_iden_mat, col);
-	//for (int i = 0; i<col; i++)
-	//{
-	//	fixRow << <grid2, block2 >> >(d_matrix, d_iden_mat, col, i);
-	//	//fixColumn << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
-	//	gaussjordan << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
-	//}
 	for (int i = 0; i<col; i++)
 	{
-		nodiag_normalize << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
-		diag_normalize << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
-		//CHECK(cudaThreadSynchronize());
-		gaussjordan_old << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
-		//set_zero << <grid, block >> >(d_matrix, d_iden_mat, col, i);
+		fixRow << <grid2, block2 >> >(d_matrix, d_iden_mat, col, i);
+		fixColumn << <grid_fixcol, block_fixcol >> >(d_matrix, d_iden_mat, col, i);
+//	//	gaussjordan << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
 	}
+
+//	for (int i = 0; i<col; i++)
+//	{
+//		nodiag_normalize << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
+//		diag_normalize << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
+//		//CHECK(cudaThreadSynchronize());
+//		gaussjordan_old << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
+//		//set_zero << <grid, block >> >(d_matrix, d_iden_mat, col, i);
+//	}
 
 
 		//dev << <grid3, block3 >> >(d_matrix, d_iden_mat, col);
