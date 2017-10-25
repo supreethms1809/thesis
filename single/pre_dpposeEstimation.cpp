@@ -561,6 +561,7 @@ void calculateQ(float *Q, float *Z, float *Y,float mu, int row, int row1)
 
 }
 
+/*
 void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size)
 {
 	MKL_INT m = ROW, n = COL, lda = LDA, ldu = LDU, ldvt = LDVT, info;
@@ -656,6 +657,148 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 	delete[] vt1;
 
 }
+*/
+
+void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size)
+{
+
+	float *Q_re = new float [row*col];
+	MKL_INT m = ROW, n = COL, lda = LDA, ldu = LDU, ldvt = LDVT, info;
+	float superb[min(ROW,COL)-1];
+	//float s[COL], u[LDU*ROW], vt[LDVT*COL];
+/*	
+	float *sigma = new float [COL];
+	float *u = new float [LDU*ROW];
+	float *vt = new float [LDVT*COL];
+	//float *Qtemp = new float [6];
+
+	float *sigma1 = new float [ROW*ROW];
+	float *vt1 = new float [ROW*COL];
+	float *Qtemp1 = new float [4];
+	float *Qtemp2 = new float [6];
+*/
+//#pragma omp parallel 
+
+//#pragma omp for
+// firstprivate(sigma,u,vt,Qtemp,sigma1,vt1,Qtemp1,Qtemp2,superb)
+	for(int i = 0;i < data_size;i++)
+	{
+	
+//#pragma omp task firstprivate(sigma,u,vt,Qtemp,sigma1,vt1,Qtemp1,Qtemp2,superb)
+
+		for(int j = 0;j<2;j++)
+		{
+			for(int k=0;k<3;k++)
+			{
+			
+			//cout << "thread id = "<<omp_get_thread_num()<< " and value = "<< (3 * i) + (j*col) + k << endl;
+			//Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
+			Q_re[(i*6)+(j * 3) + k] = Q[(3 * i) + (j*col) + k];
+			}
+		}
+	}
+#pragma omp parallel for 
+	for(int i = 0;i < data_size;i++)
+	{
+	
+	float *Qtemp = new float [6];
+	float *sigma = new float [COL];
+	float *u = new float [LDU*ROW];
+	float *vt = new float [LDVT*COL];
+
+	float *sigma1 = new float [ROW*ROW];
+	float *vt1 = new float [ROW*COL];
+	float *Qtemp1 = new float [4];
+	float *Qtemp2 = new float [6];
+
+
+		for(int j = 0;j<6;j++)
+		{
+			Qtemp[j] = Q_re[(i*6)+j];
+		}
+		info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
+
+		if(info > 0)
+		{
+			cout << "The algorithm computing SVD failed to converge" << endl;
+		}
+		
+		if((sigma[0]+sigma[1]) <= constant )
+		{
+			sigma[0] = 0;
+			sigma[1] = 0;
+		}
+		else if ((sigma[0] - sigma[1]) <= constant)
+		{
+			sigma[0] = ((sigma[0]+sigma[1])-constant)/2;
+			sigma[1] = sigma[0];
+		}
+		else
+		{
+			sigma[0] = sigma[0] - constant;
+			sigma[1] = sigma[1];
+		}
+
+		
+		for(int j = 0;j<ROW;j++)
+		{
+			for(int k =0;k<COL;k++)
+			{
+				vt1[(j*COL)+k] = vt[(j*COL) + k];
+			}
+		}	
+		for(int j = 0;j<ROW;j++)
+		{
+			for(int k =0;k<ROW;k++)
+			{
+				if(j == k)
+				{
+				sigma1[(j*ROW)+k] = sigma[j];
+				}
+				else
+				{
+				sigma1[(j*ROW)+k] = 0.0;
+				}
+			}
+		}	
+		cpuMatrixMult(u,sigma1,Qtemp1,ROW,ROW,ROW);
+		cpuMatrixMult(Qtemp1,vt1,Qtemp2,ROW,ROW,COL);
+		for(int j = 0;j<2;j++)
+                {
+                        for(int k=0;k<3;k++)
+                        {
+                        M[(3 * i) + (j*col) + k] = Qtemp2[(j * 3) + k];
+                        }
+                }
+		
+
+		C[i] = sigma1[0];
+
+	delete[] Qtemp;
+	delete[] sigma;
+	delete[] u;
+	delete[] vt;
+	delete[] Qtemp1;
+	delete[] Qtemp2;
+	delete[] sigma1;
+	delete[] vt1;
+
+	}
+
+//#pragma omp taskwait
+
+	delete[] Q_re;
+/*	delete[] Qtemp;
+	delete[] sigma;
+	delete[] u;
+	delete[] vt;
+	delete[] Qtemp1;
+	delete[] Qtemp2;
+	delete[] sigma1;
+	delete[] vt1;
+*/
+}
+
 
 void updateDualvariable(float *Y,float mu,float *M,float *Z,int row,int row1)
 {
@@ -739,7 +882,7 @@ void resCalc(float *PrimRes, float *DualRes, float *M, float *Z, float *ZO,float
 
 int main(void)
 {
-	const int iter_num = 100;
+	const int iter_num = 50;
 	high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4;
 	for(int p = 0;p<iter_num;p++)
 	{	//t3 = high_resolution_clock::now();

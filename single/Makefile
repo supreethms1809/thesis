@@ -9,22 +9,21 @@ CUDA_PATH = /usr/local/cuda-9.0
 INCLUDES := -I$(CUDA_PATH)/include
 LIBS := -L$(CUDA_PATH)/lib64/
 
-INC = 
 
-SRCS = cuda_dpposeEstimation.cpp
+SRCS = pre_dpposeEstimation.cpp
 
 LIB = 
 
-OBJ = cuda_dpposeEstimation.o gjev2.o
+OBJ = pre_dpposeEstimation.o gjev2.o
 
-EXE = cuda_dpposeEstimation
+EXE = pre_dpposeEstimation
 
 run: all
-	./cuda_dpposeEstimation
+	./pre_dpposeEstimation
 
 all:
 	$(NVCC) -O3 -g -arch=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart gjev2.cu -c
 	$(CC)  $(OPT) $(SRCS) $(LIB) -c  -lm
 	$(CC) $(OBJ) -o $(EXE) $(LIBS) $(OPT) -lcudart -lm 
 clean: 
-	rm ./cuda_dpposeEstimation
+	rm ./pre_dpposeEstimation
