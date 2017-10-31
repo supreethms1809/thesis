@@ -58,18 +58,19 @@ __global__ void check_diag_zero(float *d_m , float *d_i , const int n)
 }
 
 
-
+/*
 /////////////////////////////////////////method 1 - not working ///////////////////////////////////////////
 __global__ void fixRow(float *d_m, float *d_I,  int n, int i)
 {
 	__shared__ float Ri[384];
 	__shared__ float Ii[384];
-	__shared__ float Aii;
+	float Aii;
 	int colId = threadIdx.x;
 	
 	Ri[colId] = d_m[n*i+colId];
 	Ii[colId] = d_I[n*i+colId];
 	Aii = d_m[n*i+i];
+//	printf("Value of i = %d Aii = %f \n",i,Aii);
 	__syncthreads();
 	
 	Ri[colId] = Ri[colId] / Aii;
@@ -87,7 +88,7 @@ __global__ void fixColumn(float *d_m, float *d_I, const int n, const int colId)
 	__shared__ float col[384];
 	__shared__ float Icol[384];
 
-	__shared__ float AColIdj;
+	float AColIdj;
 
 	__shared__ float colj[384];
 	__shared__ float Icolj[384];
@@ -120,7 +121,82 @@ __global__ void fixColumn(float *d_m, float *d_I, const int n, const int colId)
 	//}
 	}
 }
+*/
 
+///////////////////////method 4 //////////////////////////////
+
+__global__ void fixRow_shared(float *d_m, float *d_I,  int n, int i)
+{       
+        float Aii;
+        int rowId = threadIdx.x;
+        
+        Aii = d_m[n*i+i];
+        d_m[n*i+rowId] = d_m[n*i+rowId] / Aii;
+        d_I[n*i+rowId] = d_I[n*i+rowId] / Aii;
+}
+
+__global__ void fixColumn_shared(float *d_m, float *d_I, const int n, const int colId)
+{
+	int i = threadIdx.x;
+	int j = blockIdx.x;
+	float AColIdj;
+	__shared__ float row[384];
+	__shared__ float rowI[384];
+
+//	__shared__ float rowj[384];
+//	__shared__ float rowjI[384];
+//
+//	rowj[i] = d_m[j*n+i];
+//	rowjI[i] = d_I[j*n+i];
+
+	row[i] = d_m[colId*n+i];
+	rowI[i] = d_I[colId*n+i];
+	AColIdj = d_m[j*n+colId];
+	__syncthreads();	
+
+	if(i < n && j < n)
+	{
+		if(j != colId)
+		{
+			d_m[j*n+i] = d_m[j*n+i] - (AColIdj*row[i]);
+			d_I[j*n+i] = d_I[j*n+i] - (AColIdj*rowI[i]);
+//			rowj[i] = rowj[i] - (AColIdj*row[i]);
+//			rowjI[i] = rowjI[i] - (AColIdj*rowI[i]);
+		}
+	}
+//	d_m[j*n+i] = rowj[i];
+//	d_I[j*n+i] = rowjI[i];
+}
+
+/*
+/////////////////////////////////////////method 1 - not working ///////////////////////////////////////////
+__global__ void fixRow_global(float *d_m, float *d_I,  int n, int i)
+{
+	float Aii;
+	int rowId = threadIdx.x;
+
+	Aii = d_m[n*i+i];
+	d_m[n*i+rowId] = d_m[n*i+rowId] / Aii;
+	d_I[n*i+rowId] = d_I[n*i+rowId] / Aii;
+}
+
+__global__ void fixColumn_global(float *d_m, float *d_I, const int n, const int colId)
+{
+	int i = threadIdx.x;
+	int j = blockIdx.x;
+	
+	float AColIdj;
+	AColIdj = d_m[j*n+colId];
+	if(i < n && j < n)
+	{
+		if(j != colId)
+		{
+			d_m[j*n+i] = d_m[j*n+i] - (AColIdj*d_m[colId*n+i]);
+			d_I[j*n+i] = d_I[j*n+i] - (AColIdj*d_I[colId*n+i]);
+		}
+	}
+}
+*/
 
 /*
 ///////////////////////////////////method 2 - working /////////////////////////////////
@@ -262,7 +338,7 @@ __host__ void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col)
 {
 	float *d_matrix,*d_iden_mat;
 	const int MatSizeInBytes = col*col*sizeof(float);
-
+	float milliseconds = 0.0f ;
 	cudaError_t cudaSetDevice(int device);
         cudaSetDevice(0);
                
@@ -271,7 +347,7 @@ __host__ void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col)
 
 	CHECK(cudaEventCreate(&kernel_start));
 	CHECK(cudaEventCreate(&kernel_stop));
-
+	CHECK(cudaEventRecord(kernel_start));
 	//Allocate device memory on the global memory
 	CHECK(cudaMalloc((void**)&d_matrix, MatSizeInBytes));
 	CHECK(cudaMalloc((void**)&d_iden_mat, MatSizeInBytes));
@@ -308,12 +384,12 @@ __host__ void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col)
 //	cout << "\tNumber of threads along X dimension: " << block.x << endl;
 //	cout << "\tNumber of threads along Y dimension: " << block.y << endl;
 
-	CHECK(cudaEventRecord(kernel_start));
+
 	check_diag_zero << <grid3, block3 >> >(d_matrix, d_iden_mat, col);
 	for (int i = 0; i<col; i++)
 	{
-		fixRow << <grid2, block2 >> >(d_matrix, d_iden_mat, col, i);
-		fixColumn << <grid_fixcol, block_fixcol >> >(d_matrix, d_iden_mat, col, i);
+		fixRow_shared << <grid2, block2 >> >(d_matrix, d_iden_mat, col, i);
+		fixColumn_shared << <grid_fixcol, block_fixcol >> >(d_matrix, d_iden_mat, col, i);
 //	//	gaussjordan << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
 	}
 
@@ -325,16 +401,18 @@ __host__ void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col)
 //		gaussjordan_old << <grid3, block3 >> >(d_matrix, d_iden_mat, col, i);
 //		//set_zero << <grid, block >> >(d_matrix, d_iden_mat, col, i);
 //	}
+	CHECK(cudaDeviceSynchronize());
 
 
 		//dev << <grid3, block3 >> >(d_matrix, d_iden_mat, col);
-	CHECK(cudaThreadSynchronize());
+//	CHECK(cudaThreadSynchronize());
+
 	CHECK(cudaEventRecord(kernel_stop));
 	CHECK(cudaEventSynchronize(kernel_stop));
-
-	CHECK(cudaMemcpy(h_matrix, d_matrix, MatSizeInBytes, cudaMemcpyDeviceToHost));
+	CHECK(cudaEventElapsedTime(&milliseconds, kernel_start, kernel_stop));
+	cout << "GPU time "<<milliseconds<<endl;
+//	CHECK(cudaMemcpy(h_matrix, d_matrix, MatSizeInBytes, cudaMemcpyDeviceToHost));
 	CHECK(cudaMemcpy(h_iden_mat, d_iden_mat, MatSizeInBytes, cudaMemcpyDeviceToHost));
-
 	CHECK(cudaFree(d_matrix));
 	CHECK(cudaFree(d_iden_mat));
 	CHECK(cudaEventDestroy(kernel_start));

@@ -9,6 +9,7 @@
 #include <limits>
 #include <chrono>
 #include <ctime>
+#include <omp.h>
 
 #define LAPACK_ROW_MAJOR   101
 #define min(a,b) ((a)>(b)?(b):(a))
@@ -23,10 +24,11 @@ using std::string;
 using namespace std;
 using namespace std::chrono;
 
+extern void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col);
+
 int readValues(char *text, float *variable, int i,int row,int col)
 {
  	float temp;
-	//cout << "value of text " << text << endl;
 	ifstream myReadFile;
 	myReadFile.open(text, ios::in);
 	if (myReadFile.is_open()) 
@@ -36,7 +38,6 @@ int readValues(char *text, float *variable, int i,int row,int col)
 			if(i < (row*col))
 			{
 			myReadFile >> temp;
-			//cout << "value of variable " << variable[i] << endl;
 			variable[i] = temp;
 			i++;
 			}
@@ -101,7 +102,6 @@ void rowMean(float *variable, int col, int row , float *mean)
 			sum += variable[(j*col)+ i];
 		}
 		mean[j] = sum / col;
-	        //cout << "value of mean " << mean[j] << endl;
 	}
 }
 
@@ -128,10 +128,8 @@ float mean_of_std_deviation(float *variable, int col, int row, float *mean)
 		temp += pow((variable[(j * 15) + i] - mean[j]), 2);
 		}
 	std[j] = sqrt(temp / (col));
-	//cout << "value od std deviation " << std[j] << endl;
 	}
 	a = (std[0] + std[1]) / 2;
-	//cout << "value of a " << a << endl;
 	return a;
 }
 
@@ -167,12 +165,9 @@ float meanCalc(float *variable, int col, int row)
 		for (int j = 0;j < col; j++)
 		{
 		sum += fabs(variable[(i*col) + j]);
-	//	cout << "value of varialbe is " << fabs(variable[(i*col) + j]) << endl;
 		}
 	}
-	//cout << "value of sum is "<<sum << endl;
 	mean = sum / (col*row);
-	//cout << "value of mean " << mean << endl;
 	mu = 1 / mean;
 	return mu;
 }
@@ -231,12 +226,10 @@ void cpuMatrixMult(float *A, float *B, float *C, int row, int col,int col2)
 			{
 			fSum += (A[(i*col) + k] * B[(k*col2) + j]);
 			}
-		//cout << count<<"\t" <<"value of (i*row) + j \t"<< (i*row) + j <<"\t value of i and j"<<"\t"<<i<<" and "<<j<<"\t value of fsum" << fSum << endl;
 		count++;
 		C[(i*col2) + j] = fSum;
 		}
 	}
-	//cout << "count =" << count << endl;
 }
 
 void scalarToMatrixMultiply(float *Temp, float *M, float mu, int row, int col)
@@ -279,126 +272,25 @@ void addScalarToDiagonal(float *Zden, float *BBt, float mu, int row, int col)
 	}
 }
 
-void AugmentIdentity(float *matrix, float *augmatrix, int n)
+void eye(float *I, int m, int n)
 {
-	for (int i = 0; i < n; i++)
-	{
-		for (int j = 0; j < n; j++)
-		{
-		augmatrix[(i * 2 * n) + j] = matrix[(i*n) + j];
-		augmatrix[(((2 * i) + 1)*n) + j] = 0.0;
-		}
-	}
-	for (int i = 0; i < n; i++)
-	{
-	augmatrix[(((2 * i) + 1)*n) + i] = 1.0;
-	}
-}
-
-void cpuInverseOfMatrix(float *matrix, int col)
-{
-//#pragma omp parallel for 
-	for (int m = 0; m < col; m++)
-	{
-		//Checking if diagonal element is 0
-		if (matrix[((2 * col) + 1)*m] == 0)
-		{
-			//checking if the row is last row. If it is last row add the previous row to make it non zero
-                	if (m == (col - 1))
-			{
-				for (int i = 0; i < (2 * col); i++)
-				{					
-				matrix[(m * (2 * col)) + i] = matrix[((m - 1) * (2 * col)) + i] + matrix[(m * (2 * col)) + i];
-				}
-			}
-			else	//if it is not last row, add the next row.
-			{
-			        for (int i = 0; i < (2 * col); i++)
-				{
-				matrix[(m * 2 * col) + i] = matrix[((m + 1) * 2 * col) + i] + matrix[(m * 2 * col) + i];
-				}
-			}
-		}
-		//Make the diagonal elements 1 along with the whole row(divide).
-		float initialValue = matrix[((2 * col) + 1)*m];
-		for (int j = 0; j < (2 * col); j++)
-		{
-		matrix[(m * (2 * col)) + j] = matrix[(m * (2 * col)) + j] / initialValue;
-		}
-
-		//Making the elements of the row to zero
-		for (int k = 0; k < col; k++)
-		{
-			float tempIni;
-			tempIni = matrix[m + (k * (2 * col))];
-			if (k == m)
-			{
-			//Just a loop to do nothing
-			}
-			else
-			{
-				for (int l = 0; l < (2 * col); l++)
-				{
-				
-				float tempMul, tempDiv;
-				tempMul = matrix[(m * (2 * col)) + l] * tempIni;
-				tempDiv = tempMul / matrix[(m * (2 * col)) + m];
-				matrix[(k * 2 * col) + l] = matrix[(k * (2 * col)) + l] - tempDiv;
-				}
-			}
-
-		}
-	}
-}
-
-void Inverse(float *augmatrix, float *matrixInverse, int n)
-{
-	for (int i = 0;i < n;i++)
-	{
-		for (int j = 0;j < n;j++)
-		{
-		matrixInverse[(i*n) + j] = augmatrix[(i*2*n)+n+j];
-		}
+        for(int i=0;i<n;i++)
+        {
+                for(int j=0;j<n;j++)
+                {
+                        if(i==j)
+                        {
+                                I[i*n+j] = 1.0;
+                        }
+                        else
+                        {
+                                I[i*n+j] = 0.0;
+                        }
+                }
         }
 }
 
-//Determinant
-float Determinant(float *a,int n)
-{
-	cout << "time "<<endl;
-	int i,j,j1,j2;
-	float det = 0.0;
 
-        for (j1=0;j1<n;j1++)
-	{
-		
-	float *m = new float [(n-1)*(n-1)];		
-		for (i=1;i<n;i++)
-         	{
-			j2 = 0;
-			
-			for (j=0;j<n;j++)
-            		{
-				if (j == j1)
-				{
-		        	continue;
-				}
-				else
-				{
-		       		m[((i-1)*n)+j2] = a[(i*n)+j];
-		       		j2++;
-				}
-			}
-		}
-		
-		det += pow(-1.0,j1+2.0) * a[j1] * Determinant(m,n-1);
-	
-	//free the pointer
-	delete[] m;
-	}
-
-	return(det);
-}
 
 lapack_int matInv(float *A, int n)
 {
@@ -445,47 +337,17 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 
 	//temp3 = mu*M
 	scalarToMatrixMultiply(temp3, M, mu, row, row1);
-	//displayValues(temp3, row*row1);
 
 	//Znum = ((W-E-T*ones(1,p))*B'+mu*M+Y) 
 	sumOfMatrix(Znum,temp2, temp3, Y, row, row1);
-	//displayValues(Znum, row*row1);
 
 	//denominator
 	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
-	//displayValues(Zden, row1*row1);
 	
-	//t3 = high_resolution_clock::now();
 	status = matInv(Zden,row1);
-	//cout << "value of determinant "<< status << endl;	
-	//t4 = high_resolution_clock::now();
-	//duration<float> time_span1 = duration_cast<duration<float>>(t4 - t3);
-	//cout << "Time in miliseconds for inverse section is : " << time_span1.count() * 1000 << " ms" << endl;
 	
-	//Inverse calculation via guass-jordon method
-	////AugmentIdentity(Zden, Zdenaug, row1);
-	////t1 = high_resolution_clock::now();	
-	////cpuInverseOfMatrix(Zdenaug, row1);
-
-	//displayValues(Zdenaug, row1*row1);
-	////Inverse(Zdenaug,ZdenInverse,row1);
-	//displayValues(ZdenInverse, row1*row1);
-	////t2 = high_resolution_clock::now();
-	//duration<float> time_span = duration_cast<duration<float>>(t2 - t1);
-	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
-	
- 	//dump_to_file("Zden_old.txt",Zden,row1,row1);		
-	////t3 = high_resolution_clock::now();
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
         cpuMatrixMult(Znum, Zden, Z, row, row1, row1);	
-       
-        
-	////cpuMatrixMult(Znum, ZdenInverse, Z, row, row1, row1);	
-	//displayValues(Z,row*row1);
-	
-	//t4 = high_resolution_clock::now();
-	//duration<float> time_span1 = duration_cast<duration<float>>(t4 - t3);
-	//cout << "Time in miliseconds for inverse section is : " << time_span1.count() * 1000 << " ms" << endl;
 	
 	delete [] temp;	
 	delete [] temp2;
@@ -517,20 +379,15 @@ void calculateZ_preZden(float *Z,float *Zden,float *xy, float *E, float *T, floa
         }
         //temp2 = temp * B'
         cpuMatrixMult(temp, B_transpose, temp2, row, col, row1);
-        //displayValues(temp2,row*row1);
 
         //temp3 = mu*M
         scalarToMatrixMultiply(temp3, M, mu, row, row1);
-        //displayValues(temp3, row*row1);
 
         //Znum = ((W-E-T*ones(1,p))*B'+mu*M+Y) 
         sumOfMatrix(Znum,temp2, temp3, Y, row, row1);
-        //displayValues(Znum, row*row1);
 
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
         cpuMatrixMult(Znum, Zden, Z, row, row1, row1);
-        //dump_to_file("Z_pre_den.txt",Zden,row1,row1);
-        //displayValues(Zden, row1*row1);
 
 	delete [] temp;
         delete [] temp2;
@@ -561,103 +418,6 @@ void calculateQ(float *Q, float *Z, float *Y,float mu, int row, int row1)
 
 }
 
-/*
-void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size)
-{
-	MKL_INT m = ROW, n = COL, lda = LDA, ldu = LDU, ldvt = LDVT, info;
-	float superb[min(ROW,COL)-1];
-	//float s[COL], u[LDU*ROW], vt[LDVT*COL];
-	
-	float *sigma = new float [COL];
-	float *u = new float [LDU*ROW];
-	float *vt = new float [LDVT*COL];
-	float *Qtemp = new float [6];
-
-	float *sigma1 = new float [ROW*ROW];
-	float *vt1 = new float [ROW*COL];
-	float *Qtemp1 = new float [4];
-	float *Qtemp2 = new float [6];
-
-//#pragma omp parallel for
-	for(int i = 0;i < data_size;i++)
-	{
-		for(int j = 0;j<2;j++)
-		{
-			for(int k=0;k<3;k++)
-			{
-			Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
-			}
-		}
-		info = LAPACKE_sgesvd(LAPACK_ROW_MAJOR, 'A', 'A', m, n, Qtemp, lda, sigma, u, ldu, vt, ldvt, superb);
-
-		if(info > 0)
-		{
-			cout << "The algorithm computing SVD failed to converge" << endl;
-		}
-		
-		if((sigma[0]+sigma[1]) <= constant )
-		{
-			sigma[0] = 0;
-			sigma[1] = 0;
-		}
-		else if ((sigma[0] - sigma[1]) <= constant)
-		{
-			sigma[0] = ((sigma[0]+sigma[1])-constant)/2;
-			sigma[1] = sigma[0];
-		}
-		else
-		{
-			sigma[0] = sigma[0] - constant;
-			sigma[1] = sigma[1];
-		}
-
-		
-		for(int j = 0;j<ROW;j++)
-		{
-			for(int k =0;k<COL;k++)
-			{
-				vt1[(j*COL)+k] = vt[(j*COL) + k];
-			}
-		}	
-		for(int j = 0;j<ROW;j++)
-		{
-			for(int k =0;k<ROW;k++)
-			{
-				if(j == k)
-				{
-				sigma1[(j*ROW)+k] = sigma[j];
-				}
-				else
-				{
-				sigma1[(j*ROW)+k] = 0.0;
-				}
-			}
-		}	
-		cpuMatrixMult(u,sigma1,Qtemp1,ROW,ROW,ROW);
-		cpuMatrixMult(Qtemp1,vt1,Qtemp2,ROW,ROW,COL);
-		for(int j = 0;j<2;j++)
-                {
-                        for(int k=0;k<3;k++)
-                        {
-                        M[(3 * i) + (j*col) + k] = Qtemp2[(j * 3) + k];
-                        }
-                }
-		
-
-		C[i] = sigma1[0];
-	}
-
-	delete[] Qtemp;
-	delete[] sigma;
-	delete[] u;
-	delete[] vt;
-	delete[] Qtemp1;
-	delete[] Qtemp2;
-	delete[] sigma1;
-	delete[] vt1;
-
-}
-*/
 
 void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size)
 {
@@ -665,38 +425,19 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 	float *Q_re = new float [row*col];
 	MKL_INT m = ROW, n = COL, lda = LDA, ldu = LDU, ldvt = LDVT, info;
 	float superb[min(ROW,COL)-1];
-	//float s[COL], u[LDU*ROW], vt[LDVT*COL];
-/*	
-	float *sigma = new float [COL];
-	float *u = new float [LDU*ROW];
-	float *vt = new float [LDVT*COL];
-	//float *Qtemp = new float [6];
-
-	float *sigma1 = new float [ROW*ROW];
-	float *vt1 = new float [ROW*COL];
-	float *Qtemp1 = new float [4];
-	float *Qtemp2 = new float [6];
-*/
-//#pragma omp parallel 
-
-//#pragma omp for
-// firstprivate(sigma,u,vt,Qtemp,sigma1,vt1,Qtemp1,Qtemp2,superb)
+	
 	for(int i = 0;i < data_size;i++)
 	{
-	
-//#pragma omp task firstprivate(sigma,u,vt,Qtemp,sigma1,vt1,Qtemp1,Qtemp2,superb)
-
 		for(int j = 0;j<2;j++)
 		{
 			for(int k=0;k<3;k++)
 			{
 			
-			//cout << "thread id = "<<omp_get_thread_num()<< " and value = "<< (3 * i) + (j*col) + k << endl;
-			//Qtemp[(j * 3) + k] = Q[(3 * i) + (j*col) + k];
 			Q_re[(i*6)+(j * 3) + k] = Q[(3 * i) + (j*col) + k];
 			}
 		}
 	}
+omp_set_num_threads(24);
 #pragma omp parallel for 
 	for(int i = 0;i < data_size;i++)
 	{
@@ -785,18 +526,7 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 
 	}
 
-//#pragma omp taskwait
-
 	delete[] Q_re;
-/*	delete[] Qtemp;
-	delete[] sigma;
-	delete[] u;
-	delete[] vt;
-	delete[] Qtemp1;
-	delete[] Qtemp2;
-	delete[] sigma1;
-	delete[] vt1;
-*/
 }
 
 
@@ -810,33 +540,7 @@ void updateDualvariable(float *Y,float mu,float *M,float *Z,int row,int row1)
 		}
 	}
 }
-/*
-float febNorm(float *a, int row, int col)
-{
-	float norm = 0.0;
-	float sum = 0.0;
-	float *a_transpose = new float [col*row];
-	float *ata = new float [col*col];
 
-	TransposeOnCPU(a,a_transpose,row,col);
-        cpuTransMatrixMult(a_transpose, a, ata, col, row);
-	for(int i=0;i<col;i++)
-	{
-		for(int j=0;j<col;j++)
-		{
-			if(i==j)
-			{
-		  	sum += float((ata[(i*col)+j]));
-			}
-		}
-	}
-	norm=sqrt(float(sum));
-
-	delete[] a_transpose;
-	delete[] ata;
-	return float(norm);
-}
-*/
 float febNorm(float *a, int row, int col)
 {
         float norm = 0.0;
@@ -851,12 +555,6 @@ float febNorm(float *a, int row, int col)
         norm=sqrt(sum);
         return norm;
 }
-
-
-        //dump_to_file("a.txt",a,row,col);
-        //dump_to_file("atranspose.txt",a_transpose,col,row);
-	
-        //dump_to_file("ata.txt",ata,col,col);
 
 void resCalc(float *PrimRes, float *DualRes, float *M, float *Z, float *ZO,float mu, int row, int row1)
 {
@@ -882,7 +580,7 @@ void resCalc(float *PrimRes, float *DualRes, float *M, float *Z, float *ZO,float
 
 int main(void)
 {
-	const int iter_num = 110;
+	const int iter_num = 1;
 	high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4;
 	for(int p = 0;p<iter_num;p++)
 	{	//t3 = high_resolution_clock::now();
@@ -936,9 +634,11 @@ int main(void)
 	float mu2 = 0.0;
 	float mu3 = 0.0;
 	float mu4 = 0.0;
-	
+	float *Zden_inv = new float [row1*row1];
+	float *Zden1_inv = new float [row1*row1];
+
 	//t1[p] = high_resolution_clock::now();
-	
+	t1[p] = high_resolution_clock::now();
 	items = readValues("messi2.txt",xy,items,row,col);
 	rowMean(xy, col, row, mean);
         Scalc(xy, col, row, mean);
@@ -967,8 +667,6 @@ int main(void)
         TransposeOnCPU(B,B_transpose,row1,col);
         cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
         //Zden
-	
-	//t3 = high_resolution_clock::now();
 
 	//Precompute mu
 	mu_orig = mu;
@@ -984,75 +682,63 @@ int main(void)
 	//addScalarToDiagonal(Zden4,BBt,mu4,row1,row1);
  	
 	//dump_to_file("Z_old.txt",Z,row1,row1);				
-
-	status = matInv(Zden,row1);
-	status = matInv(Zden1,row1);
+	
+	eye(Zden_inv,row1,row1);
+	eye(Zden1_inv,row1,row1);
+	t3 = high_resolution_clock::now();
+	gpuInverseOfMatrix(Zden,Zden_inv,row1);
+	gpuInverseOfMatrix(Zden1,Zden1_inv,row1);
+//	status = matInv(Zden,row1);
+//	status = matInv(Zden1,row1);
 	//status = matInv(Zden2,row1);
 	//status = matInv(Zden3,row1);
 	//status = matInv(Zden4,row1);	
 	
-	//t4 = high_resolution_clock::now();
-	//duration<float> time_span = duration_cast<duration<float>>(t4 - t3);
-	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
+	t4 = high_resolution_clock::now();
+	duration<float> time_span = duration_cast<duration<float>>(t4 - t3);
+	cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
-	
-	t1[p] = high_resolution_clock::now();
 	for(int iter = 0; iter < 500; iter++)
 	{
 		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
-		//displayValues(Z,row1*row);
-//		calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 
 		//pre_computed part
 		if(mu == mu_orig)
 		{
-			//cout << "coming inside 1"<<endl;
-			calculateZ_preZden(Z, Zden,xy, E, T, B_transpose,mu_orig,M,Y,row,col,row1);
-			//calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
+			calculateZ_preZden(Z, Zden_inv,xy, E, T, B_transpose,mu_orig,M,Y,row,col,row1);
 		}
 		else if(mu == mu1)
 		{
-			//cout << "coming inside 2"<<endl;
-			calculateZ_preZden(Z, Zden1,xy, E, T, B_transpose,mu1,M,Y,row,col,row1);
+			calculateZ_preZden(Z, Zden1_inv,xy, E, T, B_transpose,mu1,M,Y,row,col,row1);
 		}
 		else if(mu == mu2)
 		{
-			//cout << "coming inside 3"<<endl;
 			calculateZ_preZden(Z, Zden2,xy, E, T, B_transpose,mu2,M,Y,row,col,row1);	
 		}
 		else if(mu == mu3)
 		{
-			//cout << "coming inside 4"<<endl;
 			calculateZ_preZden(Z, Zden3,xy, E, T, B_transpose,mu3,M,Y,row,col,row1);
 		}
 		else if(mu == mu4)
 		{
-			//cout << "coming inside 5"<<endl;
 			calculateZ_preZden(Z, Zden4,xy, E, T, B_transpose,mu4,M,Y,row,col,row1);
 		}
 		else
 		{
-			cout << "coming inside 6****************************************************************"<<endl;
 			calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 		}
 		
-	//	t1 = high_resolution_clock::now();
 		calculateQ(Q,Z,Y,mu,row,row1);
-	//	t2 = high_resolution_clock::now();
-		//displayValues(Z,row*row1);
 	
-		//t1 = high_resolution_clock::now();
 		prox_2norm(Q,M,C,lam/mu,row,row1,data_size);
-		//t2 = high_resolution_clock::now();
 		
 		updateDualvariable(Y,mu,M,Z,row,row1);
 		resCalc(&PrimRes,&DualRes,M,Z,ZO,mu,row,row1);
-		//displayValues(M,row*row1);
 		
 		//if ((verb == true) && ((iter%10) == 0))
 		//{
-		//	cout << "Iter "<< iter+1 <<": PrimRes = "<<PrimRes <<", DualRes = "<<DualRes<<", mu = "<< mu <<endl; 
+//			cout << "Iter "<< iter+1 <<": PrimRes = "<<PrimRes <<", DualRes = "<<DualRes<<", mu = "<< mu <<endl; 
 		//}
 
 		if((PrimRes < tol) && (DualRes < tol))
@@ -1099,7 +785,9 @@ int main(void)
 	delete[] Zden2;
 	delete[] Zden3;
 	delete[] Zden4;
-
+	
+	delete[] Zden_inv;
+	delete[] Zden1_inv;
 
 	//duration<float> time_span = duration_cast<duration<float>>(t2 - t1);
 	//cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;

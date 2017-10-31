@@ -15,7 +15,7 @@ SRCS = cuda_dpposeEstimation.cpp
 
 LIB = 
 
-OBJ = cuda_dpposeEstimation.o gjev2.o
+OBJ = cuda_dpposeEstimation.o inverse_shared.o
 
 EXE = cuda_dpposeEstimation
 
@@ -23,7 +23,7 @@ run: all
 	./cuda_dpposeEstimation
 
 all:
-	$(NVCC) -O3 -g -arch=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart gjev2.cu -c
+	$(NVCC) -O3 -g -arch=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart inverse_shared.cu -c
 	$(CC)  $(OPT) $(SRCS) $(LIB) -c  -lm
 	$(CC) $(OBJ) -o $(EXE) $(LIBS) $(OPT) -lcudart -lm 
 clean: 
