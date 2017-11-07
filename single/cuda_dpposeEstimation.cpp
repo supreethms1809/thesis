@@ -287,6 +287,41 @@ void eye(float *I, int m, int n)
         }
 }
 
+/*
+void cpuInv(float *m,float *I, int n)
+{
+	float Aii;
+	float AColIdj;
+	for (int i = 0; i<n; i++)
+	{
+	Aii = m[n*i+i];
+omp_set_num_threads(24);
+#pragma omp parallel 
+#pragma omp for private(Aii)
+        for(int j=0;j<n;j++)
+        {
+                m[n*i+j] = m[n*i+j] / Aii;
+                I[n*i+j] = I[n*i+j] / Aii;
+        }
+#pragma omp for 
+	for(int j=0;j<n;j++)
+        {
+		AColIdj = m[j*n+i];
+                for(int k=0 ;k<n;k++)
+                {
+                        if(j != i)
+                        {
+                        m[j*n+k] = m[j*n+k] - (AColIdj*m[i*n+k]);
+                        I[j*n+k] = I[j*n+k] - (AColIdj*I[i*n+k]);
+                        }
+                }
+        }
+	}
+
+
+}
+*/
+
 lapack_int matInv(float *A, int n)
 {
 	int ipiv[n+1];
@@ -341,9 +376,9 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
 	
 		t3 = high_resolution_clock::now();
-	eye(ZdenInv,row1,row1);
-	gpuInverseOfMatrix(Zden,ZdenInv,row1);
-//	status = matInv(Zden,row1);
+//	eye(ZdenInv,row1,row1);
+//	gpuInverseOfMatrix(Zden,ZdenInv,row1);
+	status = matInv(Zden,row1);
 		t4 = high_resolution_clock::now();
 		duration<double> time_span = duration_cast<duration<double>>(t4 - t3);
 		cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
@@ -351,8 +386,8 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 
 	//Inverse calculation via guass-jordon method
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
-        cpuMatrixMult(Znum, ZdenInv, Z, row, row1, row1);	
-//        cpuMatrixMult(Znum, Zden, Z, row, row1, row1);	
+//        cpuMatrixMult(Znum, ZdenInv, Z, row, row1, row1);	
+        cpuMatrixMult(Znum, Zden, Z, row, row1, row1);	
 	
 	delete [] temp;	
 	delete [] temp2;

@@ -4,7 +4,7 @@ See "https://software.intel.com/en-us/intel-advisor-xe" for details.
 
 Intel(R) C Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 17.0.4.196 Build 20170411
 
-Compiler options: -qopenmp -qopt-report=3 -xHost -align -O3 -g -mkl -heap-arrays -parallel -std=c++11 -c -lm
+Compiler options: -qopenmp -qopt-report=3 -xHost -align -O3 -g -mkl=parallel -heap-arrays -parallel -std=c++11 -c -lm
 
     Report from: Interprocedural optimizations [ipo]
 
@@ -62,62 +62,62 @@ Begin optimization report for: prox_2norm(float *, float *, float *, float, int,
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (prox_2norm(float *, float *, float *, float, int, int, int)) [6] cuda_dpposeEstimation.cpp(429,1)
-  -> EXTERN: (431,31) operator new[](std::size_t)
-  -> EXTERN: (431,31) __cxa_throw_bad_array_new_length()
-  -> EXTERN: (445,1) omp_set_num_threads(int)
-  -> EXTERN: (450,15) operator new[](std::size_t)
-  -> EXTERN: (451,15) operator new[](std::size_t)
-  -> EXTERN: (452,11) operator new[](std::size_t)
-  -> EXTERN: (453,12) operator new[](std::size_t)
-  -> EXTERN: (455,16) operator new[](std::size_t)
-  -> EXTERN: (456,13) operator new[](std::size_t)
-  -> EXTERN: (457,16) operator new[](std::size_t)
-  -> EXTERN: (458,16) operator new[](std::size_t)
-  -> EXTERN: (464,10) LAPACKE_sgesvd(int, char, char, int, int, float *, int, float *, float *, int, float *, int, float *)
-  -> (468,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
-  -> (468,61) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
-  -> INLINE: (509,3) cpuMatrixMult(float *, float *, float *, int, int, int)
-  -> INLINE: (510,3) cpuMatrixMult(float *, float *, float *, int, int, int)
-  -> EXTERN: (522,2) operator delete[](void *)
-  -> EXTERN: (523,2) operator delete[](void *)
-  -> EXTERN: (524,2) operator delete[](void *)
-  -> EXTERN: (525,2) operator delete[](void *)
-  -> EXTERN: (526,2) operator delete[](void *)
-  -> EXTERN: (527,2) operator delete[](void *)
-  -> EXTERN: (528,2) operator delete[](void *)
-  -> EXTERN: (529,2) operator delete[](void *)
-  -> EXTERN: (534,2) operator delete[](void *)
+INLINE REPORT: (prox_2norm(float *, float *, float *, float, int, int, int)) [6] cuda_dpposeEstimation.cpp(464,1)
+  -> EXTERN: (466,31) operator new[](std::size_t)
+  -> EXTERN: (466,31) __cxa_throw_bad_array_new_length()
+  -> EXTERN: (480,1) omp_set_num_threads(int)
+  -> EXTERN: (485,15) operator new[](std::size_t)
+  -> EXTERN: (486,15) operator new[](std::size_t)
+  -> EXTERN: (487,11) operator new[](std::size_t)
+  -> EXTERN: (488,12) operator new[](std::size_t)
+  -> EXTERN: (490,16) operator new[](std::size_t)
+  -> EXTERN: (491,13) operator new[](std::size_t)
+  -> EXTERN: (492,16) operator new[](std::size_t)
+  -> EXTERN: (493,16) operator new[](std::size_t)
+  -> EXTERN: (499,10) LAPACKE_sgesvd(int, char, char, int, int, float *, int, float *, float *, int, float *, int, float *)
+  -> (503,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (503,61) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (544,3) cpuMatrixMult(float *, float *, float *, int, int, int)
+  -> INLINE: (545,3) cpuMatrixMult(float *, float *, float *, int, int, int)
+  -> EXTERN: (557,2) operator delete[](void *)
+  -> EXTERN: (558,2) operator delete[](void *)
+  -> EXTERN: (559,2) operator delete[](void *)
+  -> EXTERN: (560,2) operator delete[](void *)
+  -> EXTERN: (561,2) operator delete[](void *)
+  -> EXTERN: (562,2) operator delete[](void *)
+  -> EXTERN: (563,2) operator delete[](void *)
+  -> EXTERN: (564,2) operator delete[](void *)
+  -> EXTERN: (569,2) operator delete[](void *)
 
 
     Report from: OpenMP optimizations [openmp]
 
-cuda_dpposeEstimation.cpp(446:1-446:1):OMP:_Z10prox_2normPfS_S_fiii:  OpenMP DEFINED LOOP WAS PARALLELIZED
+cuda_dpposeEstimation.cpp(481:1-481:1):OMP:_Z10prox_2normPfS_S_fiii:  OpenMP DEFINED LOOP WAS PARALLELIZED
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(437,3)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(472,3)
    remark #25444: Loopnest Interchanged: ( 1 2 3 ) --> ( 2 1 3 )
    remark #17108: loop was not parallelized: insufficient computational work
-   remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override    [ cuda_dpposeEstimation.cpp(437,3) ]
-   remark #15452: unmasked strided loads: 1    [ cuda_dpposeEstimation.cpp(437,3) ]
-   remark #15453: unmasked strided stores: 1    [ cuda_dpposeEstimation.cpp(437,3) ]
-   remark #15475: --- begin vector cost summary ---   [ cuda_dpposeEstimation.cpp(437,3) ]
-   remark #15476: scalar cost: 5    [ cuda_dpposeEstimation.cpp(437,3) ]
-   remark #15477: vector cost: 7.500    [ cuda_dpposeEstimation.cpp(437,3) ]
-   remark #15478: estimated potential speedup: 0.660    [ cuda_dpposeEstimation.cpp(437,3) ]
-   remark #15488: --- end vector cost summary ---   [ cuda_dpposeEstimation.cpp(437,3) ]
+   remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override    [ cuda_dpposeEstimation.cpp(472,3) ]
+   remark #15452: unmasked strided loads: 1    [ cuda_dpposeEstimation.cpp(472,3) ]
+   remark #15453: unmasked strided stores: 1    [ cuda_dpposeEstimation.cpp(472,3) ]
+   remark #15475: --- begin vector cost summary ---   [ cuda_dpposeEstimation.cpp(472,3) ]
+   remark #15476: scalar cost: 5    [ cuda_dpposeEstimation.cpp(472,3) ]
+   remark #15477: vector cost: 7.500    [ cuda_dpposeEstimation.cpp(472,3) ]
+   remark #15478: estimated potential speedup: 0.660    [ cuda_dpposeEstimation.cpp(472,3) ]
+   remark #15488: --- end vector cost summary ---   [ cuda_dpposeEstimation.cpp(472,3) ]
    remark #25015: Estimate of max trip count of loop=2
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(435,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(470,2)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15315: loop was not vectorized: estimated number of iterations (2) is insufficient for vectorization
       remark #15452: unmasked strided loads: 1 
       remark #15453: unmasked strided stores: 1 
       remark #25015: Estimate of max trip count of loop=2
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(439,4)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(474,4)
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
          remark #15450: unmasked unaligned unit stride loads: 1 
@@ -132,11 +132,11 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(437,3)
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(447,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(482,2)
    remark #17104: loop was not parallelized: existence of parallel dependence
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(460,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(495,3)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15450: unmasked unaligned unit stride loads: 1 
@@ -149,7 +149,7 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(447,2)
       remark #25015: Estimate of max trip count of loop=1
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(488,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(523,3)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
       remark #15452: unmasked strided loads: 1 
@@ -161,7 +161,7 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(447,2)
       remark #15488: --- end vector cost summary ---
       remark #25436: completely unrolled by 2  
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(490,4)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(525,4)
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
          remark #15450: unmasked unaligned unit stride loads: 1 
@@ -174,11 +174,11 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(447,2)
          remark #25436: completely unrolled by 3  
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(490,4)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(525,4)
       LOOP END
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(495,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(530,3)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
       remark #15452: unmasked strided loads: 1 
@@ -192,7 +192,7 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(447,2)
       remark #15488: --- end vector cost summary ---
       remark #25436: completely unrolled by 2  
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(497,4)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(532,4)
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
          remark #15450: unmasked unaligned unit stride loads: 2 
@@ -205,11 +205,11 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(447,2)
          remark #25436: completely unrolled by 2  
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(497,4)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(532,4)
       LOOP END
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(509,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(544,3)
       remark #25461: Imperfect Loop Unroll-Jammed by 2   (pre-vector) 
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
@@ -222,7 +222,7 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(447,2)
       remark #15488: --- end vector cost summary ---
       remark #25436: completely unrolled by 2  
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(509,3)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(544,3)
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
          remark #15450: unmasked unaligned unit stride loads: 1 
@@ -235,10 +235,10 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(447,2)
          remark #25436: completely unrolled by 2  
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(509,3)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(544,3)
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(509,3)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(544,3)
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
          remark #15450: unmasked unaligned unit stride loads: 1 
@@ -252,7 +252,7 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(447,2)
       LOOP END
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(510,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(545,3)
       remark #25101: Loop Interchange not done due to: Original Order seems proper
       remark #25452: Original Order found to be proper, but by a close margin
       remark #17108: loop was not parallelized: insufficient computational work
@@ -266,7 +266,7 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(447,2)
       remark #15488: --- end vector cost summary ---
       remark #25436: completely unrolled by 2  
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(510,3)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(545,3)
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
          remark #15450: unmasked unaligned unit stride loads: 1 
@@ -278,7 +278,7 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(447,2)
          remark #15488: --- end vector cost summary ---
          remark #25436: completely unrolled by 3  
 
-         LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(510,3)
+         LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(545,3)
             remark #17108: loop was not parallelized: insufficient computational work
             remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
             remark #15450: unmasked unaligned unit stride loads: 1 
@@ -291,33 +291,33 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(447,2)
             remark #25436: completely unrolled by 2  
          LOOP END
 
-         LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(510,3)
+         LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(545,3)
          LOOP END
 
-         LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(510,3)
+         LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(545,3)
          LOOP END
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(510,3)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(545,3)
 
-         LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(510,3)
+         LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(545,3)
          LOOP END
 
-         LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(510,3)
+         LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(545,3)
          LOOP END
 
-         LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(510,3)
+         LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(545,3)
          LOOP END
       LOOP END
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(511,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(546,3)
       remark #17104: loop was not parallelized: existence of parallel dependence
       remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-      remark #15346: vector dependence: assumed OUTPUT dependence between M[i*3+j*col+k] (515:25) and M[i*3+j*col+k] (515:25)
+      remark #15346: vector dependence: assumed OUTPUT dependence between M[i*3+j*col+k] (550:25) and M[i*3+j*col+k] (550:25)
       remark #25436: completely unrolled by 2  
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(513,25)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(548,25)
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
          remark #15450: unmasked unaligned unit stride loads: 1 
@@ -330,11 +330,11 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(447,2)
          remark #25436: completely unrolled by 3  
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(513,25)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(548,25)
       LOOP END
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(460,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(495,3)
    <Remainder loop for vectorization>
       remark #25436: completely unrolled by 2  
    LOOP END
@@ -342,7 +342,7 @@ LOOP END
 
     Report from: Code generation optimizations [cg]
 
-cuda_dpposeEstimation.cpp(429,1):remark #34051: REGISTER ALLOCATION : [_Z10prox_2normPfS_S_fiii] cuda_dpposeEstimation.cpp:429
+cuda_dpposeEstimation.cpp(464,1):remark #34051: REGISTER ALLOCATION : [_Z10prox_2normPfS_S_fiii] cuda_dpposeEstimation.cpp:464
 
     Hardware registers
         Reserved     :    2[ rsp rip]
@@ -377,65 +377,70 @@ Begin optimization report for: calculateZ(float *, float *, float *, float *, fl
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (calculateZ(float *, float *, float *, float *, float *, float *, float, float *, float *, int, int, int)) [8] cuda_dpposeEstimation.cpp(309,1)
-  -> EXTERN: (310,31) operator new[](std::size_t)
-  -> EXTERN: (310,31) __cxa_throw_bad_array_new_length()
-  -> EXTERN: (311,32) operator new[](std::size_t)
-  -> EXTERN: (311,32) __cxa_throw_bad_array_new_length()
-  -> EXTERN: (312,32) operator new[](std::size_t)
-  -> EXTERN: (312,32) __cxa_throw_bad_array_new_length()
-  -> EXTERN: (313,31) operator new[](std::size_t)
-  -> EXTERN: (313,31) __cxa_throw_bad_array_new_length()
-  -> EXTERN: (314,32) operator new[](std::size_t)
-  -> EXTERN: (314,32) __cxa_throw_bad_array_new_length()
-  -> EXTERN: (315,35) operator new[](std::size_t)
-  -> EXTERN: (315,35) __cxa_throw_bad_array_new_length()
-  -> INLINE: (332,2) cpuMatrixMult(float *, float *, float *, int, int, int)
-  -> INLINE: (335,2) scalarToMatrixMultiply(float *, float *, float, int, int)
-  -> INLINE: (338,2) sumOfMatrix(float *, float *, float *, float *, int, int)
-  -> INLINE: (341,2) addScalarToDiagonal(float *, float *, float, int, int)
-  -> EXTERN: (343,8) std::chrono::_V2::system_clock::now()
-  -> INLINE: (344,2) eye(float *, int, int)
-  -> EXTERN: (345,2) gpuInverseOfMatrix(float *, float *, int)
-  -> EXTERN: (347,8) std::chrono::_V2::system_clock::now()
-  -> INLINE (MANUAL): (348,69) std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1L, 1L>>, int64_t, std::nano>(const std::chrono::duration<int64_t, std::nano> &)
+INLINE REPORT: (calculateZ(float *, float *, float *, float *, float *, float *, float, float *, float *, int, int, int)) [8] cuda_dpposeEstimation.cpp(344,1)
+  -> EXTERN: (345,31) operator new[](std::size_t)
+  -> EXTERN: (345,31) __cxa_throw_bad_array_new_length()
+  -> EXTERN: (346,32) operator new[](std::size_t)
+  -> EXTERN: (346,32) __cxa_throw_bad_array_new_length()
+  -> EXTERN: (347,32) operator new[](std::size_t)
+  -> EXTERN: (347,32) __cxa_throw_bad_array_new_length()
+  -> EXTERN: (348,31) operator new[](std::size_t)
+  -> EXTERN: (348,31) __cxa_throw_bad_array_new_length()
+  -> EXTERN: (349,32) operator new[](std::size_t)
+  -> EXTERN: (349,32) __cxa_throw_bad_array_new_length()
+  -> EXTERN: (350,35) operator new[](std::size_t)
+  -> EXTERN: (350,35) __cxa_throw_bad_array_new_length()
+  -> INLINE: (367,2) cpuMatrixMult(float *, float *, float *, int, int, int)
+  -> INLINE: (370,2) scalarToMatrixMultiply(float *, float *, float, int, int)
+  -> INLINE: (373,2) sumOfMatrix(float *, float *, float *, float *, int, int)
+  -> INLINE: (376,2) addScalarToDiagonal(float *, float *, float, int, int)
+  -> EXTERN: (378,8) std::chrono::_V2::system_clock::now()
+  -> INLINE: (381,11) matInv(float *, int)
+    -> EXTERN: (327,6) _vla_alloc(long)
+    -> EXTERN: (327,6) _vla_free(void *, long)
+    -> EXTERN: (330,8) LAPACKE_sgetrf(int, int, int, float *, int, int *)
+    -> EXTERN: (333,10) _vla_free(void *, long)
+    -> EXTERN: (336,8) LAPACKE_sgetri(int, int, float *, int, const int *)
+    -> EXTERN: (338,9) _vla_free(void *, long)
+  -> EXTERN: (382,8) std::chrono::_V2::system_clock::now()
+  -> INLINE (MANUAL): (383,69) std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1L, 1L>>, int64_t, std::nano>(const std::chrono::duration<int64_t, std::nano> &)
     -> INLINE (MANUAL): /usr/include/c++/5/chrono:(203,22) std::chrono::__duration_cast_impl<std::chrono::duration<double, std::ratio<1L, 1L>>, std::ratio_divide<std::nano, std::chrono::duration<int64_t, std::ratio<1L, 1L>>::period>, std::__success_type<double>::type, true, false>::__cast<int64_t, std::nano>(const std::chrono::duration<int64_t, std::nano> &)
       -> INLINE (MANUAL): (162,20) std::chrono::duration<double, std::ratio<1L, 1L>>::duration<std::chrono::duration<double, std::ratio<1L, 1L>>::rep, void>(std::chrono::duration<double, std::ratio<1L, 1L>> *, const std::chrono::duration<double, std::ratio<1L, 1L>>::rep &)
       -> INLINE (MANUAL): (163,29) std::chrono::duration<int64_t, std::nano>::count(const std::chrono::duration<int64_t, std::nano> *) const
-  -> INLINE (MANUAL): (348,69) std::chrono::operator-<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration, std::chrono::_V2::system_clock::duration>(const std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> &, const std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> &)
+  -> INLINE (MANUAL): (383,69) std::chrono::operator-<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration, std::chrono::_V2::system_clock::duration>(const std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> &, const std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> &)
     -> INLINE (MANUAL): /usr/include/c++/5/chrono:(652,16) std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration>::time_since_epoch(const std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> *) const
     -> INLINE (MANUAL): /usr/include/c++/5/chrono:(652,43) std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration>::time_since_epoch(const std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> *) const
     -> INLINE (MANUAL): /usr/include/c++/5/chrono:(652,43) std::chrono::operator-<int64_t, std::nano, int64_t, std::nano>(const std::chrono::duration<int64_t, std::nano> &, const std::chrono::duration<int64_t, std::nano> &)
       -> INLINE (MANUAL): (399,14) std::chrono::duration<int64_t, std::nano>::duration<std::chrono::duration<int64_t, std::nano>::rep, void>(std::chrono::duration<int64_t, std::nano> *, const std::chrono::duration<int64_t, std::nano>::rep &)
       -> INLINE (MANUAL): (399,26) std::chrono::duration<int64_t, std::nano>::count(const std::chrono::duration<int64_t, std::nano> *) const
       -> INLINE (MANUAL): (399,48) std::chrono::duration<int64_t, std::nano>::count(const std::chrono::duration<int64_t, std::nano> *) const
-  -> (349,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
-  -> (349,35) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, double)
-  -> INLINE (MANUAL): (349,48) std::chrono::duration<double, std::ratio<1L, 1L>>::count(const std::chrono::duration<double, std::ratio<1L, 1L>> *) const
-  -> (349,63) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
-  -> (349,72) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
-  -> INLINE: (354,9) cpuMatrixMult(float *, float *, float *, int, int, int)
-  -> EXTERN: (357,2) operator delete[](void *)
-  -> EXTERN: (358,2) operator delete[](void *)
-  -> EXTERN: (359,2) operator delete[](void *)
-  -> EXTERN: (360,2) operator delete[](void *)
-  -> EXTERN: (361,2) operator delete[](void *)
-  -> EXTERN: (362,2) operator delete[](void *)
+  -> (384,8) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (384,35) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, double)
+  -> INLINE (MANUAL): (384,48) std::chrono::duration<double, std::ratio<1L, 1L>>::count(const std::chrono::duration<double, std::ratio<1L, 1L>> *) const
+  -> (384,63) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (384,72) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> INLINE: (390,9) cpuMatrixMult(float *, float *, float *, int, int, int)
+  -> EXTERN: (392,2) operator delete[](void *)
+  -> EXTERN: (393,2) operator delete[](void *)
+  -> EXTERN: (394,2) operator delete[](void *)
+  -> EXTERN: (395,2) operator delete[](void *)
+  -> EXTERN: (396,2) operator delete[](void *)
+  -> EXTERN: (397,2) operator delete[](void *)
 
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(321,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(356,2)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(323,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(358,3)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=7
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(323,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(358,3)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15442: entire loop may be executed in remainder
@@ -448,23 +453,23 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(321,2)
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(323,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(358,3)
    <Remainder loop for vectorization>
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(323,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(358,3)
    <Remainder loop for vectorization>
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(332,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(367,2)
 <Distributed chunk1>
    remark #25426: Loop Distributed (2 way) 
    remark #17104: loop was not parallelized: existence of parallel dependence
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(332,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(367,2)
    <Distributed chunk1>
       remark #25087: Preprocess Loopnests: Sinking 1 Stmts Into Inner LOOP to Create Perfect Nest 
       remark #25426: Loop Distributed (2 way) 
@@ -472,7 +477,7 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimatio
       remark #17104: loop was not parallelized: existence of parallel dependence
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(332,2)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(367,2)
       <Distributed chunk1>
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15301: PARTIAL LOOP WAS VECTORIZED
@@ -485,38 +490,38 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimatio
          remark #25015: Estimate of max trip count of loop=3
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(332,2)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(367,2)
       <Remainder loop for vectorization, Distributed chunk1>
          remark #25015: Estimate of max trip count of loop=24
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(332,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(367,2)
 <Distributed chunk2>
    remark #25444: Loopnest Interchanged: ( 1 2 3 ) --> ( 1 3 2 )
    remark #25229: Loop multiversioned for Trip-count
    remark #25459: Loopnest replaced by matmul intrinsic
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(332,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(367,2)
 <Distributed chunk2>
    remark #17108: loop was not parallelized: insufficient computational work
    remark #25440: unrolled and jammed by 4   (pre-vector) 
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(332,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(367,2)
    <Distributed chunk2>
       remark #17104: loop was not parallelized: existence of parallel dependence
       remark #25440: unrolled and jammed by 4   (pre-vector) 
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(332,2)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(367,2)
       <Peeled loop for vectorization>
          remark #25015: Estimate of max trip count of loop=7
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(332,2)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(367,2)
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15301: PERMUTED LOOP WAS VECTORIZED
          remark #15442: entire loop may be executed in remainder
@@ -529,21 +534,21 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimatio
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(332,2)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(367,2)
       <Remainder loop for vectorization>
       LOOP END
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(332,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(367,2)
    <Remainder, Distributed chunk2>
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(332,2)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(367,2)
       <Peeled loop for vectorization>
          remark #25015: Estimate of max trip count of loop=7
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(332,2)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(367,2)
          remark #15301: PERMUTED LOOP WAS VECTORIZED
          remark #15442: entire loop may be executed in remainder
          remark #15450: unmasked unaligned unit stride loads: 5 
@@ -555,26 +560,26 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimatio
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(332,2)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(367,2)
       <Remainder loop for vectorization>
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(332,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(367,2)
 <Remainder, Distributed chunk2>
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(332,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(367,2)
    <Distributed chunk2>
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(332,2)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(367,2)
       <Peeled loop for vectorization>
          remark #25015: Estimate of max trip count of loop=7
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(332,2)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(367,2)
          remark #15301: PERMUTED LOOP WAS VECTORIZED
          remark #15442: entire loop may be executed in remainder
          remark #15450: unmasked unaligned unit stride loads: 2 
@@ -586,22 +591,22 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimatio
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(332,2)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(367,2)
       <Remainder loop for vectorization>
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(234,2) inlined into cuda_dpposeEstimation.cpp(335,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(234,2) inlined into cuda_dpposeEstimation.cpp(370,2)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(335,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(370,2)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=7
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(335,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(370,2)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15442: entire loop may be executed in remainder
@@ -614,26 +619,26 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(234,2) inlined into cuda_dpposeEstimatio
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(335,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(370,2)
    <Remainder loop for vectorization>
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(335,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(370,2)
    <Remainder loop for vectorization>
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(245,2) inlined into cuda_dpposeEstimation.cpp(338,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(245,2) inlined into cuda_dpposeEstimation.cpp(373,2)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(247,3) inlined into cuda_dpposeEstimation.cpp(338,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(247,3) inlined into cuda_dpposeEstimation.cpp(373,2)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=7
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(247,3) inlined into cuda_dpposeEstimation.cpp(338,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(247,3) inlined into cuda_dpposeEstimation.cpp(373,2)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15442: entire loop may be executed in remainder
@@ -646,26 +651,26 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(245,2) inlined into cuda_dpposeEstimatio
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(247,3) inlined into cuda_dpposeEstimation.cpp(338,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(247,3) inlined into cuda_dpposeEstimation.cpp(373,2)
    <Remainder loop for vectorization>
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(247,3) inlined into cuda_dpposeEstimation.cpp(338,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(247,3) inlined into cuda_dpposeEstimation.cpp(373,2)
    <Remainder loop for vectorization>
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(256,2) inlined into cuda_dpposeEstimation.cpp(341,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(256,2) inlined into cuda_dpposeEstimation.cpp(376,2)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(258,3) inlined into cuda_dpposeEstimation.cpp(341,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(258,3) inlined into cuda_dpposeEstimation.cpp(376,2)
    <Peeled loop for vectorization, Predicate Optimized v1>
       remark #25015: Estimate of max trip count of loop=7
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(258,3) inlined into cuda_dpposeEstimation.cpp(341,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(258,3) inlined into cuda_dpposeEstimation.cpp(376,2)
    <Predicate Optimized v1>
       remark #25423: Condition at line 260 hoisted out of this loop
       remark #15300: LOOP WAS VECTORIZED
@@ -679,16 +684,16 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(256,2) inlined into cuda_dpposeEstimatio
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(258,3) inlined into cuda_dpposeEstimation.cpp(341,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(258,3) inlined into cuda_dpposeEstimation.cpp(376,2)
    <Remainder loop for vectorization, Predicate Optimized v1>
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(258,3) inlined into cuda_dpposeEstimation.cpp(341,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(258,3) inlined into cuda_dpposeEstimation.cpp(376,2)
    <Peeled loop for vectorization, Predicate Optimized v2>
       remark #25015: Estimate of max trip count of loop=7
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(258,3) inlined into cuda_dpposeEstimation.cpp(341,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(258,3) inlined into cuda_dpposeEstimation.cpp(376,2)
    <Predicate Optimized v2>
       remark #15300: LOOP WAS VECTORIZED
       remark #15442: entire loop may be executed in remainder
@@ -701,76 +706,18 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(256,2) inlined into cuda_dpposeEstimatio
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(258,3) inlined into cuda_dpposeEstimation.cpp(341,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(258,3) inlined into cuda_dpposeEstimation.cpp(376,2)
    <Remainder loop for vectorization, Predicate Optimized v2>
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(274,9) inlined into cuda_dpposeEstimation.cpp(344,2)
-   remark #17108: loop was not parallelized: insufficient computational work
-   remark #15542: loop was not vectorized: inner loop was already vectorized
-
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(276,17) inlined into cuda_dpposeEstimation.cpp(344,2)
-   <Peeled loop for vectorization, Predicate Optimized v1>
-      remark #25015: Estimate of max trip count of loop=7
-   LOOP END
-
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(276,17) inlined into cuda_dpposeEstimation.cpp(344,2)
-   <Predicate Optimized v1>
-      remark #25423: Condition at line 278 hoisted out of this loop
-      remark #15300: LOOP WAS VECTORIZED
-      remark #15442: entire loop may be executed in remainder
-      remark #15451: unmasked unaligned unit stride stores: 1 
-      remark #15475: --- begin vector cost summary ---
-      remark #15476: scalar cost: 4 
-      remark #15477: vector cost: 0.370 
-      remark #15478: estimated potential speedup: 7.220 
-      remark #15488: --- end vector cost summary ---
-   LOOP END
-
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(276,17) inlined into cuda_dpposeEstimation.cpp(344,2)
-   <Remainder loop for vectorization, Predicate Optimized v1>
-      remark #15301: REMAINDER LOOP WAS VECTORIZED
-   LOOP END
-
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(276,17) inlined into cuda_dpposeEstimation.cpp(344,2)
-   <Remainder loop for vectorization, Predicate Optimized v1>
-   LOOP END
-
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(276,17) inlined into cuda_dpposeEstimation.cpp(344,2)
-   <Peeled loop for vectorization, Predicate Optimized v2>
-      remark #25015: Estimate of max trip count of loop=7
-   LOOP END
-
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(276,17) inlined into cuda_dpposeEstimation.cpp(344,2)
-   <Predicate Optimized v2>
-      remark #15300: LOOP WAS VECTORIZED
-      remark #15442: entire loop may be executed in remainder
-      remark #15451: unmasked unaligned unit stride stores: 1 
-      remark #15475: --- begin vector cost summary ---
-      remark #15476: scalar cost: 4 
-      remark #15477: vector cost: 0.370 
-      remark #15478: estimated potential speedup: 7.220 
-      remark #15488: --- end vector cost summary ---
-   LOOP END
-
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(276,17) inlined into cuda_dpposeEstimation.cpp(344,2)
-   <Remainder loop for vectorization, Predicate Optimized v2>
-      remark #15301: REMAINDER LOOP WAS VECTORIZED
-   LOOP END
-
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(276,17) inlined into cuda_dpposeEstimation.cpp(344,2)
-   <Remainder loop for vectorization, Predicate Optimized v2>
-   LOOP END
-LOOP END
-
-LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(354,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(390,9)
 <Distributed chunk1>
    remark #25426: Loop Distributed (2 way) 
    remark #17104: loop was not parallelized: existence of parallel dependence
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(354,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(390,9)
    <Distributed chunk1>
       remark #25087: Preprocess Loopnests: Sinking 1 Stmts Into Inner LOOP to Create Perfect Nest 
       remark #25426: Loop Distributed (2 way) 
@@ -778,7 +725,7 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimatio
       remark #17104: loop was not parallelized: existence of parallel dependence
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(354,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(390,9)
       <Distributed chunk1>
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15301: PARTIAL LOOP WAS VECTORIZED
@@ -791,38 +738,38 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimatio
          remark #25015: Estimate of max trip count of loop=3
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(354,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(390,9)
       <Remainder loop for vectorization, Distributed chunk1>
          remark #25015: Estimate of max trip count of loop=24
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(354,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(390,9)
 <Distributed chunk2>
    remark #25444: Loopnest Interchanged: ( 1 2 3 ) --> ( 1 3 2 )
    remark #25229: Loop multiversioned for Trip-count
    remark #25459: Loopnest replaced by matmul intrinsic
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(354,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(390,9)
 <Distributed chunk2>
    remark #17108: loop was not parallelized: insufficient computational work
    remark #25440: unrolled and jammed by 4   (pre-vector) 
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(354,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(390,9)
    <Distributed chunk2>
       remark #17104: loop was not parallelized: existence of parallel dependence
       remark #25440: unrolled and jammed by 4   (pre-vector) 
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(354,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(390,9)
       <Peeled loop for vectorization>
          remark #25015: Estimate of max trip count of loop=7
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(354,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(390,9)
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15301: PERMUTED LOOP WAS VECTORIZED
          remark #15442: entire loop may be executed in remainder
@@ -835,21 +782,21 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimatio
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(354,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(390,9)
       <Remainder loop for vectorization>
       LOOP END
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(354,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(390,9)
    <Remainder, Distributed chunk2>
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(354,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(390,9)
       <Peeled loop for vectorization>
          remark #25015: Estimate of max trip count of loop=7
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(354,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(390,9)
          remark #15301: PERMUTED LOOP WAS VECTORIZED
          remark #15442: entire loop may be executed in remainder
          remark #15450: unmasked unaligned unit stride loads: 5 
@@ -861,26 +808,26 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimatio
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(354,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(390,9)
       <Remainder loop for vectorization>
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(354,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(390,9)
 <Remainder, Distributed chunk2>
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(354,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(390,9)
    <Distributed chunk2>
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(354,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(390,9)
       <Peeled loop for vectorization>
          remark #25015: Estimate of max trip count of loop=7
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(354,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(390,9)
          remark #15301: PERMUTED LOOP WAS VECTORIZED
          remark #15442: entire loop may be executed in remainder
          remark #15450: unmasked unaligned unit stride loads: 2 
@@ -892,7 +839,7 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimatio
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(354,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(390,9)
       <Remainder loop for vectorization>
       LOOP END
    LOOP END
@@ -900,34 +847,34 @@ LOOP END
 
     Report from: Code generation optimizations [cg]
 
-cuda_dpposeEstimation.cpp(317,42):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (32, 0)
-cuda_dpposeEstimation.cpp(317,45):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (32, 0)
+cuda_dpposeEstimation.cpp(352,42):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (32, 0)
+cuda_dpposeEstimation.cpp(352,45):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (32, 0)
 cuda_dpposeEstimation.cpp(221,3):remark #34014: optimization advice for memset: increase the destination's alignment to 16 (and use __assume_aligned) to speed up library implementation
 cuda_dpposeEstimation.cpp(221,3):remark #34026: call to memset implemented as a call to optimized library version
 cuda_dpposeEstimation.cpp(221,3):remark #34014: optimization advice for memset: increase the destination's alignment to 16 (and use __assume_aligned) to speed up library implementation
 cuda_dpposeEstimation.cpp(221,3):remark #34026: call to memset implemented as a call to optimized library version
-cuda_dpposeEstimation.cpp(309,1):remark #34051: REGISTER ALLOCATION : [_Z10calculateZPfS_S_S_S_S_fS_S_iii] cuda_dpposeEstimation.cpp:309
+cuda_dpposeEstimation.cpp(344,1):remark #34051: REGISTER ALLOCATION : [_Z10calculateZPfS_S_S_S_S_fS_S_iii] cuda_dpposeEstimation.cpp:344
 
     Hardware registers
         Reserved     :    2[ rsp rip]
         Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
         Callee-save  :    6[ rbx rbp r12-r15]
-        Assigned     :   30[ rax rdx rcx rbx rsi rdi r8-r15 zmm0-zmm15]
+        Assigned     :   29[ rax rdx rcx rsi rdi r8-r15 zmm0-zmm15]
         
     Routine temporaries
-        Total         :    1280
-            Global    :     476
-            Local     :     804
-        Regenerable   :      50
-        Spilled       :     118
+        Total         :    1233
+            Global    :     445
+            Local     :     788
+        Regenerable   :      53
+        Spilled       :     127
         
     Routine stack
-        Variables     :     592 bytes*
-            Reads     :       1 [1.00e+00 ~ 0.0%]
+        Variables     :     600 bytes*
+            Reads     :       2 [1.00e+00 ~ 0.0%]
             Writes    :      77 [3.64e+01 ~ 0.1%]
-        Spills        :    1040 bytes*
-            Reads     :     304 [3.52e+03 ~ 6.3%]
-            Writes    :     140 [8.04e+02 ~ 1.4%]
+        Spills        :    1128 bytes*
+            Reads     :     321 [3.68e+03 ~ 6.8%]
+            Writes    :     155 [8.70e+02 ~ 1.6%]
     
     Notes
     
@@ -1202,22 +1149,22 @@ Begin optimization report for: febNorm_diff(float *, float *, int, int)
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (febNorm_diff(float *, float *, int, int)) [15] cuda_dpposeEstimation.cpp(549,1)
+INLINE REPORT: (febNorm_diff(float *, float *, int, int)) [15] cuda_dpposeEstimation.cpp(584,1)
 
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(552,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(587,9)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(554,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(589,17)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=7
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(554,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(589,17)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15442: entire loop may be executed in remainder
@@ -1229,19 +1176,19 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(552,9)
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(554,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(589,17)
    <Remainder loop for vectorization>
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(554,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(589,17)
    <Remainder loop for vectorization>
    LOOP END
 LOOP END
 
     Report from: Code generation optimizations [cg]
 
-cuda_dpposeEstimation.cpp(549,1):remark #34051: REGISTER ALLOCATION : [_Z12febNorm_diffPfS_ii] cuda_dpposeEstimation.cpp:549
+cuda_dpposeEstimation.cpp(584,1):remark #34051: REGISTER ALLOCATION : [_Z12febNorm_diffPfS_ii] cuda_dpposeEstimation.cpp:584
 
     Hardware registers
         Reserved     :    2[ rsp rip]
@@ -1276,110 +1223,110 @@ Begin optimization report for: main()
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (main()) [16] cuda_dpposeEstimation.cpp(587,1)
-  -> EXTERN: (589,36) ?1memset
-  -> EXTERN: (589,49) ?1memset
-  -> EXTERN: (598,12) operator new[](std::size_t)
-  -> EXTERN: (599,14) operator new[](std::size_t)
-  -> EXTERN: (600,11) operator new[](std::size_t)
-  -> EXTERN: (601,21) operator new[](std::size_t)
-  -> EXTERN: (602,16) operator new[](std::size_t)
-  -> EXTERN: (603,13) operator new[](std::size_t)
-  -> EXTERN: (613,11) operator new[](std::size_t)
-  -> EXTERN: (614,11) operator new[](std::size_t)
-  -> EXTERN: (615,11) operator new[](std::size_t)
-  -> EXTERN: (616,11) operator new[](std::size_t)
-  -> EXTERN: (619,11) operator new[](std::size_t)
-  -> EXTERN: (620,11) operator new[](std::size_t)
-  -> EXTERN: (621,12) operator new[](std::size_t)
-  -> EXTERN: (622,11) operator new[](std::size_t)
-  -> EXTERN: (628,10) std::chrono::_V2::system_clock::now()
-  -> (630,10) readValues(char *, float *, int, int, int)
-  -> INLINE: (631,2) rowMean(float *, int, int, float *)
-  -> INLINE: (632,9) Scalc(float *, int, int, float *)
-  -> INLINE: (633,9) rowMean(float *, int, int, float *)
-  -> (634,6) mean_of_std_deviation(float *, int, int, float *)
-  -> INLINE: (635,2) newScalc(float *, int, int, float)
-  -> (636,12) readValues(char *, float *, int, int, int)
-  -> INLINE: (637,2) rowMean(float *, int, int, float *)
-  -> INLINE: (638,2) Scalc(float *, int, int, float *)
-  -> INLINE: (640,2) initializeZero(float *, int, int)
-  -> INLINE: (641,2) initializeZero(float *, int, int)
-  -> INLINE: (642,2) initializeZero(float *, int, int)
-  -> INLINE: (643,2) rowMean(float *, int, int, float *)
-  -> INLINE: (645,2) initializeZero(float *, int, int)
-  -> INLINE: (646,2) initializeZero(float *, int, int)
-  -> INLINE: (648,7) meanCalc(float *, int, int)
-  -> INLINE: (650,2) TransposeOnCPU(float *, float *, int, int)
-  -> INLINE: (651,2) cpuTransMatrixMult(float *, float *, float *, int, int)
-  -> INLINE: (655,3) initialize(float *, float *, int, int)
-  -> (657,3) calculateZ(float *, float *, float *, float *, float *, float *, float, float *, float *, int, int, int)
-  -> INLINE: (659,3) calculateQ(float *, float *, float *, float, int, int)
-    -> EXTERN: (419,31) __cxa_throw_bad_array_new_length()
-    -> EXTERN: (419,31) operator new[](std::size_t)
-    -> INLINE: (421,2) scalarToMatrixMultiply(float *, float *, float, int, int)
-    -> INLINE: (422,2) differenceOfMatrix(float *, float *, float *, int, int)
-    -> EXTERN: (424,2) operator delete[](void *)
-  -> (661,3) prox_2norm(float *, float *, float *, float, int, int, int)
-  -> INLINE: (663,3) updateDualvariable(float *, float, float *, float *, int, int)
-  -> INLINE: (664,3) resCalc(float *, float *, float *, float *, float *, float, int, int)
-    -> (581,13) febNorm_diff(float *, float *, int, int)
-    -> INLINE: (581,40) febNorm(float *, int, int)
-    -> (582,18) febNorm_diff(float *, float *, int, int)
-    -> INLINE: (582,46) febNorm(float *, int, int)
-  -> (668,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
-  -> EXTERN: (668,19) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, int)
-  -> (668,29) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
-  -> (668,45) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, float)
-  -> (668,55) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
-  -> (668,71) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, float)
-  -> (668,80) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
-  -> (668,91) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, float)
-  -> (668,97) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
-  -> EXTERN: (691,10) std::chrono::_V2::system_clock::now()
-  -> EXTERN: (693,2) operator delete[](void *)
-  -> EXTERN: (694,9) operator delete[](void *)
-  -> EXTERN: (695,2) operator delete[](void *)
-  -> EXTERN: (696,2) operator delete[](void *)
-  -> EXTERN: (697,2) operator delete[](void *)
-  -> EXTERN: (698,2) operator delete[](void *)
-  -> EXTERN: (699,2) operator delete[](void *)
-  -> EXTERN: (700,2) operator delete[](void *)
-  -> EXTERN: (701,2) operator delete[](void *)
-  -> EXTERN: (702,2) operator delete[](void *)
-  -> EXTERN: (703,2) operator delete[](void *)
-  -> EXTERN: (704,2) operator delete[](void *)
-  -> EXTERN: (705,2) operator delete[](void *)
-  -> EXTERN: (706,2) operator delete[](void *)
-  -> INLINE (MANUAL): (712,13) std::chrono::duration<float, std::ratio<1L, 1L>>::operator+=(std::chrono::duration<float, std::ratio<1L, 1L>> *, const std::chrono::duration<float, std::ratio<1L, 1L>> &)
+INLINE REPORT: (main()) [16] cuda_dpposeEstimation.cpp(622,1)
+  -> EXTERN: (624,36) ?1memset
+  -> EXTERN: (624,49) ?1memset
+  -> EXTERN: (633,12) operator new[](std::size_t)
+  -> EXTERN: (634,14) operator new[](std::size_t)
+  -> EXTERN: (635,11) operator new[](std::size_t)
+  -> EXTERN: (636,21) operator new[](std::size_t)
+  -> EXTERN: (637,16) operator new[](std::size_t)
+  -> EXTERN: (638,13) operator new[](std::size_t)
+  -> EXTERN: (648,11) operator new[](std::size_t)
+  -> EXTERN: (649,11) operator new[](std::size_t)
+  -> EXTERN: (650,11) operator new[](std::size_t)
+  -> EXTERN: (651,11) operator new[](std::size_t)
+  -> EXTERN: (654,11) operator new[](std::size_t)
+  -> EXTERN: (655,11) operator new[](std::size_t)
+  -> EXTERN: (656,12) operator new[](std::size_t)
+  -> EXTERN: (657,11) operator new[](std::size_t)
+  -> EXTERN: (663,10) std::chrono::_V2::system_clock::now()
+  -> (665,10) readValues(char *, float *, int, int, int)
+  -> INLINE: (666,2) rowMean(float *, int, int, float *)
+  -> INLINE: (667,9) Scalc(float *, int, int, float *)
+  -> INLINE: (668,9) rowMean(float *, int, int, float *)
+  -> (669,6) mean_of_std_deviation(float *, int, int, float *)
+  -> INLINE: (670,2) newScalc(float *, int, int, float)
+  -> (671,12) readValues(char *, float *, int, int, int)
+  -> INLINE: (672,2) rowMean(float *, int, int, float *)
+  -> INLINE: (673,2) Scalc(float *, int, int, float *)
+  -> INLINE: (675,2) initializeZero(float *, int, int)
+  -> INLINE: (676,2) initializeZero(float *, int, int)
+  -> INLINE: (677,2) initializeZero(float *, int, int)
+  -> INLINE: (678,2) rowMean(float *, int, int, float *)
+  -> INLINE: (680,2) initializeZero(float *, int, int)
+  -> INLINE: (681,2) initializeZero(float *, int, int)
+  -> INLINE: (683,7) meanCalc(float *, int, int)
+  -> INLINE: (685,2) TransposeOnCPU(float *, float *, int, int)
+  -> INLINE: (686,2) cpuTransMatrixMult(float *, float *, float *, int, int)
+  -> INLINE: (690,3) initialize(float *, float *, int, int)
+  -> (692,3) calculateZ(float *, float *, float *, float *, float *, float *, float, float *, float *, int, int, int)
+  -> INLINE: (694,3) calculateQ(float *, float *, float *, float, int, int)
+    -> EXTERN: (454,31) __cxa_throw_bad_array_new_length()
+    -> EXTERN: (454,31) operator new[](std::size_t)
+    -> INLINE: (456,2) scalarToMatrixMultiply(float *, float *, float, int, int)
+    -> INLINE: (457,2) differenceOfMatrix(float *, float *, float *, int, int)
+    -> EXTERN: (459,2) operator delete[](void *)
+  -> (696,3) prox_2norm(float *, float *, float *, float, int, int, int)
+  -> INLINE: (698,3) updateDualvariable(float *, float, float *, float *, int, int)
+  -> INLINE: (699,3) resCalc(float *, float *, float *, float *, float *, float, int, int)
+    -> (616,13) febNorm_diff(float *, float *, int, int)
+    -> INLINE: (616,40) febNorm(float *, int, int)
+    -> (617,18) febNorm_diff(float *, float *, int, int)
+    -> INLINE: (617,46) febNorm(float *, int, int)
+  -> (703,9) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> EXTERN: (703,19) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, int)
+  -> (703,29) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (703,45) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, float)
+  -> (703,55) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (703,71) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, float)
+  -> (703,80) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (703,91) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, float)
+  -> (703,97) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> EXTERN: (726,10) std::chrono::_V2::system_clock::now()
+  -> EXTERN: (728,2) operator delete[](void *)
+  -> EXTERN: (729,9) operator delete[](void *)
+  -> EXTERN: (730,2) operator delete[](void *)
+  -> EXTERN: (731,2) operator delete[](void *)
+  -> EXTERN: (732,2) operator delete[](void *)
+  -> EXTERN: (733,2) operator delete[](void *)
+  -> EXTERN: (734,2) operator delete[](void *)
+  -> EXTERN: (735,2) operator delete[](void *)
+  -> EXTERN: (736,2) operator delete[](void *)
+  -> EXTERN: (737,2) operator delete[](void *)
+  -> EXTERN: (738,2) operator delete[](void *)
+  -> EXTERN: (739,2) operator delete[](void *)
+  -> EXTERN: (740,2) operator delete[](void *)
+  -> EXTERN: (741,2) operator delete[](void *)
+  -> INLINE (MANUAL): (747,13) std::chrono::duration<float, std::ratio<1L, 1L>>::operator+=(std::chrono::duration<float, std::ratio<1L, 1L>> *, const std::chrono::duration<float, std::ratio<1L, 1L>> &)
     -> INLINE (MANUAL): /usr/include/c++/5/chrono:(315,15) std::chrono::duration<float, std::ratio<1L, 1L>>::count(const std::chrono::duration<float, std::ratio<1L, 1L>> *) const
-  -> INLINE (MANUAL): (712,55) std::chrono::operator-<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration, std::chrono::_V2::system_clock::duration>(const std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> &, const std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> &)
+  -> INLINE (MANUAL): (747,55) std::chrono::operator-<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration, std::chrono::_V2::system_clock::duration>(const std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> &, const std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> &)
     -> INLINE (MANUAL): /usr/include/c++/5/chrono:(652,16) std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration>::time_since_epoch(const std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> *) const
     -> INLINE (MANUAL): /usr/include/c++/5/chrono:(652,43) std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration>::time_since_epoch(const std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration> *) const
     -> INLINE (MANUAL): /usr/include/c++/5/chrono:(652,43) std::chrono::operator-<int64_t, std::nano, int64_t, std::nano>(const std::chrono::duration<int64_t, std::nano> &, const std::chrono::duration<int64_t, std::nano> &)
       -> INLINE (MANUAL): (399,14) std::chrono::duration<int64_t, std::nano>::duration<std::chrono::duration<int64_t, std::nano>::rep, void>(std::chrono::duration<int64_t, std::nano> *, const std::chrono::duration<int64_t, std::nano>::rep &)
       -> INLINE (MANUAL): (399,26) std::chrono::duration<int64_t, std::nano>::count(const std::chrono::duration<int64_t, std::nano> *) const
       -> INLINE (MANUAL): (399,48) std::chrono::duration<int64_t, std::nano>::count(const std::chrono::duration<int64_t, std::nano> *) const
-  -> INLINE (MANUAL): (712,55) std::chrono::duration_cast<std::chrono::duration<float, std::ratio<1L, 1L>>, int64_t, std::nano>(const std::chrono::duration<int64_t, std::nano> &)
+  -> INLINE (MANUAL): (747,55) std::chrono::duration_cast<std::chrono::duration<float, std::ratio<1L, 1L>>, int64_t, std::nano>(const std::chrono::duration<int64_t, std::nano> &)
     -> INLINE (MANUAL): /usr/include/c++/5/chrono:(203,22) std::chrono::__duration_cast_impl<std::chrono::duration<float, std::ratio<1L, 1L>>, std::ratio_divide<std::nano, std::chrono::duration<int64_t, std::ratio<1L, 1L>>::period>, std::__success_type<float>::type, true, false>::__cast<int64_t, std::nano>(const std::chrono::duration<int64_t, std::nano> &)
       -> INLINE (MANUAL): (162,20) std::chrono::duration<float, std::ratio<1L, 1L>>::duration<std::chrono::duration<float, std::ratio<1L, 1L>>::rep, void>(std::chrono::duration<float, std::ratio<1L, 1L>> *, const std::chrono::duration<float, std::ratio<1L, 1L>>::rep &)
       -> INLINE (MANUAL): (163,29) std::chrono::duration<int64_t, std::nano>::count(const std::chrono::duration<int64_t, std::nano> *) const
-  -> (714,7) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
-  -> (714,33) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, float)
-  -> INLINE (MANUAL): (714,47) std::chrono::duration<float, std::ratio<1L, 1L>>::count(const std::chrono::duration<float, std::ratio<1L, 1L>> *) const
-  -> (714,72) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
-  -> (714,80) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
+  -> (749,7) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (749,33) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, float)
+  -> INLINE (MANUAL): (749,47) std::chrono::duration<float, std::ratio<1L, 1L>>::count(const std::chrono::duration<float, std::ratio<1L, 1L>> *) const
+  -> (749,72) std::operator<<<std::char_traits<char>>(std::basic_ostream<char, std::char_traits<char>> &, const char *)
+  -> (749,80) std::basic_ostream<char, std::char_traits<char>>::operator<<(std::basic_ostream<char, std::char_traits<char>> *, std::basic_ostream<char, std::char_traits<char>>::__ostream_type &(*)(std::basic_ostream<char, std::char_traits<char>>::__ostream_type &))
 
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation.cpp(631,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation.cpp(666,2)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
    remark #25015: Estimate of max trip count of loop=2
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(97,3) inlined into cuda_dpposeEstimation.cpp(631,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(97,3) inlined into cuda_dpposeEstimation.cpp(666,2)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15450: unmasked unaligned unit stride loads: 1 
@@ -1391,23 +1338,23 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation
       remark #25015: Estimate of max trip count of loop=1
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(97,3) inlined into cuda_dpposeEstimation.cpp(631,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(97,3) inlined into cuda_dpposeEstimation.cpp(666,2)
    <Remainder loop for vectorization>
       remark #25436: completely unrolled by 3  
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(107,2) inlined into cuda_dpposeEstimation.cpp(632,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(107,2) inlined into cuda_dpposeEstimation.cpp(667,9)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
    remark #25015: Estimate of max trip count of loop=2
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(109,3) inlined into cuda_dpposeEstimation.cpp(632,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(109,3) inlined into cuda_dpposeEstimation.cpp(667,9)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=3
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(109,3) inlined into cuda_dpposeEstimation.cpp(632,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(109,3) inlined into cuda_dpposeEstimation.cpp(667,9)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15442: entire loop may be executed in remainder
@@ -1421,18 +1368,18 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(107,2) inlined into cuda_dpposeEstimatio
       remark #25015: Estimate of max trip count of loop=3
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(109,3) inlined into cuda_dpposeEstimation.cpp(632,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(109,3) inlined into cuda_dpposeEstimation.cpp(667,9)
    <Remainder loop for vectorization>
       remark #25015: Estimate of max trip count of loop=15
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation.cpp(633,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation.cpp(668,9)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
    remark #25015: Estimate of max trip count of loop=2
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(97,3) inlined into cuda_dpposeEstimation.cpp(633,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(97,3) inlined into cuda_dpposeEstimation.cpp(668,9)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15450: unmasked unaligned unit stride loads: 1 
@@ -1444,23 +1391,23 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation
       remark #25015: Estimate of max trip count of loop=1
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(97,3) inlined into cuda_dpposeEstimation.cpp(633,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(97,3) inlined into cuda_dpposeEstimation.cpp(668,9)
    <Remainder loop for vectorization>
       remark #25436: completely unrolled by 3  
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(135,2) inlined into cuda_dpposeEstimation.cpp(635,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(135,2) inlined into cuda_dpposeEstimation.cpp(670,2)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
    remark #25015: Estimate of max trip count of loop=2
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(137,3) inlined into cuda_dpposeEstimation.cpp(635,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(137,3) inlined into cuda_dpposeEstimation.cpp(670,2)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=3
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(137,3) inlined into cuda_dpposeEstimation.cpp(635,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(137,3) inlined into cuda_dpposeEstimation.cpp(670,2)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15442: entire loop may be executed in remainder
@@ -1475,13 +1422,13 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(135,2) inlined into cuda_dpposeEstimatio
       remark #25015: Estimate of max trip count of loop=3
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(137,3) inlined into cuda_dpposeEstimation.cpp(635,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(137,3) inlined into cuda_dpposeEstimation.cpp(670,2)
    <Remainder loop for vectorization>
       remark #25015: Estimate of max trip count of loop=15
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation.cpp(637,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation.cpp(672,2)
    remark #17109: LOOP WAS AUTO-PARALLELIZED
    remark #17101: parallel loop shared={ } private={ } firstprivate={ i sum B mean j } lastprivate={ } firstlastprivate={ } reduction={ }
    remark #15300: LOOP WAS VECTORIZED
@@ -1495,22 +1442,22 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation
    remark #15488: --- end vector cost summary ---
    remark #25015: Estimate of max trip count of loop=48
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(97,3) inlined into cuda_dpposeEstimation.cpp(637,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(97,3) inlined into cuda_dpposeEstimation.cpp(672,2)
       remark #25436: completely unrolled by 15   (pre-vector) 
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(107,2) inlined into cuda_dpposeEstimation.cpp(638,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(107,2) inlined into cuda_dpposeEstimation.cpp(673,2)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
    remark #25015: Estimate of max trip count of loop=384
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(109,3) inlined into cuda_dpposeEstimation.cpp(638,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(109,3) inlined into cuda_dpposeEstimation.cpp(673,2)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=3
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(109,3) inlined into cuda_dpposeEstimation.cpp(638,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(109,3) inlined into cuda_dpposeEstimation.cpp(673,2)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15442: entire loop may be executed in remainder
@@ -1524,18 +1471,18 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(107,2) inlined into cuda_dpposeEstimatio
       remark #25015: Estimate of max trip count of loop=3
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(109,3) inlined into cuda_dpposeEstimation.cpp(638,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(109,3) inlined into cuda_dpposeEstimation.cpp(673,2)
    <Remainder loop for vectorization>
       remark #25015: Estimate of max trip count of loop=15
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(146,2) inlined into cuda_dpposeEstimation.cpp(640,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(146,2) inlined into cuda_dpposeEstimation.cpp(675,2)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15306: loop was not vectorized: inner loop was transformed to memset or memcpy   [ cuda_dpposeEstimation.cpp(148,3) ]
    remark #25015: Estimate of max trip count of loop=2
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(148,3) inlined into cuda_dpposeEstimation.cpp(640,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(148,3) inlined into cuda_dpposeEstimation.cpp(675,2)
       remark #25408: memset generated
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15398: loop was not vectorized: loop was transformed to memset or memcpy
@@ -1543,24 +1490,24 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(146,2) inlined into cuda_dpposeEstimatio
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(148,3) inlined into cuda_dpposeEstimation.cpp(641,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(148,3) inlined into cuda_dpposeEstimation.cpp(676,2)
    remark #25408: memset generated
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15398: loop was not vectorized: loop was transformed to memset or memcpy
    remark #25015: Estimate of max trip count of loop=1
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(146,2) inlined into cuda_dpposeEstimation.cpp(642,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(146,2) inlined into cuda_dpposeEstimation.cpp(677,2)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
    remark #25015: Estimate of max trip count of loop=2
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(148,3) inlined into cuda_dpposeEstimation.cpp(642,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(148,3) inlined into cuda_dpposeEstimation.cpp(677,2)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=3
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(148,3) inlined into cuda_dpposeEstimation.cpp(642,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(148,3) inlined into cuda_dpposeEstimation.cpp(677,2)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15442: entire loop may be executed in remainder
@@ -1573,18 +1520,18 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(146,2) inlined into cuda_dpposeEstimatio
       remark #25015: Estimate of max trip count of loop=3
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(148,3) inlined into cuda_dpposeEstimation.cpp(642,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(148,3) inlined into cuda_dpposeEstimation.cpp(677,2)
    <Remainder loop for vectorization>
       remark #25015: Estimate of max trip count of loop=15
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation.cpp(643,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation.cpp(678,2)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
    remark #25015: Estimate of max trip count of loop=2
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(97,3) inlined into cuda_dpposeEstimation.cpp(643,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(97,3) inlined into cuda_dpposeEstimation.cpp(678,2)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15450: unmasked unaligned unit stride loads: 1 
@@ -1596,18 +1543,18 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation
       remark #25015: Estimate of max trip count of loop=1
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(97,3) inlined into cuda_dpposeEstimation.cpp(643,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(97,3) inlined into cuda_dpposeEstimation.cpp(678,2)
    <Remainder loop for vectorization>
       remark #25436: completely unrolled by 3  
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(146,2) inlined into cuda_dpposeEstimation.cpp(645,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(146,2) inlined into cuda_dpposeEstimation.cpp(680,2)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15306: loop was not vectorized: inner loop was transformed to memset or memcpy   [ cuda_dpposeEstimation.cpp(148,3) ]
    remark #25015: Estimate of max trip count of loop=2
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(148,3) inlined into cuda_dpposeEstimation.cpp(645,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(148,3) inlined into cuda_dpposeEstimation.cpp(680,2)
       remark #25408: memset generated
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15398: loop was not vectorized: loop was transformed to memset or memcpy
@@ -1615,12 +1562,12 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(146,2) inlined into cuda_dpposeEstimatio
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(146,2) inlined into cuda_dpposeEstimation.cpp(646,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(146,2) inlined into cuda_dpposeEstimation.cpp(681,2)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15306: loop was not vectorized: inner loop was transformed to memset or memcpy   [ cuda_dpposeEstimation.cpp(148,3) ]
    remark #25015: Estimate of max trip count of loop=2
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(148,3) inlined into cuda_dpposeEstimation.cpp(646,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(148,3) inlined into cuda_dpposeEstimation.cpp(681,2)
       remark #25408: memset generated
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15398: loop was not vectorized: loop was transformed to memset or memcpy
@@ -1628,12 +1575,12 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(146,2) inlined into cuda_dpposeEstimatio
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(160,2) inlined into cuda_dpposeEstimation.cpp(648,7)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(160,2) inlined into cuda_dpposeEstimation.cpp(683,7)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
    remark #25015: Estimate of max trip count of loop=2
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(162,3) inlined into cuda_dpposeEstimation.cpp(648,7)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(162,3) inlined into cuda_dpposeEstimation.cpp(683,7)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15450: unmasked unaligned unit stride loads: 1 
@@ -1645,24 +1592,24 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(160,2) inlined into cuda_dpposeEstimatio
       remark #25015: Estimate of max trip count of loop=1
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(162,3) inlined into cuda_dpposeEstimation.cpp(648,7)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(162,3) inlined into cuda_dpposeEstimation.cpp(683,7)
    <Remainder loop for vectorization>
       remark #25436: completely unrolled by 3  
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(177,3) inlined into cuda_dpposeEstimation.cpp(650,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(177,3) inlined into cuda_dpposeEstimation.cpp(685,2)
    remark #25444: Loopnest Interchanged: ( 1 2 ) --> ( 2 1 )
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized   [ cuda_dpposeEstimation.cpp(177,3) ]
    remark #25015: Estimate of max trip count of loop=15
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(175,2) inlined into cuda_dpposeEstimation.cpp(650,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(175,2) inlined into cuda_dpposeEstimation.cpp(685,2)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=3
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(175,2) inlined into cuda_dpposeEstimation.cpp(650,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(175,2) inlined into cuda_dpposeEstimation.cpp(685,2)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15301: PERMUTED LOOP WAS VECTORIZED
       remark #15442: entire loop may be executed in remainder
@@ -1676,19 +1623,19 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(177,3) inlined into cuda_dpposeEstimatio
       remark #25015: Estimate of max trip count of loop=96
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(175,2) inlined into cuda_dpposeEstimation.cpp(650,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(175,2) inlined into cuda_dpposeEstimation.cpp(685,2)
    <Remainder loop for vectorization>
       remark #25015: Estimate of max trip count of loop=384
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(188,2) inlined into cuda_dpposeEstimation.cpp(651,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(188,2) inlined into cuda_dpposeEstimation.cpp(686,2)
    remark #17109: LOOP WAS AUTO-PARALLELIZED
    remark #17101: parallel loop shared={ } private={ } firstprivate={ j k fSum matrixTranspose B C i } lastprivate={ } firstlastprivate={ } reduction={ }
    remark #15542: loop was not vectorized: inner loop was already vectorized
    remark #25015: Estimate of max trip count of loop=384
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(190,3) inlined into cuda_dpposeEstimation.cpp(651,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(190,3) inlined into cuda_dpposeEstimation.cpp(686,2)
       remark #15300: LOOP WAS VECTORIZED
       remark #15450: unmasked unaligned unit stride loads: 15 
       remark #15451: unmasked unaligned unit stride stores: 1 
@@ -1699,34 +1646,34 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(188,2) inlined into cuda_dpposeEstimatio
       remark #15488: --- end vector cost summary ---
       remark #25015: Estimate of max trip count of loop=48
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(193,4) inlined into cuda_dpposeEstimation.cpp(651,2)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(193,4) inlined into cuda_dpposeEstimation.cpp(686,2)
          remark #25436: completely unrolled by 15   (pre-vector) 
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(653,15)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(688,15)
    remark #17104: loop was not parallelized: existence of parallel dependence
    remark #15542: loop was not vectorized: inner loop was already vectorized
    remark #25015: Estimate of max trip count of loop=500
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(204,2) inlined into cuda_dpposeEstimation.cpp(655,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(204,2) inlined into cuda_dpposeEstimation.cpp(690,3)
       remark #17104: loop was not parallelized: existence of parallel dependence
       remark #15542: loop was not vectorized: inner loop was already vectorized
       remark #25015: Estimate of max trip count of loop=2
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(206,3) inlined into cuda_dpposeEstimation.cpp(655,3)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(206,3) inlined into cuda_dpposeEstimation.cpp(690,3)
          remark #25401: memcopy(with guard) generated
          remark #17104: loop was not parallelized: existence of parallel dependence
          remark #15542: loop was not vectorized: inner loop was already vectorized
          remark #25015: Estimate of max trip count of loop=1
 
-         LOOP BEGIN at cuda_dpposeEstimation.cpp(206,3) inlined into cuda_dpposeEstimation.cpp(655,3)
+         LOOP BEGIN at cuda_dpposeEstimation.cpp(206,3) inlined into cuda_dpposeEstimation.cpp(690,3)
          <Peeled loop for vectorization, Multiversioned v2>
             remark #25015: Estimate of max trip count of loop=7
          LOOP END
 
-         LOOP BEGIN at cuda_dpposeEstimation.cpp(206,3) inlined into cuda_dpposeEstimation.cpp(655,3)
+         LOOP BEGIN at cuda_dpposeEstimation.cpp(206,3) inlined into cuda_dpposeEstimation.cpp(690,3)
          <Multiversioned v2>
             remark #17108: loop was not parallelized: insufficient computational work
             remark #15300: LOOP WAS VECTORIZED
@@ -1741,22 +1688,22 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(653,15)
             remark #25015: Estimate of max trip count of loop=48
          LOOP END
 
-         LOOP BEGIN at cuda_dpposeEstimation.cpp(206,3) inlined into cuda_dpposeEstimation.cpp(655,3)
+         LOOP BEGIN at cuda_dpposeEstimation.cpp(206,3) inlined into cuda_dpposeEstimation.cpp(690,3)
          <Remainder loop for vectorization, Multiversioned v2>
             remark #25015: Estimate of max trip count of loop=384
          LOOP END
       LOOP END
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(234,2) inlined into cuda_dpposeEstimation.cpp(659,3)
-      remark #25045: Fused Loops: ( 234 408 )
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(234,2) inlined into cuda_dpposeEstimation.cpp(694,3)
+      remark #25045: Fused Loops: ( 234 443 )
 
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15542: loop was not vectorized: inner loop was already vectorized
       remark #25015: Estimate of max trip count of loop=2
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(659,3)
-         remark #25045: Fused Loops: ( 236 410 )
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(694,3)
+         remark #25045: Fused Loops: ( 236 445 )
 
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15300: LOOP WAS VECTORIZED
@@ -1771,19 +1718,19 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(653,15)
          remark #25015: Estimate of max trip count of loop=24
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(410,17) inlined into cuda_dpposeEstimation.cpp(659,3)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(445,17) inlined into cuda_dpposeEstimation.cpp(694,3)
       LOOP END
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(408,9) inlined into cuda_dpposeEstimation.cpp(659,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(443,9) inlined into cuda_dpposeEstimation.cpp(694,3)
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(539,2) inlined into cuda_dpposeEstimation.cpp(663,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(574,2) inlined into cuda_dpposeEstimation.cpp(698,3)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15542: loop was not vectorized: inner loop was already vectorized
       remark #25015: Estimate of max trip count of loop=2
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(541,3) inlined into cuda_dpposeEstimation.cpp(663,3)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(576,3) inlined into cuda_dpposeEstimation.cpp(698,3)
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15300: LOOP WAS VECTORIZED
          remark #15450: unmasked unaligned unit stride loads: 3 
@@ -1797,12 +1744,12 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(653,15)
       LOOP END
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(567,9) inlined into cuda_dpposeEstimation.cpp(664,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(602,9) inlined into cuda_dpposeEstimation.cpp(699,3)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15542: loop was not vectorized: inner loop was already vectorized
       remark #25015: Estimate of max trip count of loop=2
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(569,17) inlined into cuda_dpposeEstimation.cpp(664,3)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(604,17) inlined into cuda_dpposeEstimation.cpp(699,3)
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15300: LOOP WAS VECTORIZED
          remark #15450: unmasked unaligned unit stride loads: 1 
@@ -1815,12 +1762,12 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(653,15)
       LOOP END
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(567,9) inlined into cuda_dpposeEstimation.cpp(664,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(602,9) inlined into cuda_dpposeEstimation.cpp(699,3)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15542: loop was not vectorized: inner loop was already vectorized
       remark #25015: Estimate of max trip count of loop=2
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(569,17) inlined into cuda_dpposeEstimation.cpp(664,3)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(604,17) inlined into cuda_dpposeEstimation.cpp(699,3)
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15300: LOOP WAS VECTORIZED
          remark #15450: unmasked unaligned unit stride loads: 1 
@@ -1834,7 +1781,7 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(653,15)
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation.cpp(637,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation.cpp(672,2)
    remark #15300: LOOP WAS VECTORIZED
    remark #15451: unmasked unaligned unit stride stores: 1 
    remark #15452: unmasked strided loads: 15 
@@ -1847,16 +1794,16 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation
    remark #25015: Estimate of max trip count of loop=48
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation.cpp(637,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(94,2) inlined into cuda_dpposeEstimation.cpp(672,2)
 <Remainder loop for vectorization>
    remark #25015: Estimate of max trip count of loop=384
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(188,2) inlined into cuda_dpposeEstimation.cpp(651,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(188,2) inlined into cuda_dpposeEstimation.cpp(686,2)
    remark #15542: loop was not vectorized: inner loop was already vectorized
    remark #25015: Estimate of max trip count of loop=384
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(190,3) inlined into cuda_dpposeEstimation.cpp(651,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(190,3) inlined into cuda_dpposeEstimation.cpp(686,2)
       remark #17107: loop was not parallelized: inner loop
       remark #15300: LOOP WAS VECTORIZED
       remark #15450: unmasked unaligned unit stride loads: 15 
@@ -1876,8 +1823,8 @@ cuda_dpposeEstimation.cpp(99,11):remark #34030: adjacent sparse (strided) loads 
 cuda_dpposeEstimation.cpp(99,11):remark #34030: adjacent sparse (strided) loads optimized for speed. Details: stride { 60 }, types { F32-V256, F32-V256, F32-V256, F32-V256, F32-V256, F32-V256, F32-V256 }, number of elements { 8 }, select mask { 0x00000007F }.
 cuda_dpposeEstimation.cpp(99,11):remark #34030: adjacent sparse (strided) loads optimized for speed. Details: stride { 60 }, types { F32-V256, F32-V256, F32-V256, F32-V256, F32-V256, F32-V256, F32-V256, F32-V256 }, number of elements { 8 }, select mask { 0x0000000FF }.
 cuda_dpposeEstimation.cpp(99,11):remark #34030: adjacent sparse (strided) loads optimized for speed. Details: stride { 60 }, types { F32-V256, F32-V256, F32-V256, F32-V256, F32-V256, F32-V256, F32-V256 }, number of elements { 8 }, select mask { 0x00000007F }.
-cuda_dpposeEstimation.cpp(589,36):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (32, 0)
-cuda_dpposeEstimation.cpp(589,49):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (32, 0)
+cuda_dpposeEstimation.cpp(624,36):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (32, 0)
+cuda_dpposeEstimation.cpp(624,49):remark #34000: call to memset implemented inline with stores with proven (alignment, offset): (32, 0)
 cuda_dpposeEstimation.cpp(150,3):remark #34014: optimization advice for memset: increase the destination's alignment to 16 (and use __assume_aligned) to speed up library implementation
 cuda_dpposeEstimation.cpp(150,3):remark #34026: call to memset implemented as a call to optimized library version
 cuda_dpposeEstimation.cpp(150,3):remark #34014: optimization advice for memset: increase the destination's alignment to 32 (and use __assume_aligned) to increase the width of stores
@@ -1889,7 +1836,7 @@ cuda_dpposeEstimation.cpp(150,3):remark #34026: call to memset implemented as a 
 cuda_dpposeEstimation.cpp(208,3):remark #34014: optimization advice for memcpy: increase the destination's alignment to 16 (and use __assume_aligned) to speed up library implementation
 cuda_dpposeEstimation.cpp(208,3):remark #34014: optimization advice for memcpy: increase the source's alignment to 16 (and use __assume_aligned) to speed up library implementation
 cuda_dpposeEstimation.cpp(208,3):remark #34026: call to memcpy implemented as a call to optimized library version
-cuda_dpposeEstimation.cpp(587,1):remark #34051: REGISTER ALLOCATION : [main] cuda_dpposeEstimation.cpp:587
+cuda_dpposeEstimation.cpp(622,1):remark #34051: REGISTER ALLOCATION : [main] cuda_dpposeEstimation.cpp:622
 
     Hardware registers
         Reserved     :    2[ rsp rip]
@@ -3219,18 +3166,18 @@ Begin optimization report for: matInv(float *, int)
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (matInv(float *, int)) [33] cuda_dpposeEstimation.cpp(291,1)
-  -> EXTERN: (292,6) _vla_free(void *, long)
-  -> EXTERN: (292,6) _vla_alloc(long)
-  -> EXTERN: (295,8) LAPACKE_sgetrf(int, int, int, float *, int, int *)
-  -> EXTERN: (298,10) _vla_free(void *, long)
-  -> EXTERN: (301,8) LAPACKE_sgetri(int, int, float *, int, const int *)
-  -> EXTERN: (303,9) _vla_free(void *, long)
+INLINE REPORT: (matInv(float *, int)) [33] cuda_dpposeEstimation.cpp(326,1)
+  -> EXTERN: (327,6) _vla_free(void *, long)
+  -> EXTERN: (327,6) _vla_alloc(long)
+  -> EXTERN: (330,8) LAPACKE_sgetrf(int, int, int, float *, int, int *)
+  -> EXTERN: (333,10) _vla_free(void *, long)
+  -> EXTERN: (336,8) LAPACKE_sgetri(int, int, float *, int, const int *)
+  -> EXTERN: (338,9) _vla_free(void *, long)
 
 
     Report from: Code generation optimizations [cg]
 
-cuda_dpposeEstimation.cpp(291,1):remark #34051: REGISTER ALLOCATION : [_Z6matInvPfi] cuda_dpposeEstimation.cpp:291
+cuda_dpposeEstimation.cpp(326,1):remark #34051: REGISTER ALLOCATION : [_Z6matInvPfi] cuda_dpposeEstimation.cpp:326
 
     Hardware registers
         Reserved     :    2[ rsp rip]
@@ -3265,38 +3212,38 @@ Begin optimization report for: calculateZ_preZden(float *, float *, float *, flo
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (calculateZ_preZden(float *, float *, float *, float *, float *, float *, float, float *, float *, int, int, int)) [34] cuda_dpposeEstimation.cpp(367,1)
-  -> EXTERN: (368,38) operator new[](std::size_t)
-  -> EXTERN: (368,38) __cxa_throw_bad_array_new_length()
-  -> EXTERN: (369,39) operator new[](std::size_t)
-  -> EXTERN: (369,39) __cxa_throw_bad_array_new_length()
-  -> EXTERN: (370,39) operator new[](std::size_t)
-  -> EXTERN: (370,39) __cxa_throw_bad_array_new_length()
-  -> EXTERN: (371,38) operator new[](std::size_t)
-  -> EXTERN: (371,38) __cxa_throw_bad_array_new_length()
-  -> INLINE: (385,9) cpuMatrixMult(float *, float *, float *, int, int, int)
-  -> INLINE: (389,9) scalarToMatrixMultiply(float *, float *, float, int, int)
-  -> INLINE: (393,9) sumOfMatrix(float *, float *, float *, float *, int, int)
-  -> INLINE: (397,9) cpuMatrixMult(float *, float *, float *, int, int, int)
-  -> EXTERN: (399,2) operator delete[](void *)
-  -> EXTERN: (400,9) operator delete[](void *)
-  -> EXTERN: (401,9) operator delete[](void *)
-  -> EXTERN: (402,9) operator delete[](void *)
+INLINE REPORT: (calculateZ_preZden(float *, float *, float *, float *, float *, float *, float, float *, float *, int, int, int)) [34] cuda_dpposeEstimation.cpp(402,1)
+  -> EXTERN: (403,38) operator new[](std::size_t)
+  -> EXTERN: (403,38) __cxa_throw_bad_array_new_length()
+  -> EXTERN: (404,39) operator new[](std::size_t)
+  -> EXTERN: (404,39) __cxa_throw_bad_array_new_length()
+  -> EXTERN: (405,39) operator new[](std::size_t)
+  -> EXTERN: (405,39) __cxa_throw_bad_array_new_length()
+  -> EXTERN: (406,38) operator new[](std::size_t)
+  -> EXTERN: (406,38) __cxa_throw_bad_array_new_length()
+  -> INLINE: (420,9) cpuMatrixMult(float *, float *, float *, int, int, int)
+  -> INLINE: (424,9) scalarToMatrixMultiply(float *, float *, float, int, int)
+  -> INLINE: (428,9) sumOfMatrix(float *, float *, float *, float *, int, int)
+  -> INLINE: (432,9) cpuMatrixMult(float *, float *, float *, int, int, int)
+  -> EXTERN: (434,2) operator delete[](void *)
+  -> EXTERN: (435,9) operator delete[](void *)
+  -> EXTERN: (436,9) operator delete[](void *)
+  -> EXTERN: (437,9) operator delete[](void *)
 
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(377,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(412,9)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(379,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(414,17)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=7
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(379,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(414,17)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15442: entire loop may be executed in remainder
@@ -3309,23 +3256,23 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(377,9)
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(379,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(414,17)
    <Remainder loop for vectorization>
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(379,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(414,17)
    <Remainder loop for vectorization>
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(385,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(420,9)
 <Distributed chunk1>
    remark #25426: Loop Distributed (2 way) 
    remark #17104: loop was not parallelized: existence of parallel dependence
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(385,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(420,9)
    <Distributed chunk1>
       remark #25087: Preprocess Loopnests: Sinking 1 Stmts Into Inner LOOP to Create Perfect Nest 
       remark #25426: Loop Distributed (2 way) 
@@ -3333,7 +3280,7 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimatio
       remark #17104: loop was not parallelized: existence of parallel dependence
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(385,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(420,9)
       <Distributed chunk1>
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15301: PARTIAL LOOP WAS VECTORIZED
@@ -3346,38 +3293,38 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimatio
          remark #25015: Estimate of max trip count of loop=3
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(385,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(420,9)
       <Remainder loop for vectorization, Distributed chunk1>
          remark #25015: Estimate of max trip count of loop=24
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(385,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(420,9)
 <Distributed chunk2>
    remark #25444: Loopnest Interchanged: ( 1 2 3 ) --> ( 1 3 2 )
    remark #25229: Loop multiversioned for Trip-count
    remark #25459: Loopnest replaced by matmul intrinsic
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(385,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(420,9)
 <Distributed chunk2>
    remark #17108: loop was not parallelized: insufficient computational work
    remark #25440: unrolled and jammed by 4   (pre-vector) 
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(385,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(420,9)
    <Distributed chunk2>
       remark #17104: loop was not parallelized: existence of parallel dependence
       remark #25440: unrolled and jammed by 4   (pre-vector) 
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(385,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(420,9)
       <Peeled loop for vectorization>
          remark #25015: Estimate of max trip count of loop=7
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(385,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(420,9)
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15301: PERMUTED LOOP WAS VECTORIZED
          remark #15442: entire loop may be executed in remainder
@@ -3390,21 +3337,21 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimatio
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(385,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(420,9)
       <Remainder loop for vectorization>
       LOOP END
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(385,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(420,9)
    <Remainder, Distributed chunk2>
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(385,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(420,9)
       <Peeled loop for vectorization>
          remark #25015: Estimate of max trip count of loop=7
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(385,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(420,9)
          remark #15301: PERMUTED LOOP WAS VECTORIZED
          remark #15442: entire loop may be executed in remainder
          remark #15450: unmasked unaligned unit stride loads: 5 
@@ -3416,26 +3363,26 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimatio
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(385,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(420,9)
       <Remainder loop for vectorization>
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(385,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(420,9)
 <Remainder, Distributed chunk2>
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(385,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(420,9)
    <Distributed chunk2>
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(385,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(420,9)
       <Peeled loop for vectorization>
          remark #25015: Estimate of max trip count of loop=7
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(385,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(420,9)
          remark #15301: PERMUTED LOOP WAS VECTORIZED
          remark #15442: entire loop may be executed in remainder
          remark #15450: unmasked unaligned unit stride loads: 2 
@@ -3447,22 +3394,22 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimatio
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(385,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(420,9)
       <Remainder loop for vectorization>
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(234,2) inlined into cuda_dpposeEstimation.cpp(389,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(234,2) inlined into cuda_dpposeEstimation.cpp(424,9)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(389,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(424,9)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=7
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(389,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(424,9)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15442: entire loop may be executed in remainder
@@ -3475,26 +3422,26 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(234,2) inlined into cuda_dpposeEstimatio
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(389,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(424,9)
    <Remainder loop for vectorization>
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(389,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(424,9)
    <Remainder loop for vectorization>
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(245,2) inlined into cuda_dpposeEstimation.cpp(393,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(245,2) inlined into cuda_dpposeEstimation.cpp(428,9)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(247,3) inlined into cuda_dpposeEstimation.cpp(393,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(247,3) inlined into cuda_dpposeEstimation.cpp(428,9)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=7
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(247,3) inlined into cuda_dpposeEstimation.cpp(393,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(247,3) inlined into cuda_dpposeEstimation.cpp(428,9)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15442: entire loop may be executed in remainder
@@ -3507,30 +3454,30 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(245,2) inlined into cuda_dpposeEstimatio
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(247,3) inlined into cuda_dpposeEstimation.cpp(393,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(247,3) inlined into cuda_dpposeEstimation.cpp(428,9)
    <Remainder loop for vectorization>
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(247,3) inlined into cuda_dpposeEstimation.cpp(393,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(247,3) inlined into cuda_dpposeEstimation.cpp(428,9)
    <Remainder loop for vectorization>
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(397,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimation.cpp(432,9)
    remark #17104: loop was not parallelized: existence of parallel dependence
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(397,9)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(219,3) inlined into cuda_dpposeEstimation.cpp(432,9)
       remark #17104: loop was not parallelized: existence of parallel dependence
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(397,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(432,9)
       <Peeled loop for vectorization>
          remark #25015: Estimate of max trip count of loop=3
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(397,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(432,9)
          remark #17108: loop was not parallelized: insufficient computational work
          remark #15300: LOOP WAS VECTORIZED
          remark #15442: entire loop may be executed in remainder
@@ -3543,7 +3490,7 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(217,2) inlined into cuda_dpposeEstimatio
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(397,9)
+      LOOP BEGIN at cuda_dpposeEstimation.cpp(222,4) inlined into cuda_dpposeEstimation.cpp(432,9)
       <Remainder loop for vectorization>
       LOOP END
    LOOP END
@@ -3553,7 +3500,7 @@ LOOP END
 
 cuda_dpposeEstimation.cpp(221,3):remark #34014: optimization advice for memset: increase the destination's alignment to 16 (and use __assume_aligned) to speed up library implementation
 cuda_dpposeEstimation.cpp(221,3):remark #34026: call to memset implemented as a call to optimized library version
-cuda_dpposeEstimation.cpp(367,1):remark #34051: REGISTER ALLOCATION : [_Z18calculateZ_preZdenPfS_S_S_S_S_fS_S_iii] cuda_dpposeEstimation.cpp:367
+cuda_dpposeEstimation.cpp(402,1):remark #34051: REGISTER ALLOCATION : [_Z18calculateZ_preZdenPfS_S_S_S_S_fS_S_iii] cuda_dpposeEstimation.cpp:402
 
     Hardware registers
         Reserved     :    2[ rsp rip]
@@ -3588,22 +3535,22 @@ Begin optimization report for: differenceOfMatrix(float *, float *, float *, int
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (differenceOfMatrix(float *, float *, float *, int, int)) [35] cuda_dpposeEstimation.cpp(407,1)
+INLINE REPORT: (differenceOfMatrix(float *, float *, float *, int, int)) [35] cuda_dpposeEstimation.cpp(442,1)
 
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(408,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(443,9)
    remark #17104: loop was not parallelized: existence of parallel dependence
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(410,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(445,17)
    <Peeled loop for vectorization, Multiversioned v1>
       remark #25015: Estimate of max trip count of loop=7
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(410,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(445,17)
    <Multiversioned v1>
       remark #25228: Loop multiversioned for Data Dependence
       remark #17108: loop was not parallelized: insufficient computational work
@@ -3618,30 +3565,30 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(408,9)
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(410,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(445,17)
    <Remainder loop for vectorization, Multiversioned v1>
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(410,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(445,17)
    <Remainder loop for vectorization, Multiversioned v1>
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(410,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(445,17)
    <Multiversioned v2>
       remark #17104: loop was not parallelized: existence of parallel dependence
       remark #15304: loop was not vectorized: non-vectorizable loop instance from multiversioning
       remark #25439: unrolled with remainder by 2  
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(410,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(445,17)
    <Remainder, Multiversioned v2>
    LOOP END
 LOOP END
 
     Report from: Code generation optimizations [cg]
 
-cuda_dpposeEstimation.cpp(407,1):remark #34051: REGISTER ALLOCATION : [_Z18differenceOfMatrixPfS_S_ii] cuda_dpposeEstimation.cpp:407
+cuda_dpposeEstimation.cpp(442,1):remark #34051: REGISTER ALLOCATION : [_Z18differenceOfMatrixPfS_S_ii] cuda_dpposeEstimation.cpp:442
 
     Hardware registers
         Reserved     :    2[ rsp rip]
@@ -3676,27 +3623,27 @@ Begin optimization report for: calculateQ(float *, float *, float *, float, int,
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (calculateQ(float *, float *, float *, float, int, int)) [36] cuda_dpposeEstimation.cpp(418,1)
-  -> EXTERN: (419,31) operator new[](std::size_t)
-  -> EXTERN: (419,31) __cxa_throw_bad_array_new_length()
-  -> INLINE: (421,2) scalarToMatrixMultiply(float *, float *, float, int, int)
-  -> INLINE: (422,2) differenceOfMatrix(float *, float *, float *, int, int)
-  -> EXTERN: (424,2) operator delete[](void *)
+INLINE REPORT: (calculateQ(float *, float *, float *, float, int, int)) [36] cuda_dpposeEstimation.cpp(453,1)
+  -> EXTERN: (454,31) operator new[](std::size_t)
+  -> EXTERN: (454,31) __cxa_throw_bad_array_new_length()
+  -> INLINE: (456,2) scalarToMatrixMultiply(float *, float *, float, int, int)
+  -> INLINE: (457,2) differenceOfMatrix(float *, float *, float *, int, int)
+  -> EXTERN: (459,2) operator delete[](void *)
 
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(234,2) inlined into cuda_dpposeEstimation.cpp(421,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(234,2) inlined into cuda_dpposeEstimation.cpp(456,2)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(421,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(456,2)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=7
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(421,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(456,2)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15442: entire loop may be executed in remainder
@@ -3709,26 +3656,26 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(234,2) inlined into cuda_dpposeEstimatio
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(421,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(456,2)
    <Remainder loop for vectorization>
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(421,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(236,3) inlined into cuda_dpposeEstimation.cpp(456,2)
    <Remainder loop for vectorization>
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(408,9) inlined into cuda_dpposeEstimation.cpp(422,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(443,9) inlined into cuda_dpposeEstimation.cpp(457,2)
    remark #17104: loop was not parallelized: existence of parallel dependence
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(410,17) inlined into cuda_dpposeEstimation.cpp(422,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(445,17) inlined into cuda_dpposeEstimation.cpp(457,2)
    <Peeled loop for vectorization, Multiversioned v1>
       remark #25015: Estimate of max trip count of loop=7
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(410,17) inlined into cuda_dpposeEstimation.cpp(422,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(445,17) inlined into cuda_dpposeEstimation.cpp(457,2)
    <Multiversioned v1>
       remark #25228: Loop multiversioned for Data Dependence
       remark #17108: loop was not parallelized: insufficient computational work
@@ -3743,30 +3690,30 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(408,9) inlined into cuda_dpposeEstimatio
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(410,17) inlined into cuda_dpposeEstimation.cpp(422,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(445,17) inlined into cuda_dpposeEstimation.cpp(457,2)
    <Remainder loop for vectorization, Multiversioned v1>
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(410,17) inlined into cuda_dpposeEstimation.cpp(422,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(445,17) inlined into cuda_dpposeEstimation.cpp(457,2)
    <Remainder loop for vectorization, Multiversioned v1>
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(410,17) inlined into cuda_dpposeEstimation.cpp(422,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(445,17) inlined into cuda_dpposeEstimation.cpp(457,2)
    <Multiversioned v2>
       remark #17104: loop was not parallelized: existence of parallel dependence
       remark #15304: loop was not vectorized: non-vectorizable loop instance from multiversioning
       remark #25439: unrolled with remainder by 2  
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(410,17) inlined into cuda_dpposeEstimation.cpp(422,2)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(445,17) inlined into cuda_dpposeEstimation.cpp(457,2)
    <Remainder, Multiversioned v2>
    LOOP END
 LOOP END
 
     Report from: Code generation optimizations [cg]
 
-cuda_dpposeEstimation.cpp(418,1):remark #34051: REGISTER ALLOCATION : [_Z10calculateQPfS_S_fii] cuda_dpposeEstimation.cpp:418
+cuda_dpposeEstimation.cpp(453,1):remark #34051: REGISTER ALLOCATION : [_Z10calculateQPfS_S_fii] cuda_dpposeEstimation.cpp:453
 
     Hardware registers
         Reserved     :    2[ rsp rip]
@@ -3801,22 +3748,22 @@ Begin optimization report for: updateDualvariable(float *, float, float *, float
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (updateDualvariable(float *, float, float *, float *, int, int)) [37] cuda_dpposeEstimation.cpp(538,1)
+INLINE REPORT: (updateDualvariable(float *, float, float *, float *, int, int)) [37] cuda_dpposeEstimation.cpp(573,1)
 
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(539,2)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(574,2)
    remark #17104: loop was not parallelized: existence of parallel dependence
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(541,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(576,3)
    <Peeled loop for vectorization, Multiversioned v1>
       remark #25015: Estimate of max trip count of loop=7
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(541,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(576,3)
    <Multiversioned v1>
       remark #25228: Loop multiversioned for Data Dependence
       remark #17108: loop was not parallelized: insufficient computational work
@@ -3832,30 +3779,30 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(539,2)
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(541,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(576,3)
    <Remainder loop for vectorization, Multiversioned v1>
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(541,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(576,3)
    <Remainder loop for vectorization, Multiversioned v1>
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(541,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(576,3)
    <Multiversioned v2>
       remark #17104: loop was not parallelized: existence of parallel dependence
       remark #15304: loop was not vectorized: non-vectorizable loop instance from multiversioning
       remark #25439: unrolled with remainder by 2  
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(541,3)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(576,3)
    <Remainder, Multiversioned v2>
    LOOP END
 LOOP END
 
     Report from: Code generation optimizations [cg]
 
-cuda_dpposeEstimation.cpp(538,1):remark #34051: REGISTER ALLOCATION : [_Z18updateDualvariablePffS_S_ii] cuda_dpposeEstimation.cpp:538
+cuda_dpposeEstimation.cpp(573,1):remark #34051: REGISTER ALLOCATION : [_Z18updateDualvariablePffS_S_ii] cuda_dpposeEstimation.cpp:573
 
     Hardware registers
         Reserved     :    2[ rsp rip]
@@ -3890,22 +3837,22 @@ Begin optimization report for: febNorm(float *, int, int)
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (febNorm(float *, int, int)) [38] cuda_dpposeEstimation.cpp(564,1)
+INLINE REPORT: (febNorm(float *, int, int)) [38] cuda_dpposeEstimation.cpp(599,1)
 
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(567,9)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(602,9)
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(569,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(604,17)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=7
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(569,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(604,17)
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
       remark #15442: entire loop may be executed in remainder
@@ -3917,19 +3864,19 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(567,9)
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(569,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(604,17)
    <Remainder loop for vectorization>
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(569,17)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(604,17)
    <Remainder loop for vectorization>
    LOOP END
 LOOP END
 
     Report from: Code generation optimizations [cg]
 
-cuda_dpposeEstimation.cpp(564,1):remark #34051: REGISTER ALLOCATION : [_Z7febNormPfii] cuda_dpposeEstimation.cpp:564
+cuda_dpposeEstimation.cpp(599,1):remark #34051: REGISTER ALLOCATION : [_Z7febNormPfii] cuda_dpposeEstimation.cpp:599
 
     Hardware registers
         Reserved     :    2[ rsp rip]
@@ -3964,29 +3911,29 @@ Begin optimization report for: resCalc(float *, float *, float *, float *, float
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (resCalc(float *, float *, float *, float *, float *, float, int, int)) [39] cuda_dpposeEstimation.cpp(579,1)
-  -> INLINE: (581,13) febNorm_diff(float *, float *, int, int)
-  -> INLINE: (581,40) febNorm(float *, int, int)
-  -> INLINE: (582,18) febNorm_diff(float *, float *, int, int)
-  -> INLINE: (582,46) febNorm(float *, int, int)
+INLINE REPORT: (resCalc(float *, float *, float *, float *, float *, float, int, int)) [39] cuda_dpposeEstimation.cpp(614,1)
+  -> INLINE: (616,13) febNorm_diff(float *, float *, int, int)
+  -> INLINE: (616,40) febNorm(float *, int, int)
+  -> INLINE: (617,18) febNorm_diff(float *, float *, int, int)
+  -> INLINE: (617,46) febNorm(float *, int, int)
 
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(552,9) inlined into cuda_dpposeEstimation.cpp(581,13)
-   remark #25045: Fused Loops: ( 552 567 )
+LOOP BEGIN at cuda_dpposeEstimation.cpp(587,9) inlined into cuda_dpposeEstimation.cpp(616,13)
+   remark #25045: Fused Loops: ( 587 602 )
 
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(554,17) inlined into cuda_dpposeEstimation.cpp(581,13)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(589,17) inlined into cuda_dpposeEstimation.cpp(616,13)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=7
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(554,17) inlined into cuda_dpposeEstimation.cpp(581,13)
-      remark #25045: Fused Loops: ( 554 569 )
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(589,17) inlined into cuda_dpposeEstimation.cpp(616,13)
+      remark #25045: Fused Loops: ( 589 604 )
 
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
@@ -3999,35 +3946,35 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(552,9) inlined into cuda_dpposeEstimatio
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(569,17) inlined into cuda_dpposeEstimation.cpp(581,40)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(604,17) inlined into cuda_dpposeEstimation.cpp(616,40)
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(554,17) inlined into cuda_dpposeEstimation.cpp(581,13)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(589,17) inlined into cuda_dpposeEstimation.cpp(616,13)
    <Remainder loop for vectorization>
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(554,17) inlined into cuda_dpposeEstimation.cpp(581,13)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(589,17) inlined into cuda_dpposeEstimation.cpp(616,13)
    <Remainder loop for vectorization>
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(567,9) inlined into cuda_dpposeEstimation.cpp(581,40)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(602,9) inlined into cuda_dpposeEstimation.cpp(616,40)
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(552,9) inlined into cuda_dpposeEstimation.cpp(582,18)
-   remark #25045: Fused Loops: ( 552 567 )
+LOOP BEGIN at cuda_dpposeEstimation.cpp(587,9) inlined into cuda_dpposeEstimation.cpp(617,18)
+   remark #25045: Fused Loops: ( 587 602 )
 
    remark #17108: loop was not parallelized: insufficient computational work
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(554,17) inlined into cuda_dpposeEstimation.cpp(582,18)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(589,17) inlined into cuda_dpposeEstimation.cpp(617,18)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=7
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(554,17) inlined into cuda_dpposeEstimation.cpp(582,18)
-      remark #25045: Fused Loops: ( 554 569 )
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(589,17) inlined into cuda_dpposeEstimation.cpp(617,18)
+      remark #25045: Fused Loops: ( 589 604 )
 
       remark #17108: loop was not parallelized: insufficient computational work
       remark #15300: LOOP WAS VECTORIZED
@@ -4040,25 +3987,25 @@ LOOP BEGIN at cuda_dpposeEstimation.cpp(552,9) inlined into cuda_dpposeEstimatio
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(569,17) inlined into cuda_dpposeEstimation.cpp(582,46)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(604,17) inlined into cuda_dpposeEstimation.cpp(617,46)
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(554,17) inlined into cuda_dpposeEstimation.cpp(582,18)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(589,17) inlined into cuda_dpposeEstimation.cpp(617,18)
    <Remainder loop for vectorization>
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cuda_dpposeEstimation.cpp(554,17) inlined into cuda_dpposeEstimation.cpp(582,18)
+   LOOP BEGIN at cuda_dpposeEstimation.cpp(589,17) inlined into cuda_dpposeEstimation.cpp(617,18)
    <Remainder loop for vectorization>
    LOOP END
 LOOP END
 
-LOOP BEGIN at cuda_dpposeEstimation.cpp(567,9) inlined into cuda_dpposeEstimation.cpp(582,46)
+LOOP BEGIN at cuda_dpposeEstimation.cpp(602,9) inlined into cuda_dpposeEstimation.cpp(617,46)
 LOOP END
 
     Report from: Code generation optimizations [cg]
 
-cuda_dpposeEstimation.cpp(579,1):remark #34051: REGISTER ALLOCATION : [_Z7resCalcPfS_S_S_S_fii] cuda_dpposeEstimation.cpp:579
+cuda_dpposeEstimation.cpp(614,1):remark #34051: REGISTER ALLOCATION : [_Z7resCalcPfS_S_S_S_fii] cuda_dpposeEstimation.cpp:614
 
     Hardware registers
         Reserved     :    2[ rsp rip]

@@ -91,46 +91,52 @@ extern void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT l
 #define LDVT N
 
 /* Main program */
-int main() {
-	        /* Locals */
-	        MKL_INT m = M, n = N, lda = LDA, ldu = LDU, ldvt = LDVT, info;
-		        double superb[min(M,N)-1];
-			        /* Local arrays */
-			        double s[N], u[LDU*M], vt[LDVT*N];
-				        double a[LDA*M] = {
-						            8.79,  9.93,  9.83, 5.45,  3.16,
-							                6.11,  6.91,  5.04, -0.27,  7.98,
-									           -9.15, -7.93,  4.86, 4.85,  3.01,
-										               9.57,  1.64,  8.83, 0.74,  5.80,
-											                  -3.49,  4.02,  9.80, 10.00,  4.27,
-													              9.84,  0.15, -8.99, -6.02, -5.31
-															              };
-					        /* Executable statements */
-					        printf( "LAPACKE_dgesvd (row-major, high-level) Example Program Results\n" );
-						        /* Compute SVD */
-						        info = LAPACKE_dgesvd( LAPACK_ROW_MAJOR, 'A', 'A', m, n, a, lda,
-									                        s, u, ldu, vt, ldvt, superb );
-							        /* Check for convergence */
-							        if( info > 0 ) {
-									                printf( "The algorithm computing SVD failed to converge.\n" );
-											                exit( 1 );
-													        }
-								        /* Print singular values */
-								        print_matrix( "Singular values", 1, n, s, 1 );
-									        /* Print left singular vectors */
-									        print_matrix( "Left singular vectors (stored columnwise)", m, n, u, ldu );
-										        /* Print right singular vectors */
-										        print_matrix( "Right singular vectors (stored rowwise)", n, n, vt, ldvt );
-											        exit( 0 );
+int main()
+{
+	/* Locals */
+	MKL_INT m = M, n = N, lda = LDA, ldu = LDU, ldvt = LDVT, info;
+	double superb[min(M,N)-1];
+	/* Local array*/
+	double s[N], u[LDU*M], vt[LDVT*N];
+	double a[LDA*M] = {
+			8.79,  9.93,  9.83, 5.45,  3.16,
+			6.11,  6.91,  5.04, -0.27,  7.98,
+			-9.15, -7.93,  4.86, 4.85,  3.01,
+			9.57,  1.64,  8.83, 0.74,  5.80,
+			-3.49,  4.02,  9.80, 10.00,  4.27,
+			9.84,  0.15, -8.99, -6.02, -5.31
+			};
+	/* Executable statements */
+	printf( "LAPACKE_dgesvd (row-major, high-level) Example Program Results\n" );
+	/* Compute SVD */
+	info = LAPACKE_dgesvd( LAPACK_ROW_MAJOR, 'A', 'A', m, n, a, lda, s, u, ldu, vt, ldvt, superb );
+	/* Check for convergence */
+	if( info > 0 ) 
+	{
+	printf( "The algorithm computing SVD failed to converge.\n" );
+	exit( 1 );
+	}
+	/* Print singular values */
+	print_matrix( "Singular values", 1, n, s, 1 );
+	/* Print left singular vectors */
+	print_matrix( "Left singular vectors (stored columnwise)", m, n, u, ldu );
+	/* Print right singular vectors */
+	print_matrix( "Right singular vectors (stored rowwise)", n, n, vt, ldvt );
+	exit( 0 );
 } /* End of LAPACKE_dgesvd Example */
 
 /* Auxiliary routine: printing a matrix */
-void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda ) {
-	        MKL_INT i, j;
-		        printf( "\n %s\n", desc );
-			        for( i = 0; i < m; i++ ) {
-					                for( j = 0; j < n; j++ ) printf( " %6.2f", a[i*lda+j] );
-							                printf( "\n" );
-									        }
+void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda ) 
+{
+	MKL_INT i, j;
+	printf( "\n %s\n", desc );
+	for( i = 0; i < m; i++ ) 
+	{
+		for( j = 0; j < n; j++ )
+		{
+		 printf( " %6.2f", a[i*lda+j] );
+		}
+	printf( "\n" );
+	}
 }
 

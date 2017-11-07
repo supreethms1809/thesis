@@ -2,7 +2,7 @@
 CC = icc
 NVCC = nvcc 
 
-OPT = -qopenmp -qopt-report=3 -xHost -align -O3 -g -mkl -heap-arrays -parallel -std=c++11
+OPT = -qopenmp -qopt-report=3 -xHost -align -O3 -g -mkl=sequential -heap-arrays -std=c++11
 
 CUDA_PATH = /usr/local/cuda-9.0
 
@@ -23,7 +23,7 @@ run: all
 	./cuda_dpposeEstimation
 
 all:
-	$(NVCC) -O3 -g -arch=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart inverse_shared.cu -c
+	$(NVCC) -O3 -g  -std=c++11 -arch=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart inverse_shared.cu -c
 	$(CC)  $(OPT) $(SRCS) $(LIB) -c  -lm
 	$(CC) $(OBJ) -o $(EXE) $(LIBS) $(OPT) -lcudart -lm 
 clean: 
