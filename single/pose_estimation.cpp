@@ -662,6 +662,7 @@ int main(void)
 	//displayValues(xy,items);
 	
 	mu = meanCalc(xy,col,row);
+	//mu = meanCalc(xy,col,row);
 	//cout << "value of mu is " << mu << endl;
 
         //calculation of BBt
@@ -670,14 +671,14 @@ int main(void)
         //Zden
 
 	//Precompute mu
-	mu_orig = mu;
-	mu1 = mu * 2;
+	//mu_orig = mu;
+	//mu1 = mu * 2;
 	//mu2 = mu1 * 2;
 	//mu3 = mu / 2;
 	//mu4 = mu3 / 2;
 
-	addScalarToDiagonal(Zden,BBt,mu_orig,row1,row1);
-	addScalarToDiagonal(Zden1,BBt,mu1,row1,row1);
+	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
+	//addScalarToDiagonal(Zden1,BBt,mu1,row1,row1);
 	//addScalarToDiagonal(Zden2,BBt,mu2,row1,row1);
 	//addScalarToDiagonal(Zden3,BBt,mu3,row1,row1);
 	//addScalarToDiagonal(Zden4,BBt,mu4,row1,row1);
@@ -685,27 +686,35 @@ int main(void)
 	//dump_to_file("Z_old.txt",Z,row1,row1);				
 	
 	eye(Zden_inv,row1,row1);
-	eye(Zden1_inv,row1,row1);
-	t3 = high_resolution_clock::now();
-	gpuInverseOfMatrix(Zden,Zden_inv,row1);
-	gpuInverseOfMatrix(Zden1,Zden1_inv,row1);
-//	status = matInv(Zden,row1);
+	//eye(Zden1_inv,row1,row1);
+	//t3 = high_resolution_clock::now();
+	//gpuInverseOfMatrix(Zden,Zden_inv,row1);
+	//gpuInverseOfMatrix(Zden1,Zden1_inv,row1);
+	status = matInv(Zden,row1);
 //	status = matInv(Zden1,row1);
 	//status = matInv(Zden2,row1);
 	//status = matInv(Zden3,row1);
 	//status = matInv(Zden4,row1);	
-	
-	t4 = high_resolution_clock::now();
-	duration<float> time_span = duration_cast<duration<float>>(t4 - t3);
-	cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
+
+//	mu_orig = mu;	
+
+	//t4 = high_resolution_clock::now();
+	//duration<float> time_span = duration_cast<duration<float>>(t4 - t3);
+	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 	
 	for(int iter = 0; iter < 500; iter++)
 	{
 		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
-
+		
+		if(flag == 1)
+		{
+			addScalarToDiagonal(Zden,BBt,mu,row1,row1);
+			status = matInv(Zden,row1);
+		}
 		//pre_computed part
-		if(mu == mu_orig)
+		calculateZ_preZden(Z, Zden,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
+/*		if(mu == mu_orig)
 		{
 			calculateZ_preZden(Z, Zden_inv,xy, E, T, B_transpose,mu_orig,M,Y,row,col,row1);
 		}
@@ -729,7 +738,7 @@ int main(void)
 		{
 			calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 		}
-		
+*/		
 		calculateQ(Q,Z,Y,mu,row,row1);
 	
 		prox_2norm(Q,M,C,lam/mu,row,row1,data_size);
@@ -739,7 +748,7 @@ int main(void)
 		
 		//if ((verb == true) && ((iter%10) == 0))
 		//{
-//			cout << "Iter "<< iter+1 <<": PrimRes = "<<PrimRes <<", DualRes = "<<DualRes<<", mu = "<< mu <<endl; 
+			cout << "Iter "<< iter+1 <<": PrimRes = "<<PrimRes <<", DualRes = "<<DualRes<<", mu = "<< mu <<endl; 
 		//}
 
 		if((PrimRes < tol) && (DualRes < tol))
@@ -751,13 +760,18 @@ int main(void)
 			if(PrimRes > (10*DualRes))
 			{
 				mu = 2 * mu;
+				cout << "coming inside"<<endl;
+				flag = 1;
 			}
 			else if(DualRes > (10*PrimRes))
 			{
 				mu = mu/2;
+				cout << "coming inside 2"<<endl;
+				flag = 1;
 			}
 			else
 			{
+				flag = 0;
 			}
 		}
 		//t2 = high_resolution_clock::now();
