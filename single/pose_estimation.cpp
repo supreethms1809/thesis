@@ -307,8 +307,81 @@ lapack_int matInv(float *A, int n)
 	ret = LAPACKE_sgetri(LAPACK_ROW_MAJOR,n,A,n,ipiv);
 	return ret;
 
-}	
-																					
+}
+
+void inv_mu_i(float mu,float *I,int m)
+{
+	for(int i=0;i<m;i++)
+	{
+		for(int j=0;j<m;j++)
+		{
+			if(i == j)
+			{
+			I[(i*m)+j] = 1 / (I[(i*m)+j] * mu);
+			}
+		}
+	}
+}
+
+void add(float *temp1,int n)
+{
+	for(int i=0;i<n;i++)
+	{
+		for(int j=0;j<n;j++)
+		{
+			if(i==j)
+			{
+			temp1[(i*n)+j] = temp1[(i*n)+j] + 1.0f;
+			}
+		}
+	}
+
+}
+
+void sub(float *I_n,float *temp1,float *inv,int m,int n)
+{
+	for(int i=0;i<m;i++)
+	{
+		for(int j=0;j<n;j++)
+		{
+			inv[(i*n)+j] = I_n[(i*n)+j] - temp1[(i*n)+j];
+		}
+	}
+}
+
+void Zden_cacl(float *B, float * B_transpose, float *Zden,float mu,int m,int n,)
+{
+        float *I_m = new float [m*m];
+	float *temp = new float [m*n];
+	float *temp1 = new float [n*n];
+	float *temp2 = new float [n*m];
+	float *temp3 = new float [n*m];
+	float *temp4 = new float [m*m];
+	float *temp5 = new float [m*m];
+        eye(I_n,2,2);
+        eye(I_m,2,2);
+
+	inv_mu_i(mu,I_m,m);
+	cpuMatrixMult(I_m,B,temp,m,m,n);
+	cpuMatrixMult(B_transpose,temp,temp1,n,m,n);
+	add(temp1,n);
+	matInv(temp1,n);	
+	cpuMatrixMult(temp1,B_transpose,temp2,n,n,m);
+	cpuMatrixMult(temp2,I_m,temp3,n,m,m);
+	cpuMatrixMult(B,temp3,temp4,m,n,m);
+	cpuMatrixMult(I_m,temp4,temp5,m,m,m);
+	sub(I_m,temp5,Zden,m,m);
+
+	delete[] I_m;
+	delete[] temp;
+	delete[] temp1;
+	delete[] temp2;
+	delete[] temp3;
+	delete[] temp4;
+	delete[] temp5;
+}
+
+/*																					
 void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_transpose, float mu, float *M, float *Y,const int row,const int col,const int row1)
 {
 	float *temp = new float [row*col];
@@ -356,6 +429,7 @@ void calculateZ(float *Z,float *BBt,float *xy, float *E, float *T, float *B_tran
 	delete [] Zden;
 
 }
+*/
 
 void calculateZ_preZden(float *Z,float *Zden,float *xy, float *E, float *T, float *B_transpose, float mu, float *M, float *Y,const int row,const int col,const int row1)
 {
@@ -580,7 +654,7 @@ void resCalc(float *PrimRes, float *DualRes, float *M, float *Z, float *ZO,float
 
 int main(void)
 {
-	const int iter_num = 1;
+	const int iter_num = 50;
 	high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4;
 	for(int p = 0;p<iter_num;p++)
 	{	//t3 = high_resolution_clock::now();
@@ -625,18 +699,8 @@ int main(void)
 
 	//allocate precomputed Zden
 	float *Zden = new float [row1*row1];
-	float *Zden1 = new float [row1*row1];
-	float *Zden2 = new float [row1*row1];
-	float *Zden3 = new float [row1*row1];
-	float *Zden4 = new float [row1*row1];
         int status = 0;
-	float mu_orig = 0.0;	
-	float mu1 = 0.0;
-	float mu2 = 0.0;
-	float mu3 = 0.0;
-	float mu4 = 0.0;
 	float *Zden_inv = new float [row1*row1];
-	float *Zden1_inv = new float [row1*row1];
 
 	//t1[p] = high_resolution_clock::now();
 	t1[p] = high_resolution_clock::now();
@@ -670,33 +734,12 @@ int main(void)
         cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
         //Zden
 
-	//Precompute mu
-	//mu_orig = mu;
-	//mu1 = mu * 2;
-	//mu2 = mu1 * 2;
-	//mu3 = mu / 2;
-	//mu4 = mu3 / 2;
-
 	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
-	//addScalarToDiagonal(Zden1,BBt,mu1,row1,row1);
-	//addScalarToDiagonal(Zden2,BBt,mu2,row1,row1);
-	//addScalarToDiagonal(Zden3,BBt,mu3,row1,row1);
-	//addScalarToDiagonal(Zden4,BBt,mu4,row1,row1);
  	
-	//dump_to_file("Z_old.txt",Z,row1,row1);				
-	
 	eye(Zden_inv,row1,row1);
-	//eye(Zden1_inv,row1,row1);
 	//t3 = high_resolution_clock::now();
 	//gpuInverseOfMatrix(Zden,Zden_inv,row1);
-	//gpuInverseOfMatrix(Zden1,Zden1_inv,row1);
 	status = matInv(Zden,row1);
-//	status = matInv(Zden1,row1);
-	//status = matInv(Zden2,row1);
-	//status = matInv(Zden3,row1);
-	//status = matInv(Zden4,row1);	
-
-//	mu_orig = mu;	
 
 	//t4 = high_resolution_clock::now();
 	//duration<float> time_span = duration_cast<duration<float>>(t4 - t3);
@@ -712,33 +755,8 @@ int main(void)
 			addScalarToDiagonal(Zden,BBt,mu,row1,row1);
 			status = matInv(Zden,row1);
 		}
-		//pre_computed part
+		
 		calculateZ_preZden(Z, Zden,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
-/*		if(mu == mu_orig)
-		{
-			calculateZ_preZden(Z, Zden_inv,xy, E, T, B_transpose,mu_orig,M,Y,row,col,row1);
-		}
-		else if(mu == mu1)
-		{
-			calculateZ_preZden(Z, Zden1_inv,xy, E, T, B_transpose,mu1,M,Y,row,col,row1);
-		}
-		else if(mu == mu2)
-		{
-			calculateZ_preZden(Z, Zden2,xy, E, T, B_transpose,mu2,M,Y,row,col,row1);	
-		}
-		else if(mu == mu3)
-		{
-			calculateZ_preZden(Z, Zden3,xy, E, T, B_transpose,mu3,M,Y,row,col,row1);
-		}
-		else if(mu == mu4)
-		{
-			calculateZ_preZden(Z, Zden4,xy, E, T, B_transpose,mu4,M,Y,row,col,row1);
-		}
-		else
-		{
-			calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
-		}
-*/		
 		calculateQ(Q,Z,Y,mu,row,row1);
 	
 		prox_2norm(Q,M,C,lam/mu,row,row1,data_size);
@@ -748,7 +766,7 @@ int main(void)
 		
 		//if ((verb == true) && ((iter%10) == 0))
 		//{
-			cout << "Iter "<< iter+1 <<": PrimRes = "<<PrimRes <<", DualRes = "<<DualRes<<", mu = "<< mu <<endl; 
+		//	cout << "Iter "<< iter+1 <<": PrimRes = "<<PrimRes <<", DualRes = "<<DualRes<<", mu = "<< mu <<endl; 
 		//}
 
 		if((PrimRes < tol) && (DualRes < tol))
@@ -760,13 +778,11 @@ int main(void)
 			if(PrimRes > (10*DualRes))
 			{
 				mu = 2 * mu;
-				cout << "coming inside"<<endl;
 				flag = 1;
 			}
 			else if(DualRes > (10*PrimRes))
 			{
 				mu = mu/2;
-				cout << "coming inside 2"<<endl;
 				flag = 1;
 			}
 			else
@@ -796,13 +812,8 @@ int main(void)
 	delete[] ZO;
 	delete[] Q;
 	delete[] Zden;
-	delete[] Zden1;
-	delete[] Zden2;
-	delete[] Zden3;
-	delete[] Zden4;
 	
 	delete[] Zden_inv;
-	delete[] Zden1_inv;
 
 	//duration<float> time_span = duration_cast<duration<float>>(t2 - t1);
 	//cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
