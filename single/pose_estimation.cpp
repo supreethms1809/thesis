@@ -25,6 +25,7 @@ using namespace std;
 using namespace std::chrono;
 
 extern void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col);
+extern void gpuProx_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size);
 
 int readValues(char *text, float *variable, int i,int row,int col)
 {
@@ -879,8 +880,8 @@ int main(void)
 		calculateZ_preZden(Z, Zden_inv,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 		calculateQ(Q,Q_re,Z,Y,mu,row,row1,data_size);
 	
-		prox_2norm_new(Q_re,M,C,lam/mu,row,row1,data_size);
-		//gpuProx_2norm(Q_re,M,C,lam/mu,row,row1,data_size);	
+		//prox_2norm_new(Q_re,M,C,lam/mu,row,row1,data_size);
+		gpuProx_2norm(Q_re,M,C,lam/mu,row,row1,data_size);	
 
 		updateDualvariable(Y,mu,M,Z,row,row1);
 		resCalc(&PrimRes,&DualRes,M,Z,ZO,mu,row,row1);
