@@ -99,7 +99,7 @@ __host__ void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col)
 //	float milliseconds = 0.0f ;
 	//high_resolution_clock::time_point t1,t2,t3,t4;
 //	cudaError_t cudaSetDevice(int device);
-//       cudaSetDevice(0);
+//	cudaSetDevice(0);
                
 //	cudaEvent_t kernel_start;
 //	cudaEvent_t kernel_stop;
@@ -108,10 +108,10 @@ __host__ void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col)
 //	CHECK(cudaEventCreate(&kernel_stop));
 //	CHECK(cudaEventRecord(kernel_start));
 	
-//		t3 = high_resolution_clock::now();
 	//Allocate device memory on the global memory
-	CHECK(cudaMalloc((void**)&d_matrix, MatSizeInBytes));
-	CHECK(cudaMalloc((void**)&d_iden_mat, MatSizeInBytes));
+//	CHECK(cudaFree(0));
+	CHECK(cudaMalloc(&d_matrix, MatSizeInBytes));
+	CHECK(cudaMalloc(&d_iden_mat, MatSizeInBytes));
 
 	CHECK(cudaMemcpy(d_matrix, h_matrix, MatSizeInBytes, cudaMemcpyHostToDevice));
 	CHECK(cudaMemcpy(d_iden_mat, h_iden_mat, MatSizeInBytes, cudaMemcpyHostToDevice));
@@ -143,9 +143,6 @@ __host__ void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col)
 //	CHECK(cudaDeviceSynchronize());
 
 //	CHECK(cudaEventRecord(kernel_stop));
-//		t4 = high_resolution_clock::now();
-//		duration<double> time_span = duration_cast<duration<double>>(t4 - t3);
-//		cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
 
 //	CHECK(cudaEventSynchronize(kernel_stop));
 //	CHECK(cudaEventElapsedTime(&milliseconds, kernel_start, kernel_stop));
@@ -155,33 +152,7 @@ __host__ void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col)
 	CHECK(cudaFree(d_iden_mat));
 //	CHECK(cudaEventDestroy(kernel_start));
 //	CHECK(cudaEventDestroy(kernel_stop));
-	CHECK(cudaDeviceReset());
+//	CHECK(cudaDeviceReset());
 }
 
-/*
-__host__ void gpu_prox_2norm(float *h_Qtemp,,float constant int row, int col, int data_size)
-{
-	float *d_matrix,*d_iden_mat;
-	const int MatSizeInBytes = col*col*sizeof(float);
-	float milliseconds = 0.0f ;
-	cudaError_t cudaSetDevice(int device);
-        cudaSetDevice(0);
-               
-	cudaEvent_t kernel_start;
-	cudaEvent_t kernel_stop;
 
-	CHECK(cudaEventCreate(&kernel_start));
-	CHECK(cudaEventCreate(&kernel_stop));
-	CHECK(cudaEventRecord(kernel_start));
-	//Allocate device memory on the global memory
-	CHECK(cudaMalloc((void**)&d_matrix, MatSizeInBytes));
-	CHECK(cudaMalloc((void**)&d_iden_mat, MatSizeInBytes));
-
-	CHECK(cudaMemcpy(d_matrix, h_matrix, MatSizeInBytes, cudaMemcpyHostToDevice));
-	CHECK(cudaMemcpy(d_iden_mat, h_iden_mat, MatSizeInBytes, cudaMemcpyHostToDevice));
-
-
-
-	delete[]
-}
-*/

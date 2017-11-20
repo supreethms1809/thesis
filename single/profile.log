@@ -1,0 +1,24 @@
+==23904== NVPROF is profiling process 23904, command: ./pose_estimation
+Time in miliseconds for first section is : 829.738 ms
+Iter 1: PrimRes = -nan, DualRes = -nan, mu = 1.22877
+Time in miliseconds: 879.01 ms
+==23904== Profiling application: ./pose_estimation
+==23904== Profiling result:
+            Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+ GPU activities:   77.24%  5.0063ms       384  13.037us  12.896us  13.408us  fixColumn_shared(float*, float*, int, int)
+                   19.91%  1.2908ms       384  3.3610us  2.9440us  4.3840us  fixRow_shared(float*, float*, int, int)
+                    1.82%  118.18us         2  59.089us  58.561us  59.617us  [CUDA memcpy HtoD]
+                    0.91%  58.849us         1  58.849us  58.849us  58.849us  [CUDA memcpy DtoH]
+                    0.12%  7.7440us         1  7.7440us  7.7440us  7.7440us  check_diag_zero(float*, float*, int)
+      API calls:   54.14%  338.90ms         2  169.45ms  200.80us  338.70ms  cudaMalloc
+                   43.92%  274.92ms         1  274.92ms  274.92ms  274.92ms  cudaDeviceReset
+                    0.88%  5.5313ms       769  7.1920us  6.7680us  36.771us  cudaLaunch
+                    0.40%  2.5018ms       282  8.8710us     347ns  409.11us  cuDeviceGetAttribute
+                    0.31%  1.9583ms         3  652.78us  118.62us  1.6831ms  cudaMemcpy
+                    0.12%  752.61us         3  250.87us  107.86us  323.63us  cuDeviceTotalMem
+                    0.09%  543.11us      3075     176ns     155ns  5.7670us  cudaSetupArgument
+                    0.07%  409.96us         2  204.98us  202.84us  207.12us  cudaFree
+                    0.03%  216.83us         3  72.277us  64.643us  84.715us  cuDeviceGetName
+                    0.03%  179.90us       769     233ns     225ns  1.1500us  cudaConfigureCall
+                    0.00%  3.9070us         6     651ns     385ns  1.3120us  cuDeviceGet
+                    0.00%  2.7680us         3     922ns     329ns  1.7210us  cuDeviceGetCount

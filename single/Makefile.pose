@@ -22,7 +22,7 @@ run: all
 	./pose_estimation
 
 all:
-	$(NVCC) -std=c++11 -O3 -g -arch=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart inverse_shared.cu -c
+	$(NVCC) -std=c++11 -O3 -g -arch=sm_35 -gencode=arch=compute_35,code=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart inverse_shared.cu -c
 	$(CC)  $(OPT) $(SRCS) $(LIB) -c  -lm
 	$(CC) $(OBJ) -o $(EXE) $(LIBS) $(OPT) -lcudart -lm 
 clean: 
