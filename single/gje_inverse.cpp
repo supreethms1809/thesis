@@ -20,7 +20,7 @@ extern void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col);
 void print_matrix(string desc,float *a, int m, int n)
 {
 	cout << desc << endl;
-    	for(int i=0; i<n; i++)
+    	for(int i=0; i<m; i++)
 	{
         	for(int j=0; j<n; j++)
 		{
@@ -195,8 +195,8 @@ void sub(float *I_n,float *temp1,float *inv,int m,int n)
 
 }
 
-
-void Zden_cacl(float *B, float * B_transpose, float *Zden,float mu,int m,int n,)
+/*
+void Zden_cacl_old(float *B, float * B_transpose, float *Zden,float mu,int m,int n)
 {
         float *I_m = new float [m*m];
 	float *temp = new float [m*n];
@@ -227,15 +227,53 @@ void Zden_cacl(float *B, float * B_transpose, float *Zden,float mu,int m,int n,)
 	delete[] temp4;
 	delete[] temp5;
 }
+*/
+
+void Zden_cacl(float *B, float * B_transpose, float *Zden,float mu,const int m,const int n)
+{
+        float *I_m = new float [m*m];
+	float *temp = new float [m*n];
+	float *temp1 = new float [n*n];
+	float *temp2 = new float [n*m];
+	float *temp3 = new float [n*m];
+	float *temp4 = new float [m*m];
+	float *temp5 = new float [m*m];
+        eye(I_m,m,m);
+	cout << "coming inside Zden_calc"<<endl;
+
+	inv_mu_i(mu,I_m,m);	
+	
+	cpuMatrixMult(I_m,B,temp,m,m,n);
+	cout << "checkpoint 1"<<endl;
+	cpuMatrixMult(B_transpose,temp,temp1,n,m,n);
+	
+	add(temp1,n);
+	matInv(temp1,n);	
+	cpuMatrixMult(temp1,B_transpose,temp2,n,n,m);
+	cpuMatrixMult(temp2,I_m,temp3,n,m,m);
+	cpuMatrixMult(B,temp3,temp4,m,n,m);
+	cpuMatrixMult(I_m,temp4,temp5,m,m,m);
+	sub(I_m,temp5,Zden,m,m);
+	cout << "leaving Zden_calc"<<endl;
+
+	delete[] I_m;
+	delete[] temp;
+	delete[] temp1;
+	delete[] temp2;
+	delete[] temp3;
+	delete[] temp4;
+	delete[] temp5;
+}
 
 
 
 int main(void)
 {
-	const int n = 3;
+/*	const int n = 3;
 	const int m = 3;
 	high_resolution_clock::time_point t3,t4;
-/*	const int n = 384;
+
+	const int n = 384;
 	float *a = new float[n*n];
 	float *h_a = new float[n*n];
 
@@ -248,23 +286,23 @@ int main(void)
 			h_a[i*n+j] = a[i*n+j];
 		}
 	}
-*/
+
 	float a[n*n] = {0,3,4,1,3,10,4,9,16};
-/*	float a[n*n] = {
+	float a[n*n] = {
         0.378589,   0.971711,   0.016087,   0.037668,   0.312398,
         0.756377,   0.345708,   0.922947,   0.846671,   0.856103,
         0.732510,   0.108942,   0.476969,   0.398254,   0.507045,
         0.162608,   0.227770,   0.533074,   0.807075,   0.180335,
         0.517006,   0.315992,   0.914848,   0.460825,   0.731980
     };
-*/
+
 	float *I = new float [n*n];
 
 	eye(I,n,n);
-/*	print_matrix("Input",a,n,n);
+	print_matrix("Input",a,n,n);
 	print_matrix("Identity matrix",I,n,n);
     	cout << endl << endl;
-*/	
+	
 
 	t3 = high_resolution_clock::now();
     	cpuInverseOfMatrix(a,I,n);
@@ -279,14 +317,14 @@ int main(void)
 	print_matrix("Inverse ",I,n,n);
 
 	float h_a[n*n] = {0,3,4,1,3,10,4,9,16};
-/*	float h_a[n*n] = {
+	float h_a[n*n] = {
         0.378589,   0.971711,   0.016087,   0.037668,   0.312398,
         0.756377,   0.345708,   0.922947,   0.846671,   0.856103,
         0.732510,   0.108942,   0.476969,   0.398254,   0.507045,
         0.162608,   0.227770,   0.533074,   0.807075,   0.180335,
         0.517006,   0.315992,   0.914848,   0.460825,   0.731980
     };
-*/
+
         float *h_I = new float [n*n];
 
         eye(h_I,n,n);
@@ -344,4 +382,21 @@ int main(void)
 
 	delete[] I_n;
 	delete[] I_m;
+*/
+	//float *D = new float [5*3];
+	//float *D_t = new float [3*5];
+	float mu = 1.140937;
+	float *B = new float [384*15];
+	float *B_t = new float [15*384];
+	float D[5*3] = {3,2,2,4,2,1,1,6,5,2,2,1,4,6,3};
+	float D_t[3*5] = {3,4,1,2,4,2,2,6,2,6,2,1,5,1,3};
+	print_matrix("D",D,5,3);
+	print_matrix("D_t",D_t,3,5);
+	float *inv = new float [5*5];
+
+	Zden_cacl(D, D_t, inv,mu,5,3);
+	print_matrix("inv",inv,5,5);
+	delete[] B;
+	delete[] B_t;
+	delete[] inv;
 }

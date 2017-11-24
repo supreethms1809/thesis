@@ -10,16 +10,16 @@ INCLUDES := -I$(CUDA_PATH)/include
 LIBS := -L$(CUDA_PATH)/lib64/
 
 
-SRCS = 256_pose_estimation.cpp
+SRCS = pose_estimation.cpp
 
 LIB = 
 
-OBJ = 256_pose_estimation.o inverse_shared.o prox_2norm.o
+OBJ = pose_estimation.o inverse_shared.o prox_2norm.o
 
-EXE = 256_pose_estimation
+EXE = estimation
 
 run: all
-	./256_pose_estimation
+	./estimation
 
 all:
 	$(NVCC) -std=c++11 -O3 -g -arch=sm_35 -gencode=arch=compute_35,code=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart inverse_shared.cu -c
@@ -27,4 +27,4 @@ all:
 	$(CC)  $(OPT) $(SRCS) $(LIB) -c  -lm
 	$(CC) $(OBJ) -o $(EXE) $(LIBS) $(OPT) -lcudart -lm 
 clean: 
-	rm ./256_pose_estimation
+	rm ./estimation

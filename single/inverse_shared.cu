@@ -18,7 +18,8 @@
 
 using namespace std;
 
-#define TILE_WIDTH 384
+//#define TILE_WIDTH 384
+#define TILE_WIDTH 768
 
 #define CHECK(call) \
 {                                                                        \

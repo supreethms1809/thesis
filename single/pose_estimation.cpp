@@ -217,7 +217,7 @@ void initialize(float *variable,float *variable2, int col, int row)
 void cpuMatrixMult(float *A, float *B, float *C, int row, int col,int col2)
 {
 	float fSum;
-	int count = 0;
+	//int count = 0;
 	for (int i = 0; i < row; i++)
 	{
 		for (int j = 0; j < col2; j++)
@@ -227,7 +227,7 @@ void cpuMatrixMult(float *A, float *B, float *C, int row, int col,int col2)
 			{
 			fSum += (A[(i*col) + k] * B[(k*col2) + j]);
 			}
-		count++;
+		//cout << "fSum = "<<fSum<<endl;
 		C[(i*col2) + j] = fSum;
 		}
 	}
@@ -324,7 +324,7 @@ void inv_mu_i(float mu,float *I,int m)
 	}
 }
 
-void add(float *temp1,int n)
+void add_iden(float *temp1,int n)
 {
 	for(int i=0;i<n;i++)
 	{
@@ -339,7 +339,7 @@ void add(float *temp1,int n)
 
 }
 
-void sub(float *I_n,float *temp1,float *inv,int m,int n)
+void sub_wood(float *I_n,float *temp1,float *inv,int m,int n)
 {
 	for(int i=0;i<m;i++)
 	{
@@ -350,36 +350,69 @@ void sub(float *I_n,float *temp1,float *inv,int m,int n)
 	}
 }
 
-void Zden_cacl(float *B, float * B_transpose, float *Zden,float mu,int m,int n)
+void cpuMatrixMult_1(float *A, float *B, float *C, int row, int col,int col2)
+{
+	float fSum;
+	//cout << "value of row "<<row<<endl;
+	//cout << "value of col "<<col<<endl;
+	//cout << "value of col2 "<<col2<<endl;
+	//int count = 0;
+	for (int i = 0; i < row; i++)
+	{
+		//cout <<"row "<<endl;
+		for (int j = 0; j < col2; j++)
+		{
+		fSum = 0.0;
+			for (int k = 0; k < col; k++)
+			{
+	//		cout << "value of i = "<<i<<"\t value of j = "<<j<<endl;
+			fSum += (A[(i*col) + k] * B[(k*col2) + j]);
+			}
+		//cout << "fSum = "<<fSum<<endl;
+		C[(i*col2) + j] = fSum;
+		}
+	}
+	//cout << "after for loop"<<endl;
+}
+
+
+void Zden_cacl(float *B, float *B_transpose, float *Zden,float mu,const int m,const int n)
 {
         float *I_m = new float [m*m];
-	float *temp = new float [m*n];
-	float *temp1 = new float [n*n];
-	float *temp2 = new float [n*m];
-	float *temp3 = new float [n*m];
-	float *temp4 = new float [m*m];
-	float *temp5 = new float [m*m];
+	float temp_n [m*n]; 
+	float *wood = new float [m*n];
+	float *wood1 = new float [n*n];
+	float *wood2 = new float [n*m];
+	float *wood3 = new float [n*m];
+	float *wood4 = new float [m*m];
+	float *wood5 = new float [m*m];
         eye(I_m,m,m);
+	cout << "coming inside Zden_calc"<<endl;
 
-	inv_mu_i(mu,I_m,m);
-	cpuMatrixMult(I_m,B,temp,m,m,n);
-	cpuMatrixMult(B_transpose,temp,temp1,n,m,n);
-	add(temp1,n);
-	matInv(temp1,n);	
-	cpuMatrixMult(temp1,B_transpose,temp2,n,n,m);
-	cpuMatrixMult(temp2,I_m,temp3,n,m,m);
-	cpuMatrixMult(B,temp3,temp4,m,n,m);
-	cpuMatrixMult(I_m,temp4,temp5,m,m,m);
-	sub(I_m,temp5,Zden,m,m);
-	dump_to_file("inverse", Zden, m, m);
+	inv_mu_i(mu,I_m,m);	
+	initializeZero(wood, n, m);
+	
+	cpuMatrixMult_1(I_m,B,wood,m,m,n);
+	cout << "checkpoint 1"<<endl;
+	cpuMatrixMult(B_transpose,wood,wood1,n,m,n);
+	
+	add_iden(wood1,n);
+	matInv(wood1,n);	
+	cpuMatrixMult(wood1,B_transpose,wood2,n,n,m);
+	cpuMatrixMult(wood2,I_m,wood3,n,m,m);
+	cpuMatrixMult(B,wood3,wood4,m,n,m);
+	cpuMatrixMult(I_m,wood4,wood5,m,m,m);
+	sub_wood(I_m,wood5,Zden,m,m);
+	dump_to_file("woodberry_inverse", Zden, m, m);
+	cout << "leaving Zden_calc"<<endl;
 
 	delete[] I_m;
-	delete[] temp;
-	delete[] temp1;
-	delete[] temp2;
-	delete[] temp3;
-	delete[] temp4;
-	delete[] temp5;
+	delete[] wood;
+	delete[] wood1;
+	delete[] wood2;
+	delete[] wood3;
+	delete[] wood4;
+	delete[] wood5;
 }
 
 
@@ -769,6 +802,48 @@ void resCalc(float *PrimRes, float *DualRes, float *M, float *Z, float *ZO,float
 	delete[] ZminusZO;
 }
 
+float resCalc_PrimRes(float *M, float *Z, float *ZO,float mu, int row, int row1)
+{
+	float *MminusZ = new float [row*row1];
+	float temp = 0.0f;
+
+	for(int i = 0; i< row ;i++)
+	{
+		for(int j = 0; j<row1 ; j++)
+		{
+			MminusZ[(i*row1)+j] = M[(i*row1)+j] - Z[(i*row1)+j];
+		}
+	}
+	
+		
+	temp = febNorm(MminusZ,row,row1)/febNorm(ZO,row,row1);
+	
+	delete[] MminusZ;
+	return temp;
+}
+
+float resCalc_DualRes(float *Z, float *ZO,float mu, int row, int row1)
+{
+	float *ZminusZO = new float [row*row1];
+	float temp = 0.0f;
+
+	for(int i = 0; i< row ;i++)
+	{
+		for(int j = 0; j<row1 ; j++)
+		{
+			ZminusZO[(i*row1)+j] = Z[(i*row1)+j] - ZO[(i*row1)+j];
+		}
+	}	
+		
+	cout << "value of febnorm 1"<<febNorm(ZminusZO,row,row1)<<endl;
+	cout << "value of norm 2 "<< febNorm(ZO,row,row1)<<endl;
+	temp = mu * febNorm(ZminusZO,row,row1)/febNorm(ZO,row,row1);
+	
+	delete[] ZminusZO;
+	return temp;
+}
+
+
 int main(void)
 {
 	const int iter_num = 1;
@@ -853,38 +928,62 @@ int main(void)
         //Zden
 
 	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
- 	
-	eye(Zden_inv,row1,row1);
-//	t3 = high_resolution_clock::now();
-	gpuInverseOfMatrix(Zden,Zden_inv,row1);
+
+
+//	t3 = high_resolution_clock::now();	
+	//gpu inverse
+//	eye(Zden_inv,row1,row1);
+//	gpuInverseOfMatrix(Zden,Zden_inv,row1);
+
+	//cpu inverse
 //	status = matInv(Zden,row1);
-//	Zden_cacl(B, B_transpose, Zden,mu,row1,col);
+//	dump_to_file("mkl inverse", Zden, row1, row1);
+
+	//woodburry inverse
+	cout << "value of row1"<<row1 << endl;
+	cout << "value of col " << col << endl;
+	Zden_cacl(B,B_transpose,Zden,mu,row1,col);
+/*
 //	t4 = high_resolution_clock::now();
 //	duration<float> time_span = duration_cast<duration<float>>(t4 - t3);
 //	cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
+
 	
-	for(int iter = 0; iter < 500; iter++)
+	for(int iter = 0; iter < 10; iter++)
 	{
 		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
 		
 		if(flag == 1)
 		{
+			//cpu inverse
 			addScalarToDiagonal(Zden,BBt,mu,row1,row1);
-			//status = matInv(Zden,row1);
-			eye(Zden_inv,row1,row1);
-			gpuInverseOfMatrix(Zden,Zden_inv,row1);
+			status = matInv(Zden,row1);
+
+			//gpuinverse
+			//eye(Zden_inv,row1,row1);
+			//gpuInverseOfMatrix(Zden,Zden_inv,row1);
+
+			//woodburry inverse
+			//Zden_cacl(B, B_transpose,Zden,mu,row1,col);
 		}
 		
-		//calculateZ_preZden(Z, Zden,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
-		calculateZ_preZden(Z, Zden_inv,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
+		//cpu
+		calculateZ_preZden(Z, Zden,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
+
+		//gpu
+		//calculateZ_preZden(Z, Zden_inv,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
+
 		calculateQ(Q,Q_re,Z,Y,mu,row,row1,data_size);
 	
 		//prox_2norm_new(Q_re,M,C,lam/mu,row,row1,data_size);
 		gpuProx_2norm(Q_re,M,C,lam/mu,row,row1,data_size);	
 
 		updateDualvariable(Y,mu,M,Z,row,row1);
-		resCalc(&PrimRes,&DualRes,M,Z,ZO,mu,row,row1);
+		//resCalc(&PrimRes,&DualRes,M,Z,ZO,mu,row,row1);
+		
+		PrimRes = resCalc_PrimRes(M,Z,ZO,mu,row,row1);
+		DualRes = resCalc_DualRes(Z,ZO,mu,row,row1);
 		
 		//if ((verb == true) && ((iter%10) == 0))
 		//{
@@ -917,6 +1016,7 @@ int main(void)
 		//cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
 
 	}
+*/
 	t2[p] = high_resolution_clock::now();
 
 	delete[] xy;

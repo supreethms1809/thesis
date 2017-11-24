@@ -547,13 +547,13 @@ omp_set_num_threads(24);
 	for(int i = 0;i < data_size;i++)
 	{
 	
-	float *Qtemp = new float [6];
+	float *Qtemp = new float [ROW*COL];
 	float *sigma = new float [COL];
 	float *u = new float [LDU*ROW];
 	float *vt = new float [ROW*COL];
 
-	float *Qtemp1 = new float [4];
-	float *Qtemp2 = new float [6];
+	float *Qtemp1 = new float [ROW*ROW];
+	float *Qtemp2 = new float [ROW*COL];
 
 
 		for(int j = 0;j<6;j++)
@@ -829,7 +829,7 @@ int main(void)
 	a = mean_of_std_deviation(xy,col,row,mean);
 	newScalc(xy,col,row,a);
 	//displayValues(xy,items);
-	B_items = readValues("exp1.txt", B, B_items,row1,col1);
+	B_items = readValues("B_256.txt", B, B_items,row1,col1);
 	rowMean(B,col1,row1,B_mean);
 	Scalc(B, col1,row1,B_mean);
 	
