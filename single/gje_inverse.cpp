@@ -17,6 +17,51 @@ using std::string;
 
 extern void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col);
 
+int readValues(char *text, float *variable, int i,int row,int col)
+{
+ 	float temp;
+	ifstream myReadFile;
+	myReadFile.open(text, ios::in);
+	if (myReadFile.is_open()) 
+	{
+		while (!myReadFile.eof())
+		{
+			if(i < (row*col))
+			{
+			myReadFile >> temp;
+			variable[i] = temp;
+			i++;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+  	myReadFile.close();
+	return i;
+}
+void dump_to_file(char *filename, float *matrix, int row, int col)
+{
+	cout << "filename "<<filename<<endl;
+	cout << "value of df row " << row <<endl;
+	cout << "value of df col " << col <<endl;
+	ofstream fs;
+	fs.open(filename, ios::out);
+	for(int i = 0; i<row;i++)
+	{
+		for(int j = 0;j<col ;j++)
+		{
+		//if(i==j)
+		//{
+		fs << matrix[i*col+j] << "\n" ;
+		//}
+		}
+	fs << "\n";
+	}
+}
+
+
 void print_matrix(string desc,float *a, int m, int n)
 {
 	cout << desc << endl;
@@ -193,6 +238,17 @@ void sub(float *I_n,float *temp1,float *inv,int m,int n)
 	}
 
 
+}
+void TransposeOnCPU(float *matrix, float *matrixTranspose, int row, int col)
+{
+
+	for (int i = 0; i < row; i++)
+	{
+		for (int j = 0; j < col; j++)
+		{
+		matrixTranspose[j*row + i] = matrix[i*col + j];
+		}
+	}
 }
 
 /*
@@ -386,8 +442,17 @@ int main(void)
 	//float *D = new float [5*3];
 	//float *D_t = new float [3*5];
 	float mu = 1.140937;
+	int B_items = 0;
 	float *B = new float [384*15];
 	float *B_t = new float [15*384];
+	float *in = new float [384*384];
+	B_items = readValues("exp1.txt", B, B_items,384,15);
+	TransposeOnCPU(B, B_t, 384,15);
+	Zden_cacl(B, B_t, in,mu,384,15);
+	dump_to_file("in",in,384,384);	
+
+
+
 	float D[5*3] = {3,2,2,4,2,1,1,6,5,2,2,1,4,6,3};
 	float D_t[3*5] = {3,4,1,2,4,2,2,6,2,6,2,1,5,1,3};
 	print_matrix("D",D,5,3);
@@ -399,4 +464,5 @@ int main(void)
 	delete[] B;
 	delete[] B_t;
 	delete[] inv;
+	delete[] in;
 }

@@ -2,7 +2,7 @@
 CC = icc
 NVCC = nvcc 
 
-OPT = -qopenmp -O3 -g -mkl -heap-arrays -parallel -ip -std=c++11
+OPT = -qopenmp -O3 -g -mkl -heap-arrays -ip -std=c++11
 
 CUDA_PATH = /usr/local/cuda-9.0
 
@@ -16,10 +16,10 @@ LIB =
 
 OBJ = pose_estimation.o inverse_shared.o prox_2norm.o
 
-EXE = estimation
+EXE = pose_estimation
 
 run: all
-	./estimation
+	./pose_estimation
 
 all:
 	$(NVCC) -std=c++11 -O3 -g -arch=sm_35 -gencode=arch=compute_35,code=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart inverse_shared.cu -c
@@ -27,4 +27,4 @@ all:
 	$(CC)  $(OPT) $(SRCS) $(LIB) -c  -lm
 	$(CC) $(OBJ) -o $(EXE) $(LIBS) $(OPT) -lcudart -lm 
 clean: 
-	rm ./estimation
+	rm ./pose_estimation
