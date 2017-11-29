@@ -353,32 +353,63 @@ void sub_wood(float *I_n,float *temp1,float *inv,int m,int n)
 	}
 }
 
-void cpuMatrixMult_1(float *A, float *B, float *C, int row, int col,int col2)
+void cpuInverseOfMatrix(float *matrix, float *I, int col)
 {
-	float fSum;
-	//cout << "value of row "<<row<<endl;
-	//cout << "value of col "<<col<<endl;
-	//cout << "value of col2 "<<col2<<endl;
-	int count = 0;
-	for (int i = 0; i < row; i++)
-	{
-		//cout <<"row "<<endl;
-		for (int j = 0; j < col2; j++)
-		{
-		fSum = 0.0;
-			for (int k = 0; k < col; k++)
-			{
-	//		cout << "value of i = "<<i<<"\t value of j = "<<j<<endl;
-			fSum += (A[(i*col) + k] * B[(k*col2) + j]);
-			}
-		//cout << "fSum = "<<fSum<<endl;
-		count++;
-		C[(i*col2) + j] = fSum;
-		}
-	}
-	cout << "after for loop"<<count<<endl;
-}
 
+	for (int m = 0; m < col; m++)
+	{
+		//Checking if diagonal element is 0
+		if (matrix[((col) + 1)*m] == 0)
+		{
+			//checking if the row is last row. If it is last row add the previous row to make it non zero
+                	if (m == (col - 1))
+			{
+				for (int i = 0; i < (col); i++)
+				{					
+				matrix[(m * (col)) + i] = matrix[((m - 1) * (col)) + i] + matrix[(m * (col)) + i];
+				I[(m * (col)) + i] = matrix[((m - 1) * (col)) + i] + matrix[(m * (col)) + i];
+				}
+			}
+			else	//if it is not last row, add the next row.
+			{
+			        for (int i = 0; i < (2 * col); i++)
+				{
+				matrix[(m * col) + i] = matrix[((m + 1) * col) + i] + matrix[(m * col) + i];
+				I[(m * col) + i] = matrix[((m + 1) * col) + i] + matrix[(m * col) + i];
+				}
+			}
+		}
+
+		float initialValue = matrix[((col) + 1)*m];
+
+//Make the diagonal elements 1 along with the whole row(divide).
+		for (int j = 0; j < (col); j++)
+		{
+		matrix[(m * (col)) + j] = matrix[(m * (col)) + j] / initialValue;
+		I[(m * (col)) + j] = I[(m * (col)) + j] / initialValue;
+		}
+
+omp_set_num_threads(24);
+#pragma omp parallel for
+		//Making the elements of the row to zero
+		for (int k = 0; k < col; k++)
+		{
+			float tempIni;
+			tempIni = matrix[m + (k * (col))];
+			if (k != m)
+			{	
+				for (int l = 0; l < (col); l++)
+				{
+					matrix[k*col+l] = matrix[k*col+l] - ((tempIni*matrix[m*col+l])/matrix[m*col+m]);
+					I[k*col+l] = I[k*col+l] - ((tempIni*I[m*col+l])/matrix[m*col+m]);
+
+				}
+			}
+
+		}
+
+	}
+}
 
 void Zden_cacl(float *B, float *B_transpose, float *Zden,float mu,const int m,const int n)
 {
@@ -444,7 +475,10 @@ void calculateZ_preZden(float *Z,float *Zden,float *xy, float *E, float *T, floa
                 }
         }
         //temp2 = temp * B'
-        cpuMatrixMult(temp, B_transpose, temp2, row, col, row1);
+        //CPU//
+	cpuMatrixMult(temp, B_transpose, temp2, row, col, row1);
+        //GPU//
+	//gpuMultShared(temp, B_transpose, temp2, row, col, row1);
 
         //temp3 = mu*M
         scalarToMatrixMultiply(temp3, M, mu, row, row1);
@@ -453,7 +487,10 @@ void calculateZ_preZden(float *Z,float *Zden,float *xy, float *E, float *T, floa
         sumOfMatrix(Znum,temp2, temp3, Y, row, row1);
 
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
-        cpuMatrixMult(Znum, Zden, Z, row, row1, row1);
+        //CPU//
+	cpuMatrixMult(Znum, Zden, Z, row, row1, row1);
+	//GPU//
+	//gpuMultShared(Znum, Zden, Z, row, row1, row1);
 
 	delete [] temp;
         delete [] temp2;
@@ -852,14 +889,14 @@ float resCalc_DualRes(float *Z, float *ZO,float mu, int row, int row1)
 int main(void)
 {
 	const int iter_num = 100;
-	high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4;
+	high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4,t5[500],t6[500];
 	for(int p = 0;p<iter_num;p++)
 	{	//t3 = high_resolution_clock::now();
 
 	
 	const int row = 2;
 	const int col = 15;
-	const int row1 = 384;
+	const int row1 = 1536;
 	const int col1 = 15;
 	float tol = 1e-04;
 
@@ -875,6 +912,8 @@ int main(void)
 	int lam =1;
 	bool verb = true;
 	int flag = 0;
+	int iter = 0;
+	int count1 = 0;
 
 	const int data_size = row1/3;	
 	
@@ -909,7 +948,7 @@ int main(void)
 	a = mean_of_std_deviation(xy,col,row,mean);
 	newScalc(xy,col,row,a);
 	//displayValues(xy,items);
-	B_items = readValues("exp1.txt", B, B_items,row1,col1);
+	B_items = readValues("B_512.txt", B, B_items,row1,col1);
 	rowMean(B,col1,row1,B_mean);
 	Scalc(B, col1,row1,B_mean);
 	
@@ -937,11 +976,12 @@ int main(void)
 
 //	t3 = high_resolution_clock::now();	
 	//gpu inverse
-//	eye(Zden_inv,row1,row1);
+	//eye(Zden_inv,row1,row1);
 //	gpuInverseOfMatrix(Zden,Zden_inv,row1);
 
 	//cpu inverse
 	status = matInv(Zden,row1);
+	//cpuInverseOfMatrix(Zden, Zden_inv, row1);
 //	dump_to_file("mkl inverse", Zden, row1, row1);
 
 	//woodburry inverse
@@ -952,8 +992,9 @@ int main(void)
 //	cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
 
 	
-	for(int iter = 0; iter < 500; iter++)
+	for(iter = 0; iter < 500; iter++)
 	{
+		count1 = iter;
 		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
 		
@@ -962,6 +1003,8 @@ int main(void)
 			//cpu inverse
 			addScalarToDiagonal(Zden,BBt,mu,row1,row1);
 			status = matInv(Zden,row1);
+			//eye(Zden_inv,row1,row1);
+			//cpuInverseOfMatrix(Zden, Zden_inv, row1);
 
 			//gpuinverse
 			//eye(Zden_inv,row1,row1);
@@ -978,9 +1021,11 @@ int main(void)
 		//calculateZ_preZden(Z, Zden_inv,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 
 		calculateQ(Q,Q_re,Z,Y,mu,row,row1,data_size);
-	
+		
+		//t5[iter] = high_resolution_clock::now();
 		prox_2norm_new(Q_re,M,C,lam/mu,row,row1,data_size);
 		//gpuProx_2norm(Q_re,M,C,lam/mu,row,row1,data_size);	
+		//t6[iter] = high_resolution_clock::now();
 
 		updateDualvariable(Y,mu,M,Z,row,row1);
 		//resCalc(&PrimRes,&DualRes,M,Z,ZO,mu,row,row1);
@@ -1017,7 +1062,7 @@ int main(void)
 		//t2 = high_resolution_clock::now();
 		//duration<float> time_span = duration_cast<duration<float>>(t2 - t1);
 		//cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
-
+		
 	}
 
 	t2[p] = high_resolution_clock::now();
@@ -1040,7 +1085,14 @@ int main(void)
 	delete[] Zden;
 	
 	delete[] Zden_inv;
-
+	/*cout << "count 1 = "<<count1<<endl; 
+	duration<float> time_span_prox;
+	for(int p=0;p<count1;p++)
+	{
+		time_span_prox += duration_cast<duration<float>>(t6[p] - t5[p]);
+	}	
+	cout << "Time in miliseconds for prox_norm: "<< (time_span_prox.count()/count1) * 1000 << " ms"<<endl; 
+*/
 	//duration<float> time_span = duration_cast<duration<float>>(t2 - t1);
 	//cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
 	}	

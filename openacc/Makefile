@@ -1,8 +1,8 @@
 # compiler option
-CC = icc
+CC = pgc++
 NVCC = nvcc 
 
-OPT = -qopenmp -O3 -g -mkl -heap-arrays -ip -std=c++11
+OPT = -O3 -g -acc -Minfo=accel -mp -Mcuda
 
 CUDA_PATH = /usr/local/cuda-9.0
 
@@ -14,7 +14,7 @@ SRCS = pose_estimation.cpp
 
 LIB = 
 
-OBJ = pose_estimation.o inverse_shared.o prox_2norm_old.o GPUSharedMult.o
+OBJ = pose_estimation.o inverse_shared.o prox_2norm_old.o
 
 EXE = pose_estimation
 
@@ -24,7 +24,6 @@ run: all
 all:
 	$(NVCC) -std=c++11 -O3 -g -arch=sm_35 -gencode=arch=compute_35,code=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart inverse_shared.cu -c
 	$(NVCC) -std=c++11 -O3 -g -arch=sm_35 -gencode=arch=compute_35,code=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart prox_2norm_old.cu -c
-	$(NVCC) -std=c++11 -O3 -g -arch=sm_35 -gencode=arch=compute_35,code=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart GPUSharedMult.cu -c
 	$(CC)  $(OPT) $(SRCS) $(LIB) -c  -lm
 	$(CC) $(OBJ) -o $(EXE) $(LIBS) $(OPT) -lcudart -lm 
 clean: 

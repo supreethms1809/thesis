@@ -18,7 +18,6 @@
 
 using namespace std;
 
-#define MAT_NUM 32
 #define TILE_MN 6
 #define TILE_MM 4
 
@@ -35,7 +34,7 @@ using namespace std;
 
 __global__ void svd_2_3_gpu(float *d_Q,float *d_M,float *d_C,float constant,int row,int col,int data_size)
 {
-	int threadid = threadIdx.x;
+	//int threadid = threadIdx.x;
 	int blockid = blockIdx.x;
 	float T = 0;
 	float D = 0;
@@ -48,15 +47,15 @@ __global__ void svd_2_3_gpu(float *d_Q,float *d_M,float *d_C,float constant,int 
 	int m = 2;
 	int n = 3;
 
-	__shared__ float a[MAT_NUM][TILE_MN];
-	__shared__ float aat[MAT_NUM][TILE_MM];
-	__shared__ float u[MAT_NUM][TILE_MM];
-	__shared__ float sig[MAT_NUM][TILE_MM];
-	__shared__ float vt[MAT_NUM][TILE_MN];
-	__shared__ float sig_inv[MAT_NUM][TILE_MM];
-	__shared__ float temp[MAT_NUM][TILE_MM];
-	__shared__ float u_t[MAT_NUM][TILE_MM];
-	__shared__ float Qtemp2[MAT_NUM][TILE_MN];
+	__shared__ float a[TILE_MN];
+	__shared__ float aat[TILE_MM];
+	__shared__ float u[TILE_MM];
+	__shared__ float sig[TILE_MM];
+	__shared__ float vt[TILE_MN];
+	__shared__ float sig_inv[TILE_MM];
+	__shared__ float temp[TILE_MM];
+	__shared__ float u_t[TILE_MM];
+	__shared__ float Qtemp2[TILE_MN];
 	//float sig_inv[m*m];
 	//float temp[m*m];
 	//float u_t[m*m];
@@ -64,50 +63,50 @@ __global__ void svd_2_3_gpu(float *d_Q,float *d_M,float *d_C,float constant,int 
 
 	for(int j = 0;j<6;j++)
 	{
-		a[threadid][j] = d_Q[(blockid*192)+(threadid*6)+j];
+		a[j] = d_Q[(blockid*6)+j];
 	}
 
 		
-	aat[threadid][0] = a[threadid][0]*a[threadid][0]+ a[threadid][1]*a[threadid][1] + a[threadid][2]*a[threadid][2];
-	aat[threadid][1] = a[threadid][0]*a[threadid][3]+ a[threadid][1]*a[threadid][4] + a[threadid][2]*a[threadid][5];
-	aat[threadid][2] = a[threadid][3]*a[threadid][0]+ a[threadid][4]*a[threadid][1] + a[threadid][5]*a[threadid][2];
-	aat[threadid][3] = a[threadid][3]*a[threadid][3]+ a[threadid][4]*a[threadid][4] + a[threadid][5]*a[threadid][5]; 
+	aat[0] = a[0]*a[0]+ a[1]*a[1] + a[2]*a[2];
+	aat[1] = a[0]*a[3]+ a[1]*a[4] + a[2]*a[5];
+	aat[2] = a[3]*a[0]+ a[4]*a[1] + a[5]*a[2];
+	aat[3] = a[3]*a[3]+ a[4]*a[4] + a[5]*a[5]; 
 
-	T = aat[threadid][0] + aat[threadid][3];
-	D = aat[threadid][0] * aat[threadid][3] - aat[threadid][1] * aat[threadid][2];
+	T = aat[0] + aat[3];
+	D = aat[0] * aat[3] - aat[1] * aat[2];
 	lam1 = 0.5*(T + (sqrt((T*T)-4*D)));
 	lam2 = 0.5*(T - (sqrt((T*T)-4*D)));
 
-	u[threadid][0] = aat[threadid][1];
-	u[threadid][2] = lam1 - aat[threadid][0];
-	u[threadid][1] = aat[threadid][1];
-	u[threadid][3] = lam2 - aat[threadid][0];
-	u1_norm =1/sqrt(u[threadid][0]*u[threadid][0]+u[threadid][2]*u[threadid][2]);
-	u2_norm =1/sqrt(u[threadid][1]*u[threadid][1]+u[threadid][3]*u[threadid][3]);
+	u[0] = aat[1];
+	u[2] = lam1 - aat[0];
+	u[1] = aat[1];
+	u[3] = lam2 - aat[0];
+	u1_norm =1/sqrt(u[0]*u[0]+u[2]*u[2]);
+	u2_norm =1/sqrt(u[1]*u[1]+u[3]*u[3]);
 
 	//final u
-	u[threadid][0] = u[threadid][0]*u1_norm;
-	u[threadid][2] = u[threadid][2]*u1_norm;
-	u[threadid][1] = u[threadid][1]*u2_norm;
-	u[threadid][3] = u[threadid][3]*u2_norm;
+	u[0] = u[0]*u1_norm;
+	u[2] = u[2]*u1_norm;
+	u[1] = u[1]*u2_norm;
+	u[3] = u[3]*u2_norm;
 
 	//u_transpose
-	u_t[threadid][0] = u[threadid][0];
-	u_t[threadid][1] = u[threadid][2];
-	u_t[threadid][2] = u[threadid][1];
-	u_t[threadid][3] = u[threadid][3];
+	u_t[0] = u[0];
+	u_t[1] = u[2];
+	u_t[2] = u[1];
+	u_t[3] = u[3];
 	
 	//sigma 
-	sig[threadid][0] = sqrt(lam1);
-	sig[threadid][1] = 0;
-	sig[threadid][2] = 0;
-	sig[threadid][3] = sqrt(lam2);
+	sig[0] = sqrt(lam1);
+	sig[1] = 0;
+	sig[2] = 0;
+	sig[3] = sqrt(lam2);
 
 	//sigma_inv
-	sig_inv[threadid][0] = 1/sig[threadid][0];
-	sig_inv[threadid][1] = 0;
-	sig_inv[threadid][2] = 0;
-	sig_inv[threadid][3] = 1/sig[threadid][3];
+	sig_inv[0] = 1/sig[0];
+	sig_inv[1] = 0;
+	sig_inv[2] = 0;
+	sig_inv[3] = 1/sig[3];
 
 	//vt
 	for (int i = 0; i < m; i++)
@@ -117,9 +116,9 @@ __global__ void svd_2_3_gpu(float *d_Q,float *d_M,float *d_C,float constant,int 
 		fSum = 0.0;
 			for (int k = 0; k < m; k++)
 			{
-			fSum += (sig_inv[threadid][(i*m) + k] * u_t[threadid][(k*m) + j]);
+			fSum += (sig_inv[(i*m) + k] * u_t[(k*m) + j]);
 			}
-		temp[threadid][(i*m) + j] = fSum;
+		temp[(i*m) + j] = fSum;
 		}
 	}
 	for (int i = 0; i < m; i++)
@@ -129,26 +128,26 @@ __global__ void svd_2_3_gpu(float *d_Q,float *d_M,float *d_C,float constant,int 
 		fSum = 0.0;
 			for (int k = 0; k < m; k++)
 			{
-			fSum += (temp[threadid][(i*m) + k] * a[threadid][(k*n) + j]);
+			fSum += (temp[(i*m) + k] * a[(k*n) + j]);
 			}
-		vt[threadid][(i*n) + j] = fSum;
+		vt[(i*n) + j] = fSum;
 		}
 	}
 	
-	if((sig[threadid][0]+sig[threadid][3]) <= constant )
+	if((sig[0]+sig[3]) <= constant )
 	{
-		sig[threadid][0] = 0;
-		sig[threadid][3] = 0;
+		sig[0] = 0;
+		sig[3] = 0;
 	}
-	else if ((sig[threadid][0] - sig[threadid][3]) <= constant)
+	else if ((sig[0] - sig[3]) <= constant)
 	{
-		sig[threadid][0] = ((sig[threadid][0]+sig[threadid][3])-constant)/2;
-		sig[threadid][3] = sig[threadid][0];
+		sig[0] = ((sig[0]+sig[3])-constant)/2;
+		sig[3] = sig[0];
 	}
 	else
 	{
-		sig[threadid][0] = sig[threadid][0] - constant;
-		sig[threadid][3] = sig[threadid][3];
+		sig[0] = sig[0] - constant;
+		sig[3] = sig[3];
 	}
 
 	for (int i = 0; i < m; i++)
@@ -158,9 +157,9 @@ __global__ void svd_2_3_gpu(float *d_Q,float *d_M,float *d_C,float constant,int 
 		fSum = 0.0;
 			for (int k = 0; k < m; k++)
 			{
-			fSum += (u[threadid][(i*m) + k] * sig[threadid][(k*m) + j]);
+			fSum += (u[(i*m) + k] * sig[(k*m) + j]);
 			}
-		temp[threadid][(i*m) + j] = fSum;
+		temp[(i*m) + j] = fSum;
 		}
 	}
 	for (int i = 0; i < m; i++)
@@ -170,9 +169,9 @@ __global__ void svd_2_3_gpu(float *d_Q,float *d_M,float *d_C,float constant,int 
 		fSum = 0.0;
 			for (int k = 0; k < m; k++)
 			{
-			fSum += (temp[threadid][(i*m) + k] * vt[threadid][(k*n) + j]);
+			fSum += (temp[(i*m) + k] * vt[(k*n) + j]);
 			}
-		Qtemp2[threadid][(i*n) + j] = fSum;
+		Qtemp2[(i*n) + j] = fSum;
 		}
 	}
 
@@ -183,11 +182,11 @@ __global__ void svd_2_3_gpu(float *d_Q,float *d_M,float *d_C,float constant,int 
 	{
 		for(int k=0;k<3;k++)
 		{
-			d_M[(3 * ((blockid*MAT_NUM) + threadid)) + (j*col) + k] = Qtemp2[threadid][(j * 3) + k];
+			d_M[(3 * blockid) + (j*col) + k] = Qtemp2[(j * 3) + k];
 		}
 	}	
 
-	d_C[(blockid*MAT_NUM) + threadid] = sig[threadid][0];
+	d_C[blockid] = sig[0];
 
 
 }
@@ -207,10 +206,10 @@ __host__ void gpuProx_2norm(float *Q, float *M, float *C, float constant, int ro
 	CHECK(cudaMemcpy(d_Q,Q,MatSizeInBytes,cudaMemcpyHostToDevice));
 
 	//2D grid and 2D block
-	int dimx = 32;
+	int dimx = 1;
 	int dimy = 1;
 	dim3 block(dimx,dimy);
-	dim3 grid(data_size/32,1);
+	dim3 grid(data_size,1);
 //	cout << "threads in a block "<<block.x<<endl;
 //	cout << "blocks in a grid "<<grid.x<<endl;
 
