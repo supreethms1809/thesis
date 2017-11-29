@@ -1009,8 +1009,8 @@ int main(void)
 
         //calculation of BBt
 	TransposeOnCPU(B,B_transpose,row1,col);
-	//cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
-        gpuMultShared(B,B_transpose,BBt,row1,col,col,row1);
+	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
+        //gpuMultShared(B,B_transpose,BBt,row1,col,col,row1);
 	//Zden
 
 	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
