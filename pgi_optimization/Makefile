@@ -1,8 +1,8 @@
 # compiler option
-CC = icc
+CC = pgc++
 NVCC = nvcc 
 
-OPT = -qopenmp -O3 -g -mkl -heap-arrays -ip -std=c++11
+OPT = -mp -O3 -g 
 
 CUDA_PATH = /usr/local/cuda-9.0
 

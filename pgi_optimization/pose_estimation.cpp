@@ -7,7 +7,6 @@
 #include <mkl.h>
 #include <mkl_lapack.h>
 #include <limits>
-#include <chrono>
 #include <ctime>
 #include <omp.h>
 
@@ -22,7 +21,6 @@
 
 using std::string;
 using namespace std;
-using namespace std::chrono;
 
 extern void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col);
 extern void gpuProx_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size);
@@ -55,9 +53,6 @@ int readValues(char *text, float *variable, int i,int row,int col)
 
 void dump_to_file(char *filename, float *matrix, int row, int col)
 {
-	cout << "filename "<<filename<<endl;
-	cout << "value of df row " << row <<endl;
-	cout << "value of df col " << col <<endl;
 	ofstream fs;
 	fs.open(filename, ios::out);
 	for(int i = 0; i<row;i++)
@@ -326,8 +321,7 @@ void eye(float *I, int m, int n)
         }
 }
 
-
-
+/*
 lapack_int matInv(float *A, int n)
 {
 	int ipiv[n+1];
@@ -344,6 +338,7 @@ lapack_int matInv(float *A, int n)
 	return ret;
 
 }
+*/
 
 void inv_mu_i(float mu,float *I,int m)
 {
@@ -446,12 +441,12 @@ omp_set_num_threads(24);
 void Zden_cacl(float *B, float *Bt, float *Zden,float mu,const int m,const int n)
 {
 
-	high_resolution_clock::time_point t3,t4;
 	float mu_inv =0.0f;
         float *I_m = new float [m];
 	float *temp_mui_B = new float [m*n];
 	float *temp_Bt_mui = new float [m*n];
 	float *temp_inv = new float [n*n];
+	float *temp_I = new float [n*n];
 	float *temp_mult = new float [n*m];
 	float *temp_sub = new float [m*m];
 
@@ -491,9 +486,10 @@ void Zden_cacl(float *B, float *Bt, float *Zden,float mu,const int m,const int n
                 }
         }	
 
-	matInv(temp_inv,n);
-//row,col2,col,col,col2,col2	
-	t3 = high_resolution_clock::now();
+	//matInv(temp_inv,n);
+	eye(temp_I,n,n);
+	cpuInverseOfMatrix(temp_inv, temp_I, n);
+	
 	for (int i = 0; i < n; i++)
         {
                 for (int j = 0; j < m; j++)
@@ -501,7 +497,7 @@ void Zden_cacl(float *B, float *Bt, float *Zden,float mu,const int m,const int n
                 fSum = 0.0;
                         for (int k = 0; k < n; k++)
                         {
-                        fSum += (temp_inv[(i*n) + k] * temp_Bt_mui[(k*m) + j]);
+                        fSum += (temp_I[(i*n) + k] * temp_Bt_mui[(k*m) + j]);
                         }
                 temp_mult[(i*m) + j] = fSum;
                 }
@@ -532,10 +528,6 @@ omp_set_num_threads(24);
                 }
         }	
        
-	t4 = high_resolution_clock::now();
-	duration<float> time_span = duration_cast<duration<float>>(t4 - t3);
-	cout << "Time in miliseconds zden is : " << time_span.count() * 1000 << " ms" << endl;
-	
 	delete [] I_m;
 	delete [] temp_mui_B;
 	delete [] temp_Bt_mui;
@@ -555,7 +547,6 @@ void calculateZ_preZden(float *Z,float *Zden,float *xy, float *E, float *T, floa
         float *temp3 = new float [row*row1];
         float *Znum = new float [row*row1];
         int status = 0;
-        high_resolution_clock::time_point t1,t2,t3,t4;
 
         //numerator
         //temp = (W-E-T*ones(1,p))
@@ -577,15 +568,11 @@ void calculateZ_preZden(float *Z,float *Zden,float *xy, float *E, float *T, floa
         //Znum = ((W-E-T*ones(1,p))*B'+mu*M+Y) 
         sumOfMatrix(Znum,temp2, M, Y, mu, row, row1);
 
-	//t3 = high_resolution_clock::now();
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
         //CPU//
 	//cpuMatrixMult(Znum, Zden, Z, row, row1, row1);
 	//GPU//
 	gpuMultShared(Znum, Zden, Z, row, row1, row1, row1);
-	//t4 = high_resolution_clock::now();
-	//duration<float> time_span = duration_cast<duration<float>>(t4 - t3);
-	//cout << "Time in miliseconds inside multiplication is : " << time_span.count() * 1000 << " ms" << endl;
 
 	delete [] temp;
         delete [] temp2;
@@ -857,11 +844,6 @@ float resCalc_DualRes(float *Z, float *ZO,float mu, int row, int row1)
 
 int main(void)
 {
-	const int iter_num = 100;
-	high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4,t5[500],t6[500];
-	for(int p = 0;p<iter_num;p++)
-	{	//t3 = high_resolution_clock::now();
-
 	
 	const int row = 2;
 	const int col = 15;
@@ -942,15 +924,9 @@ int main(void)
 	//eye(Zden_inv,row1,row1);
 	//cpuInverseOfMatrix(Zden, Zden_inv, row1);
 
-	t3 = high_resolution_clock::now();	
 	//woodburry inverse
 	Zden_cacl(B,B_transpose,Zden,mu,row1,col);
 
-	t4 = high_resolution_clock::now();
-	duration<float> time_span = duration_cast<duration<float>>(t4 - t3);
-	cout << "Time in miliseconds for first section outside is : " << time_span.count() * 1000 << " ms" << endl;
-
-	t1[p] = high_resolution_clock::now();	
 	for(iter = 0; iter < 500; iter++)
 	{
 		count1 = iter;
@@ -973,27 +949,19 @@ int main(void)
 			Zden_cacl(B, B_transpose,Zden,mu,row1,col);
 		}
 		
-		//t3 = high_resolution_clock::now();	
 		//cpu
 		calculateZ_preZden(Z, Zden,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 
 		//gpu
 		//calculateZ_preZden(Z, Zden_inv,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
-		//t4 = high_resolution_clock::now();
-		//time_span = duration_cast<duration<float>>(t4 - t3);
-		//cout << "Time in miliseconds for Znum/Zden is : " << time_span.count() * 1000 << " ms" << endl;
 
 		calculateQ(Q,Q_re,Z,Y,mu,row,row1,data_size);
 	
-		//t3 = high_resolution_clock::now();	
 		//cpu	
 		//prox_2norm(Q_re,M,C,lam/mu,row,row1,data_size);
 
 		//gpu
 		gpuProx_2norm(Q_re,M,C,lam/mu,row,row1,data_size);	
-		//t4 = high_resolution_clock::now();
-		//time_span = duration_cast<duration<float>>(t4 - t3);
-		//cout << "Time in miliseconds for prox_2norm is : " << time_span.count() * 1000 << " ms" << endl;
 
 		updateDualvariable(Y,mu,M,Z,row,row1);
 		
@@ -1027,10 +995,6 @@ int main(void)
 			}
 		}
 	}
-	t2[p] = high_resolution_clock::now();
-	duration<float> time_span1 = duration_cast<duration<float>>(t2[p] - t1[p]);
-	cout << "Time in miliseconds each section is : " << time_span1.count() * 1000 << " ms" << endl;
-
 
 	delete[] xy;
         delete[] mean;
@@ -1050,13 +1014,6 @@ int main(void)
 	delete[] Zden;
 	delete[] Zden_inv;
 	
-	}	
 
-	duration<float> time_span;
-	for(int p=0;p<iter_num;p++)
-	{
-		time_span += duration_cast<duration<float>>(t2[p] - t1[p]);
-	}	
-	cout << "Time in miliseconds: "<< (time_span.count()/iter_num) * 1000 << " ms"<<endl; 
 }
 
