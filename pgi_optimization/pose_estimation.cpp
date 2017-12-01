@@ -4,8 +4,6 @@
 #include <fstream>
 #include <math.h>
 #include <stdlib.h>
-#include <mkl.h>
-#include <mkl_lapack.h>
 #include <limits>
 #include <ctime>
 #include <omp.h>
@@ -68,9 +66,9 @@ void dump_to_file(char *filename, float *matrix, int row, int col)
 	}
 }
 
-void print_matrix( char *desc, MKL_INT m, MKL_INT n, float *a) 
+void print_matrix( char *desc, int m, int n, float *a) 
 {
-        MKL_INT i, j;
+        int i, j;
         printf( "\n %s\n", desc );
         for( i = 0; i < m; i++ ) 
 	{
@@ -416,8 +414,8 @@ void cpuInverseOfMatrix(float *matrix, float *I, int col)
 		I[(m * (col)) + j] = I[(m * (col)) + j] / initialValue;
 		}
 
-omp_set_num_threads(24);
-#pragma omp parallel for
+//omp_set_num_threads(24);
+//#pragma omp parallel for
 		//Making the elements of the row to zero
 		for (int k = 0; k < col; k++)
 		{
@@ -847,7 +845,7 @@ int main(void)
 	
 	const int row = 2;
 	const int col = 15;
-	const int row1 = 1536;
+	const int row1 = 384;
 	const int col1 = 15;
 	float tol = 1e-04;
 
@@ -897,7 +895,7 @@ int main(void)
 	normalizeS(xy,row,col,T);
 
 	//read the dictionary
-	B_items = readValues("B_512.txt", B, B_items,row1,col1);
+	B_items = readValues("B_128.txt", B, B_items,row1,col1);
 
 	//centralize basis
 	centralizeB(B,row1,col1);

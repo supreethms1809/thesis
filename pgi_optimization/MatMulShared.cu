@@ -4,12 +4,9 @@
 #include <fstream>
 #include <math.h>
 #include <stdlib.h>
-#include <mkl.h>
-#include <mkl_lapack.h>
 #include <limits>
 #include <ctime>
 #include <string>
-#include <chrono>
 
 #include <cuda.h>
 #include <math.h>
