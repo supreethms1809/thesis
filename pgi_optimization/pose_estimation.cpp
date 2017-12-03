@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <sys/time.h>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -842,10 +843,12 @@ float resCalc_DualRes(float *Z, float *ZO,float mu, int row, int row1)
 
 int main(void)
 {
-	
+	struct timeval start,end;
+        float fElapsedTime;
+        float fMemoryCopyTime = 0.0f;
 	const int row = 2;
 	const int col = 15;
-	const int row1 = 384;
+	const int row1 = 1536;
 	const int col1 = 15;
 	float tol = 1e-04;
 
@@ -887,6 +890,8 @@ int main(void)
 	float *Zden = new float [row1*row1];
         int status = 0;
 	float *Zden_inv = new float [row1*row1];
+	
+	gettimeofday(&start,NULL);
 
 	//read the 15 points from 15 point model
 	items = readValues("messi2.txt",xy,items,row,col);
@@ -895,7 +900,7 @@ int main(void)
 	normalizeS(xy,row,col,T);
 
 	//read the dictionary
-	B_items = readValues("B_128.txt", B, B_items,row1,col1);
+	B_items = readValues("B_512.txt", B, B_items,row1,col1);
 
 	//centralize basis
 	centralizeB(B,row1,col1);
@@ -993,6 +998,9 @@ int main(void)
 			}
 		}
 	}
+	gettimeofday(&end,NULL);
+	double fSequential_time = ((end.tv_sec*1e6+end.tv_usec)-(start.tv_sec*1e6+start.tv_usec))/1000;
+	cout<<" The Sequential Execution time is : "<<fSequential_time<<" ms"<<endl;
 
 	delete[] xy;
         delete[] mean;
