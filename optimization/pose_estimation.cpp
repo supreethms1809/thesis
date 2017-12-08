@@ -469,7 +469,9 @@ void Zden_cacl(float *B, float *Bt, float *Zden,float mu,const int m,const int n
 			temp_Bt_mui[(i*n)+j] = Bt[(i*n)+j] * I_m[j];
 		}
 	}
-	
+
+		cout << m <<"\t"<<n<<endl;
+		dump_to_file("temp_mui_B",temp_mui_B,m,n);	
 	float fSum;
         for (int i = 0; i < n; i++)
         {
@@ -507,8 +509,6 @@ void Zden_cacl(float *B, float *Bt, float *Zden,float mu,const int m,const int n
                 }
         }	
 
-omp_set_num_threads(24);
-#pragma omp parallel for
 	for (int i = 0; i < m; i++)
         {
                 for (int j = 0; j < m; j++)
@@ -857,7 +857,7 @@ float resCalc_DualRes(float *Z, float *ZO,float mu, int row, int row1)
 
 int main(void)
 {
-	const int iter_num = 100;
+	const int iter_num = 1;
 	high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4,t5[500],t6[500];
 	for(int p = 0;p<iter_num;p++)
 	{	//t3 = high_resolution_clock::now();
@@ -865,7 +865,7 @@ int main(void)
 	
 	const int row = 2;
 	const int col = 15;
-	const int row1 = 1536;
+	const int row1 = 384;
 	const int col1 = 15;
 	float tol = 1e-04;
 
@@ -915,7 +915,7 @@ int main(void)
 	normalizeS(xy,row,col,T);
 
 	//read the dictionary
-	B_items = readValues("B_512.txt", B, B_items,row1,col1);
+	B_items = readValues("B_128.txt", B, B_items,row1,col1);
 
 	//centralize basis
 	centralizeB(B,row1,col1);
@@ -951,7 +951,7 @@ int main(void)
 	cout << "Time in miliseconds for first section outside is : " << time_span.count() * 1000 << " ms" << endl;
 
 	t1[p] = high_resolution_clock::now();	
-	for(iter = 0; iter < 500; iter++)
+	for(iter = 0; iter < 1; iter++)
 	{
 		count1 = iter;
 		initialize(ZO,Z,row1,row);

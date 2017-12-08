@@ -41,16 +41,29 @@ __global__ void transposeOnGPU(float *d_B, float *d_B_t, int ny, int nx)
 	}
 }
 
-__global__ void MatVecMul(float *A, float *B, float mu_inv, int m, int n)
+__global__ void MatVecMulrow(float *A, float *B, float *I_m, int m, int n)
 {
 	int col = threadIdx.x + blockIdx.x * blockDim.x; 	
 	int row = threadIdx.y + blockIdx.y * blockDim.y; 
 	
 	if(col < n && row < m)
 	{
-		B[col*m+row] = A[col*m+row] * mu_inv;	
+		B[col*n+row] = A[col*n+row] * I_m[row];	
 	}	
 }
+
+__global__ void MatVecMulcol(float *A, float *B, float *I_m, int m, int n)
+{
+	int col = threadIdx.x + blockIdx.x * blockDim.x; 	
+	int row = threadIdx.y + blockIdx.y * blockDim.y; 
+	
+	if(col < n && row < m)
+	{
+		printf("col %d",col);
+		B[col*m+row] = A[col*m+row] * I_m[col];	
+	}	
+}
+
 
 __global__ void MatmulplusI(float *A, float *B, float *C, int A_rows, int A_cols, int B_rows, int B_cols, int C_rows, int C_cols)
 {
@@ -284,15 +297,19 @@ __global__ void fixColumn_shared(float *d_m, float *d_I, const int n, const int 
 /*
 __global__ void	Zden_caclGPU(float *B,float *B_transpose,float *Zden, float *temp_mui_B, float *temp_Bt_mui, float *temp_mult, float *temp_I, float *temp_inv,float mu_inv,int row1,int col);
 {
-
+	for(int i = 0;i<m;i++)
+	{
+		I_m[i] = mu_inv;
+	}
 	for(int i = 0;i<m;i++)
 	{
 		for(int j=0;j<n;j++)
 		{
-			temp_mui_B[(i*n)+j] = mu_inv * B[(i*n)+j];
-			temp_Bt_mui[(i*n)+j] = Bt[(i*n)+j] * mu_inv;
+			temp_mui_B[(i*n)+j] = I_m[i] * B[(i*n)+j];
+			temp_Bt_mui[(i*n)+j] = Bt[(i*n)+j] * I_m[j];
 		}
 	}
+
 	
 	float fSum;
         for (int i = 0; i < n; i++)
@@ -482,13 +499,12 @@ void resCalc(float *PrimRes, float *DualRes, float *M, float *Z, float *ZO,float
 }
 */
 
-__host__ void loop_cu(float *xy, float *B, float *B_t, float *Z, float *ZO,float *Zden, float *Y, float *Q, float *Q_re,float *M, float *C,float *E, float *T, float *iden, float mu, float constant, int row, int col, int row1, int col1, int data_size)
+__host__ void loop_cu(float *xy, float *B, float *B_t, float *Z, float *ZO,float *Zden, float *Y, float *Q, float *Q_re,float *M, float *C,float *E, float *T, float *iden,float *I_m, float mu, float constant, int row, int col, int row1, int col1, int data_size,float *h_temp_mui_B)
 {
-	float *d_xy, *d_B, *d_B_t, *d_Z, *d_ZO, *d_Y, *d_Q, *d_Q_re, *d_M, *d_C, *d_E, *d_T, *d_Zden;
+	float *d_xy, *d_B, *d_B_t, *d_Z, *d_ZO, *d_Y, *d_Q, *d_Q_re, *d_M, *d_C, *d_E, *d_T, *d_Zden, *d_Im;
 
 	//local arrays
 	float *temp_mui_B, *temp_Bt_mui, *temp_mult, *temp_I, *temp_inv;
-	float mu_inv = 0.0f;
 
 	const int xy_size = row*col*sizeof(float);
 	const int B_size = row1*col1*sizeof(float);
@@ -501,6 +517,7 @@ __host__ void loop_cu(float *xy, float *B, float *B_t, float *Z, float *ZO,float
 	const int T_size = row*sizeof(float);
 	const int inv_size = row1*row1*sizeof(float);
 	const int winv_size = col*col*sizeof(float);
+	const int Im_size = row1*sizeof(float);
 
 	//memory allocation on GPU
 	CHECK(cudaMalloc((void**)&d_xy,xy_size));
@@ -523,6 +540,7 @@ __host__ void loop_cu(float *xy, float *B, float *B_t, float *Z, float *ZO,float
 	CHECK(cudaMalloc((void**)&temp_I,winv_size));
 	CHECK(cudaMalloc((void**)&temp_inv,winv_size));
 	CHECK(cudaMalloc((void**)&iden,winv_size));
+	CHECK(cudaMalloc((void**)&d_Im,Im_size));
 
 	//memory copy
 	CHECK(cudaMemcpy(d_xy,xy,xy_size,cudaMemcpyHostToDevice));	
@@ -537,6 +555,8 @@ __host__ void loop_cu(float *xy, float *B, float *B_t, float *Z, float *ZO,float
 	CHECK(cudaMemcpy(d_C,C,C_size,cudaMemcpyHostToDevice));
 	CHECK(cudaMemcpy(d_E,E,E_size,cudaMemcpyHostToDevice));
 	CHECK(cudaMemcpy(d_T,T,T_size,cudaMemcpyHostToDevice));
+	CHECK(cudaMemcpy(d_Im,I_m,Im_size,cudaMemcpyHostToDevice));
+	CHECK(cudaMemcpy(temp_mui_B,h_temp_mui_B,Im_size,cudaMemcpyHostToDevice));
 
 	int dimx_transpose = 16;
 	int dimy_transpose = 16;
@@ -559,7 +579,13 @@ __host__ void loop_cu(float *xy, float *B, float *B_t, float *Z, float *ZO,float
 	int dimy_Zcalc = 16;
 	dim3 block_Zcalc(dimx_Zcalc,dimy_Zcalc);
 	dim3 grid_Zcalc((row1+block_Zcalc.x-1)/block_Zcalc.x,(col+block_Zcalc.y-1)/block_Zcalc.y);
-	
+	cout << "2D Grid Dimension" << endl;
+	cout << "\tNumber of Blocks along X dimension: " << grid_Zcalc.x << endl;
+	cout << "\tNumber of Blocks along Y dimension: " << grid_Zcalc.y << endl;
+	cout << "2D Block Dimension" << endl;
+	cout << "\tNumber of threads along X dimension: " << block_Zcalc.x << endl;
+	cout << "\tNumber of threads along Y dimension: " << block_Zcalc.y << endl;
+
 	dim3 block_inner(TILE_WIDTH, TILE_WIDTH, 1);
 	dim3 grid_inner((col-1)/TILE_WIDTH+1, (col-1)/TILE_WIDTH+1, 1);
 	
@@ -609,9 +635,10 @@ __host__ void loop_cu(float *xy, float *B, float *B_t, float *Z, float *ZO,float
 
 
 	transposeOnGPU << <grid_transpose, block_transpose >> >(d_B, d_B_t, row1, col);
-	mu_inv = 1/mu;
-	MatVecMul<< <grid_Zcalc,block_Zcalc >> >(d_B,temp_mui_B , mu_inv, row1, col);
-	MatVecMul<< <grid_Zcalc,block_Zcalc >> >(d_B_t,temp_Bt_mui , mu_inv, row1, col);
+	cudaThreadSynchronize();
+	MatVecMulcol<< <grid_Zcalc,block_Zcalc >> >(d_B,temp_mui_B , d_Im, row1, col);
+/*	cudaThreadSynchronize();
+	MatVecMulrow<< <grid_Zcalc,block_Zcalc >> >(d_B_t,temp_Bt_mui , d_Im, row1, col);
 	
 	cudaThreadSynchronize();
 	
@@ -637,7 +664,7 @@ __host__ void loop_cu(float *xy, float *B, float *B_t, float *Z, float *ZO,float
 	for(int iter=0; iter < 1;iter++)
 	{
 		initializeGPU<< <grid_ini,block_ini >> >(d_ZO,d_Z,row1,row);
-/*		if(flag == 1)
+*//*		if(flag == 1)
 		{
 			Zden_caclGPU(B,B_transpose,Zden,mu,row1,col);
 		}
@@ -672,9 +699,10 @@ __host__ void loop_cu(float *xy, float *B, float *B_t, float *Z, float *ZO,float
 				flag = 0;
 			}
 		}
-*/
-	}
 
+	}
+*/
+	CHECK(cudaMemcpy(h_temp_mui_B, temp_mui_B, B_size, cudaMemcpyDeviceToHost));
 	CHECK(cudaMemcpy(Zden, d_Zden, inv_size, cudaMemcpyDeviceToHost));
 
 

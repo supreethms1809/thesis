@@ -463,7 +463,7 @@ void Zden_cacl(float *B, float *Bt, float *Zden,float mu,const int m,const int n
 			temp_Bt_mui[(i*n)+j] = Bt[(i*n)+j] * I_m[j];
 		}
 	}
-	
+
 	float fSum;
         for (int i = 0; i < n; i++)
         {
