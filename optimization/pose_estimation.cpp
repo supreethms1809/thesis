@@ -471,7 +471,7 @@ void Zden_cacl(float *B, float *Bt, float *Zden,float mu,const int m,const int n
 	}
 
 		cout << m <<"\t"<<n<<endl;
-		dump_to_file("temp_mui_B",temp_mui_B,m,n);	
+		dump_to_file("temp_Bt_mui",temp_Bt_mui,n,m);	
 	float fSum;
         for (int i = 0; i < n; i++)
         {
