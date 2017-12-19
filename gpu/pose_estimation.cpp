@@ -21,7 +21,7 @@ using std::string;
 using namespace std;
 
 //extern void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col);
-extern void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *ZO,float *T,float *M,float *Y,int row,int col,int row1,int col1,float mu,float *bbt);
+extern void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *ZO,float *T,float *M,float *Y,float *Q,float *Q_re,float *C,int row,int col,int row1,int col1,float mu,float constant,int data_size,float *bbt,float *MminusZ,float *ZminusZO);
 //extern void loop_cu(float *xy, float *B, float *B_t, float *Z, float *ZO,float *Zden, float *Y, float *Q, float *Q_re,float *M, float *C,float *E, float *T, float *iden, float *I_m, float mu, float constant, int row, int col, int row1, int col1, int data_size,float *temp_mui_B);
 //extern void gpuProx_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size);
 //extern void gpuMultShared(float *h_A, float *h_B, float *h_C, const int A_rows, const int A_cols,const int B_rows,const int B_cols);
@@ -896,6 +896,8 @@ int main(void)
         int status = 0;
 	float *Zden_inv = new float [row1*row1];
 
+	float *MminusZ = new float [row*row1];
+	float *ZminusZO = new float [row*row1];
 	//read the 15 points from 15 point model
 	items = readValues("messi2.txt",xy,items,row,col);
 	
@@ -922,13 +924,18 @@ int main(void)
 		I_m[i] = mu_inv;
 	}
 
-	eye(Zden,row1,row1);
-	loop(xy,B,B_transpose,Zden,Z,ZO,T,M,Y,row,col,row1,col1,mu,BBt);
+	//eye(Zden,row1,row1);
+	loop(xy,B,B_transpose,Zden,Z,ZO,T,M,Y,Q,Q_re,C,row,col,row1,col1,mu,lam/mu,data_size,BBt,MminusZ,ZminusZO);
 	//loop_cu(xy, B, B_transpose, Z, ZO, Zden, Y, Q, Q_re, M, C, E, T, iden, I_m, mu, constant, row, col, row1, col1, data_size,h_temp_Bt_mui);
 	//dump_to_file("Zden",Zden,row1,row1);
 	//dump_to_file("B",B,row1,col);
 	dump_to_file("Zden",Zden,row1,row1);
 	dump_to_file("Z",Z,row,row1);
+	dump_to_file("ZO",ZO,row,row1);
+	dump_to_file("M",M,row,row1);
+	dump_to_file("Y",Y,row,row1);
+	dump_to_file("MminusZ",MminusZ,row,row1);
+	dump_to_file("ZminusZO",ZminusZO,row,row1);
 
 /*        //calculation of BBt
 	TransposeOnCPU(B,B_transpose,row1,col);
@@ -1037,6 +1044,8 @@ int main(void)
 	delete[] Zden_inv;
 	delete[] I_m;
 	delete[] h_temp_Bt_mui;
+	delete[] MminusZ;
+	delete[] ZminusZO;
 
 }
 
