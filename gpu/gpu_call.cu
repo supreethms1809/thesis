@@ -26,7 +26,7 @@ __device__ float d_prim ;
 __device__ float d_dual ;
 __device__ float d_mu;
 __device__ int d_flag;
-__device__ float d_tol = 1e-04;
+__device__ float d_tol;
 __device__ float MminusZ_norm;
 __device__ float MminusZ_sum;
 __device__ float ZminusZ0_norm;
@@ -169,6 +169,13 @@ __global__ void addmu_diagonal(float *d_bbt,float *d_Zden_bbt,float mu,int row, 
 	unsigned int iy = threadIdx.x + (blockIdx.x*blockDim.x);
 	unsigned int ix = threadIdx.y + (blockIdx.y*blockDim.y);
 
+	if(ix==0 && iy==0)
+	{
+		d_mu = mu;
+		d_tol = 1e-04;
+		d_flag = 0;
+	}
+
 	if (ix < row && iy < col)
 	{
 		if(ix==iy)
@@ -181,6 +188,26 @@ __global__ void addmu_diagonal(float *d_bbt,float *d_Zden_bbt,float mu,int row, 
 		}
 	}
 }
+
+__global__ void addmu_diagonalgpumu(float *d_bbt,float *d_Zden_bbt,int row, int col)
+{
+	unsigned int iy = threadIdx.x + (blockIdx.x*blockDim.x);
+	unsigned int ix = threadIdx.y + (blockIdx.y*blockDim.y);
+
+	if (ix < row && iy < col)
+	{
+		if(ix==iy)
+		{
+			d_Zden_bbt[ix*col + iy] = d_bbt[ix*col + iy]+d_mu;
+		}
+		if(ix!=iy)
+		{
+			d_Zden_bbt[ix*col + iy] = d_bbt[ix*col + iy];
+		}
+	}
+}
+
+
 
 __global__ void eye_gpu(float *d_Zden,int row, int col)
 {
@@ -225,21 +252,21 @@ __global__ void tempnum1Calc(float *d_tempNum1,float *d_xy,float *d_T,int row,in
 	}
 }
 
-__global__ void sumOfMatrixGPU(float *d_Znum,float *d_tempNum2,float *d_M,float *d_Y,float mu,int row,int col)
+__global__ void sumOfMatrixGPU(float *d_Znum,float *d_tempNum2,float *d_M,float *d_Y,int row,int col)
 {
 	unsigned int iy = threadIdx.x + (blockIdx.x*blockDim.x);
 	unsigned int ix = threadIdx.y + (blockIdx.y*blockDim.y);
 
 	if (ix < row && iy < col)
 	{
-		d_Znum[ix*col + iy] = d_tempNum2[ix*col + iy]+mu*d_M[ix*col + iy]+d_Y[ix*col + iy];
+		d_Znum[ix*col + iy] = d_tempNum2[ix*col + iy]+d_mu*d_M[ix*col + iy]+d_Y[ix*col + iy];
 	}
 }
 
-__global__ void calculateQGPU(float *d_Q,float *d_Z,float *d_Y,float mu,int row,int col)
+__global__ void calculateQGPU(float *d_Q,float *d_Z,float *d_Y,int row,int col)
 {
 	float oneovermu;
-	oneovermu = 1/mu;
+	oneovermu = 1/d_mu;
 	unsigned int iy = threadIdx.x + (blockIdx.x*blockDim.x);
 	unsigned int ix = threadIdx.y + (blockIdx.y*blockDim.y);
 
@@ -422,18 +449,18 @@ __global__ void svd_2_3_gpu(float *d_Q,float *d_M,float *d_C,float constant,int 
 
 }
 
-__global__ void updateYGPU(float *d_Y,float *d_M,float *d_Z,float mu,int row,int col)
+__global__ void updateYGPU(float *d_Y,float *d_M,float *d_Z,int row,int col)
 {
 	unsigned int iy = threadIdx.x + (blockIdx.x*blockDim.x);
 	unsigned int ix = threadIdx.y + (blockIdx.y*blockDim.y);
 
 	if (ix < row && iy < col)
 	{
-		d_Y[ix*col + iy] += mu*(d_M[ix*col + iy] - d_Z[ix*col + iy]);
+		d_Y[ix*col + iy] += d_mu*(d_M[ix*col + iy] - d_Z[ix*col + iy]);
 	}
 }
 
-__device__ void norm1(float mu)
+__device__ void norm1()
 {
 	MminusZ_norm = sqrtf(MminusZ_sum);
 	ZminusZ0_norm = sqrtf(ZminusZ0_sum);
@@ -442,7 +469,7 @@ __device__ void norm1(float mu)
 	d_prim = (MminusZ_norm/Z0_norm);		
 	printf("MminusZ_norm %f \t",MminusZ_norm);
 	printf("Z0_norm %f \n",Z0_norm);
-	d_dual = (mu*ZminusZ0_norm/Z0_norm);
+	d_dual = (d_mu*ZminusZ0_norm/Z0_norm);
 	printf("ZminusZ0_norm %f \t",ZminusZ0_norm);
 	printf("d_prim %f \t",d_prim);
 	printf("d_dual %f \n",d_dual);
@@ -450,22 +477,39 @@ __device__ void norm1(float mu)
 
 }
 
+__device__ void checkcondition()
+{
+	if((d_prim<d_tol)&&(d_dual<d_tol))
+	{
+		d_flag = 2;
+	}	
+	else
+	{
+		if(d_prim > (10*d_dual))
+		{
+			d_mu = 2*d_mu;
+			d_flag = 1;
+		}
+		else if(d_dual > (10*d_prim))
+		{
+			d_mu = d_mu/2;
+			d_flag = 1;
+		}
+		else
+		{
+			d_flag = 0;
+		}
+	}
 
 
+}
 
-__global__ void resCalcGPU(float *d_M,float *d_Z,float *d_Z0,float *d_MminusZ,float *d_ZminusZ0,float mu,int row,int col)
+__global__ void resCalcGPU(float *d_M,float *d_Z,float *d_Z0,float *d_MminusZ,float *d_ZminusZ0,int row,int col)
 {
 	
 	unsigned int iy = threadIdx.x + (blockIdx.x*blockDim.x);
 	unsigned int ix = threadIdx.y + (blockIdx.y*blockDim.y);
 
-//	float MminusZ_norm = 0.0f;
-//	float MminusZ_sum = 0.0f;
-//	float ZminusZ0_norm = 0.0f;
-//	float ZminusZ0_sum = 0.0f;
-//	float Z0_norm = 0.0f;
-//	float Z0_sum = 0.0f;
-//	float temp;
 	MminusZ_norm = 0.0f;
 	MminusZ_sum = 0.0f;
 	ZminusZ0_norm = 0.0f;
@@ -482,10 +526,6 @@ __global__ void resCalcGPU(float *d_M,float *d_Z,float *d_Z0,float *d_MminusZ,fl
 
 	if (ix < row && iy < col)
 	{
-		//MminusZ_sum += d_MminusZ[ix*col + iy] * d_MminusZ[ix*col + iy];
-		//ZminusZ0_sum += d_ZminusZ0[ix*col + iy] * d_ZminusZ0[ix*col + iy];	
-		//Z0_sum += d_Z0[ix*col + iy] * d_Z0[ix*col + iy];
-
 		atomicAdd(&MminusZ_sum, (d_MminusZ[ix*col + iy] * d_MminusZ[ix*col + iy]));
 		atomicAdd(&ZminusZ0_sum, (d_ZminusZ0[ix*col + iy] * d_ZminusZ0[ix*col + iy]));
 		atomicAdd(&Z0_sum, (d_Z0[ix*col + iy] * d_Z0[ix*col + iy]));
@@ -494,109 +534,11 @@ __global__ void resCalcGPU(float *d_M,float *d_Z,float *d_Z0,float *d_MminusZ,fl
 
 	if(ix==1 && iy==1)
 	{
-	norm1(mu);
+	norm1();
+	checkcondition();
 	}
 
-/*
-
-	if(ix==0 && iy==0)
-	{
-
-	//printf("MminusZ_sum %f \t",MminusZ_sum);
-	//printf("Z0_sum %f \n",Z0_sum);
-
-	MminusZ_norm = sqrtf(MminusZ_sum);
-	ZminusZ0_norm = sqrtf(ZminusZ0_sum);
-	Z0_norm = sqrtf(Z0_sum);
-
-	d_prim = (MminusZ_norm/Z0_norm);		
-	printf("MminusZ_norm %f \t",MminusZ_norm);
-	printf("Z0_norm %f \n",Z0_norm);
-	d_dual = (mu*ZminusZ0_norm/Z0_norm);
-	printf("ZminusZ0_norm %f \t",ZminusZ0_norm);
-	printf("d_prim %f \t",d_prim);
-	printf("d_dual %f \n",d_dual);
-	}
-*/
-
 }
-
-__global__ void norm(float *d_MminusZ,float *d_ZminusZ0,float *d_Z0,int row,int col,float mu)
-{
-	MminusZ_norm = 0.0f;
-	MminusZ_sum = 0.0f;
-	ZminusZ0_norm = 0.0f;
-	ZminusZ0_sum = 0.0f;
-	Z0_norm = 0.0f;
-	Z0_sum = 0.0f;
-
-        for(int i=0;i<row;i++)
-        {
-                for(int j=0;j<col;j++)
-                {
-                  MminusZ_sum +=(d_MminusZ[(i*col)+j]) * (d_MminusZ[(i*col)+j]);
-                  ZminusZ0_sum +=(d_ZminusZ0[(i*col)+j]) * (d_ZminusZ0[(i*col)+j]);
-                  Z0_sum +=(d_Z0[(i*col)+j]) * (d_Z0[(i*col)+j]);
-                }
-        }
-        MminusZ_norm=sqrt(MminusZ_sum);
-        ZminusZ0_norm=sqrt(ZminusZ0_sum);
-        Z0_norm=sqrt(Z0_sum);
-	printf("MminusZ_norm %f \t",MminusZ_norm);
-	printf("ZminusZ0_norm %f \t",mu*ZminusZ0_norm);
-	printf("Z0_norm %f \t",Z0_norm);
-	printf("\n");
-	
-}
-
-/*
-__global__ void checkcondition(float *d_prim,float *d_dual,float tol,float *mu,int *flag)
-{
-		if((d_prim<tol)&&(d_dual<tol))
-		{
-			*flag = 2;
-		}	
-		else
-		{
-			if(d_prim > (10*d_dual))
-			{
-				*mu = 2*mu;
-				*flag = 1;
-			}
-			else if(d_dual > (10*d_prim))
-			{
-				*mu = mu/2;
-				*flag = 1;
-			}
-			else
-			{
-				*flag = 0;
-			}
-		}
-
-}
-*/
-
-/*
-__global__ void clange_one_kernel(int m, int n, const magmaFloatComplex * __restrict__ A, int lda,
-    float * __restrict__ dwork )
-{
-    __shared__ float ssum[NB_X];
-    int tx = threadIdx.x;
-    
-    A += blockIdx.x*lda;  // column j
-    
-    ssum[tx] = 0;
-    for( int i = tx; i < m; i += NB_X ) {
-        ssum[tx] += MAGMA_C_ABS( A[i] );
-    }
-    magma_sum_reduce< NB_X >( tx, ssum );
-    if ( tx == 0 ) {
-        dwork[ blockIdx.x ] = ssum[0];
-    }
-}
-*/
-
 
 
 __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,float *T,float *M,float *Y,float *Q,float *Q_re,float *C,float *prim, float *dual,int row,int col,int row1,int col1,float mu,float constant,int data_size, float *bbt, float *MminusZ, float *ZminusZO)
@@ -626,7 +568,7 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	int flag = 0;
 	float tol = 1e-04;
 	int elements = 0;
-	elements = row*row1; 
+	elements = row*row1;
 	
 	cublasHandle_t handle;
 
@@ -737,7 +679,7 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	}
 	cudaThreadSynchronize();
 	
-	for(int iter=0;iter<2;iter++)
+	for(int iter=0;iter<10;iter++)
 	{
 		initializeZGPU<< <grid_ini,block_ini >> >(d_Z,d_Z0,row,row1);
 
@@ -745,7 +687,7 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 		{
 			eye_gpu<<<grid_bbt,block_bbt>>>(d_Zden,row1, row1);
 			cudaThreadSynchronize();
-			addmu_diagonal<<<grid_bbt,block_bbt>>>(d_bbt,d_Zden_bbt,mu,row1,row1);
+			addmu_diagonalgpumu<<<grid_bbt,block_bbt>>>(d_bbt,d_Zden_bbt,row1,row1);
 	
 			check_diag_zero << <grid3, block3 >> >(d_Zden_bbt, d_Zden, row1);
 			for (int i = 0; i<row1; i++)
@@ -763,13 +705,13 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 		cudaThreadSynchronize();
 		matrixMultiply<<<grid_ini,block_ini>>>(d_tempNum1,d_Bt,d_tempNum2,row,col,col1,row1,row,row1);
 		cudaThreadSynchronize();
-		sumOfMatrixGPU<<<grid_ini,block_ini>>>(d_Znum,d_tempNum2, d_M, d_Y, mu, row, row1);
+		sumOfMatrixGPU<<<grid_ini,block_ini>>>(d_Znum,d_tempNum2, d_M, d_Y, row, row1);
 		cudaThreadSynchronize();
 		matrixMultiply<<<grid_ini,block_ini>>>(d_Znum,d_Zden,d_Z,row,row1,row1,row1,row,row1);
 		cudaThreadSynchronize();
 
 		//calculateQ(Q,Q_re,Z,Y,mu,row,row1,data_size);
-		calculateQGPU<<<grid_ini,block_ini>>>(d_Q,d_Z,d_Y,mu,row,row1);
+		calculateQGPU<<<grid_ini,block_ini>>>(d_Q,d_Z,d_Y,row,row1);
 		cudaThreadSynchronize();
 		reorderQ<<<grid_re,block_re>>>(d_Q,d_Q_re,row,row1,data_size);	
 		cudaThreadSynchronize();
@@ -779,61 +721,12 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 		cudaThreadSynchronize();
 
 		//updateDualvariable
-		updateYGPU<<<grid_ini,block_ini>>>(d_Y,d_M,d_Z,mu,row,row1);
+		updateYGPU<<<grid_ini,block_ini>>>(d_Y,d_M,d_Z,row,row1);
 		cudaThreadSynchronize();
 		
 		//residual calculation
-		resCalcGPU<<<grid_ini,block_ini>>>(d_M,d_Z,d_Z0,d_MminusZ,d_ZminusZ0,mu,row,row1);	
+		resCalcGPU<<<grid_ini,block_ini>>>(d_M,d_Z,d_Z0,d_MminusZ,d_ZminusZ0,row,row1);	
 		cudaThreadSynchronize();
-	//	norm<<<1,1>>>(d_MminusZ,d_ZminusZ0,d_Z0,row,row1,mu);
-
-/*
-		int cur = cublasSnrm2(handle,elements,d_MminusZ,1,&MminusZ_norm);
-		if(cur != CUBLAS_STATUS_SUCCESS)
-		{
-		printf("error code %d, line(%d)\n", cur, __LINE__);
-		exit(EXIT_FAILURE);
-		}
-		cublasSnrm2(handle,row*row1,d_ZminusZ0,1,&ZminusZ0_norm);
-		cublasSnrm2(handle,row*row1,d_Z0,1,&Z0_norm);
-		cudaThreadSynchronize();
-
-		d_prim = MminusZ_norm/Z0_norm;
-		d_dual = mu*ZminusZ0_norm/Z0_norm;
-		cout << MminusZ_norm<<endl;
-		cout << mu*ZminusZ0_norm<<endl;
-		cout << Z0_norm<<endl;
-*/	
-//	CHECK(cudaMemcpy(prim, d_prim, element_size, cudaMemcpyDeviceToHost));
-//	CHECK(cudaMemcpy(dual, d_dual, element_size, cudaMemcpyDeviceToHost));
-		//cout<<"Iter = "<<iter+1<<": prim = "<<prim<<" , dual =  "<<dual<<", mu = "<<mu << endl;
-/*		
-		if((prim<tol)&&(dual<tol))
-		{
-			break;
-		}	
-		else
-		{
-			if(prim > (10*dual))
-			{
-				mu = 2*mu;
-				flag = 1;
-			}
-			else if(dual > (10*prim))
-			{
-				mu = mu/2;
-				flag = 1;
-			}
-			else
-			{
-				flag = 0;
-			}
-		}
-*/
-//		if(flag == 2)
-//		{
-//			break;
-//		}
 
 	}
 
@@ -869,7 +762,5 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	CHECK(cudaFree(d_C));
 	CHECK(cudaFree(d_MminusZ));	
 	CHECK(cudaFree(d_ZminusZ0));
-	//CHECK(cudaFree(d_prim));
-	//CHECK(cudaFree(d_dual));
 
 }
