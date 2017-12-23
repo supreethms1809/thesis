@@ -25,7 +25,7 @@ using namespace std;
 __device__ float d_prim ;
 __device__ float d_dual ;
 __device__ float d_mu;
-__device__ int d_flag;
+//__device__ int d_flag;
 __device__ float d_tol;
 __device__ float MminusZ_norm;
 __device__ float MminusZ_sum;
@@ -173,7 +173,6 @@ __global__ void addmu_diagonal(float *d_bbt,float *d_Zden_bbt,float mu,int row, 
 	{
 		d_mu = mu;
 		d_tol = 1e-04;
-		d_flag = 0;
 	}
 
 	if (ix < row && iy < col)
@@ -290,10 +289,11 @@ __global__ void reorderQ(float *d_Q,float *d_Q_re,int row,int col,int data_size)
 	}	
 }
 
-__global__ void svd_2_3_gpu(float *d_Q,float *d_M,float *d_C,float constant,int row,int col,int data_size)
+__global__ void svd_2_3_gpu(float *d_Q,float *d_M,float *d_C,float lam,int row,int col,int data_size)
 {
 	//int threadid = threadIdx.x;
 	int blockid = blockIdx.x;
+	float constant = lam/d_mu;
 	float T = 0;
 	float D = 0;
 	float lam1 = 0;
@@ -434,8 +434,6 @@ __global__ void svd_2_3_gpu(float *d_Q,float *d_M,float *d_C,float constant,int 
 	}
 
 
-	//cpuMatrixMult(u,sigma,Qtemp1,ROW,ROW,ROW);
-	//cpuMatrixMult(Qtemp1,vt,Qtemp2,ROW,ROW,COL);
 	for(int j = 0;j<2;j++)
 	{
 		for(int k=0;k<3;k++)
@@ -467,44 +465,45 @@ __device__ void norm1()
 	Z0_norm = sqrtf(Z0_sum);
 
 	d_prim = (MminusZ_norm/Z0_norm);		
-	printf("MminusZ_norm %f \t",MminusZ_norm);
-	printf("Z0_norm %f \n",Z0_norm);
+//	printf("MminusZ_norm %f \t",MminusZ_norm);
+//	printf("Z0_norm %f \t",Z0_norm);
 	d_dual = (d_mu*ZminusZ0_norm/Z0_norm);
-	printf("ZminusZ0_norm %f \t",ZminusZ0_norm);
-	printf("d_prim %f \t",d_prim);
-	printf("d_dual %f \n",d_dual);
+//	printf("ZminusZ0_norm %f \t",ZminusZ0_norm);
+//	printf("d_prim %f \t",d_prim);
+//	printf("d_dual %f \t",d_dual);
+//	printf("d_mu %f \n",d_mu);
 
 
 }
 
-__device__ void checkcondition()
+__device__ void checkcondition(int *d_flag)
 {
 	if((d_prim<d_tol)&&(d_dual<d_tol))
 	{
-		d_flag = 2;
+		*d_flag = 2;
 	}	
 	else
 	{
 		if(d_prim > (10*d_dual))
 		{
 			d_mu = 2*d_mu;
-			d_flag = 1;
+			*d_flag = 1;
 		}
 		else if(d_dual > (10*d_prim))
 		{
 			d_mu = d_mu/2;
-			d_flag = 1;
+			*d_flag = 1;
 		}
 		else
 		{
-			d_flag = 0;
+			*d_flag = 0;
 		}
 	}
 
 
 }
 
-__global__ void resCalcGPU(float *d_M,float *d_Z,float *d_Z0,float *d_MminusZ,float *d_ZminusZ0,int row,int col)
+__global__ void resCalcGPU(float *d_M,float *d_Z,float *d_Z0,float *d_MminusZ,float *d_ZminusZ0,int row,int col,int *d_flag)
 {
 	
 	unsigned int iy = threadIdx.x + (blockIdx.x*blockDim.x);
@@ -535,13 +534,13 @@ __global__ void resCalcGPU(float *d_M,float *d_Z,float *d_Z0,float *d_MminusZ,fl
 	if(ix==1 && iy==1)
 	{
 	norm1();
-	checkcondition();
+	checkcondition(d_flag);
 	}
 
 }
 
 
-__host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,float *T,float *M,float *Y,float *Q,float *Q_re,float *C,float *prim, float *dual,int row,int col,int row1,int col1,float mu,float constant,int data_size, float *bbt, float *MminusZ, float *ZminusZO)
+__host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,float *T,float *M,float *Y,float *Q,float *Q_re,float *C,float *prim, float *dual,int row,int col,int row1,int col1,float mu,float lam,int data_size, float *bbt, float *MminusZ, float *ZminusZO)
 {
 	float *d_xy;
 	float *d_B;
@@ -565,10 +564,11 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	float MminusZ_norm = 0.0f;
 	float ZminusZ0_norm = 0.0f;
 	float Z0_norm = 0.0f;
-	int flag = 0;
 	float tol = 1e-04;
 	int elements = 0;
 	elements = row*row1;
+	int flag = 0;
+	int * d_flag;
 	
 	cublasHandle_t handle;
 
@@ -607,10 +607,11 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	CHECK(cudaMalloc((void**)&d_C,data_size));
 	CHECK(cudaMalloc((void**)&d_MminusZ,Q_size));
 	CHECK(cudaMalloc((void**)&d_ZminusZ0,Q_size));
-
+	CHECK(cudaMalloc((void**)&d_flag, sizeof(int)));
 
 	CHECK(cudaMemcpy(d_xy,xy,xy_size,cudaMemcpyHostToDevice));	
 	CHECK(cudaMemcpy(d_B,B,B_size,cudaMemcpyHostToDevice));	
+	CHECK(cudaMemcpy(d_flag, &flag, sizeof(int), cudaMemcpyHostToDevice));
 
 	int dimx_transpose = 16;
 	int dimy_transpose = 16;
@@ -652,21 +653,12 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	int dimy_re = 1;
 	dim3 block_re(dimx_re,dimy_re);
 	dim3 grid_re(data_size,1);
-/*
-
-	cout << "2D Grid Dimension" << endl;
-	cout << "\tNumber of Blocks along X dimension: " << grid_ini.x << endl;
-	cout << "\tNumber of Blocks along Y dimension: " << grid_ini.y << endl;
-	cout << "2D Block Dimension" << endl;
-	cout << "\tNumber of threads along X dimension: " << block_ini.x << endl;
-	cout << "\tNumber of threads along Y dimension: " << block_ini.y << endl;
-*/
 
 	transposeOnGPU << <grid_transpose, block_transpose >> >(d_B, d_Bt, row1, col1);
-	cudaThreadSynchronize();
+//	cudaThreadSynchronize();
 
 	matrixMultiply<<<grid_bbt, block_bbt>>>(d_B, d_Bt, d_bbt, row1, col, col, row1, row1, row1);
-	cudaThreadSynchronize();
+//	cudaThreadSynchronize();
 	
 	eye_gpu<<<grid_bbt,block_bbt>>>(d_Zden,row1, row1);
 	addmu_diagonal<<<grid_bbt,block_bbt>>>(d_bbt,d_Zden_bbt,mu,row1,row1);
@@ -677,9 +669,9 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 		fixRow_shared << <grid2, block2 >> >(d_Zden_bbt, d_Zden, row1, i);
 		fixColumn_shared << <grid_fixcol, block_fixcol >> >(d_Zden_bbt, d_Zden, row1, i);
 	}
-	cudaThreadSynchronize();
+//	cudaThreadSynchronize();
 	
-	for(int iter=0;iter<10;iter++)
+	for(int iter=0;iter<500;iter++)
 	{
 		initializeZGPU<< <grid_ini,block_ini >> >(d_Z,d_Z0,row,row1);
 
@@ -695,39 +687,45 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 				fixRow_shared << <grid2, block2 >> >(d_Zden_bbt, d_Zden, row1, i);
 				fixColumn_shared << <grid_fixcol, block_fixcol >> >(d_Zden_bbt, d_Zden, row1, i);
 			}
-			cudaThreadSynchronize();
+//			cudaThreadSynchronize();
 
 		}
 
 		//Z calculation	
 		//calculateZ_preZden(Z, Zden_inv,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
 		tempnum1Calc<<<grid_tempnum1,block_tempnum1>>>(d_tempNum1,d_xy,d_T,row,col);
-		cudaThreadSynchronize();
+//		cudaThreadSynchronize();
 		matrixMultiply<<<grid_ini,block_ini>>>(d_tempNum1,d_Bt,d_tempNum2,row,col,col1,row1,row,row1);
-		cudaThreadSynchronize();
+//		cudaThreadSynchronize();
 		sumOfMatrixGPU<<<grid_ini,block_ini>>>(d_Znum,d_tempNum2, d_M, d_Y, row, row1);
-		cudaThreadSynchronize();
+//		cudaThreadSynchronize();
 		matrixMultiply<<<grid_ini,block_ini>>>(d_Znum,d_Zden,d_Z,row,row1,row1,row1,row,row1);
-		cudaThreadSynchronize();
+//		cudaThreadSynchronize();
 
 		//calculateQ(Q,Q_re,Z,Y,mu,row,row1,data_size);
 		calculateQGPU<<<grid_ini,block_ini>>>(d_Q,d_Z,d_Y,row,row1);
-		cudaThreadSynchronize();
+//		cudaThreadSynchronize();
 		reorderQ<<<grid_re,block_re>>>(d_Q,d_Q_re,row,row1,data_size);	
-		cudaThreadSynchronize();
+//		cudaThreadSynchronize();
 
 		//prox_norm calculation
-		svd_2_3_gpu << <grid_re, block_re >> >(d_Q_re, d_M, d_C, constant,row,row1,data_size);
-		cudaThreadSynchronize();
+		svd_2_3_gpu << <grid_re, block_re >> >(d_Q_re, d_M, d_C, lam,row,row1,data_size);
+//		cudaThreadSynchronize();
 
 		//updateDualvariable
 		updateYGPU<<<grid_ini,block_ini>>>(d_Y,d_M,d_Z,row,row1);
-		cudaThreadSynchronize();
+//		cudaThreadSynchronize();
 		
 		//residual calculation
-		resCalcGPU<<<grid_ini,block_ini>>>(d_M,d_Z,d_Z0,d_MminusZ,d_ZminusZ0,row,row1);	
-		cudaThreadSynchronize();
+		resCalcGPU<<<grid_ini,block_ini>>>(d_M,d_Z,d_Z0,d_MminusZ,d_ZminusZ0,row,row1,d_flag);	
+//		cudaThreadSynchronize();
 
+		CHECK(cudaMemcpy( &flag,d_flag, sizeof(int), cudaMemcpyDeviceToHost));
+		if(flag == 2)
+                {
+			cout << "iter = "<<iter+1<<endl;
+			break;
+		}
 	}
 
 

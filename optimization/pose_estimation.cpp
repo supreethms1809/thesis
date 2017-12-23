@@ -951,7 +951,7 @@ int main(void)
 	cout << "Time in miliseconds for first section outside is : " << time_span.count() * 1000 << " ms" << endl;
 
 	t1[p] = high_resolution_clock::now();	
-	for(iter = 0; iter < 1; iter++)
+	for(iter = 0; iter < 500; iter++)
 	{
 		count1 = iter;
 		initialize(ZO,Z,row1,row);
@@ -1002,7 +1002,7 @@ int main(void)
 		
 		//if ((verb == true) && ((iter%10) == 0))
 		//{
-		//	cout << "Iter "<< iter+1 <<": PrimRes = "<<PrimRes <<", DualRes = "<<DualRes<<", mu = "<< mu <<endl; 
+			cout << "Iter "<< iter+1 <<": PrimRes = "<<PrimRes <<", DualRes = "<<DualRes<<", mu = "<< mu <<endl; 
 		//}
 
 		if((PrimRes < tol) && (DualRes < tol))
