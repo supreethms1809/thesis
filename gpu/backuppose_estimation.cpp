@@ -927,6 +927,7 @@ int main(void)
 	//eye(Zden,row1,row1);
 	loop(xy,B,B_transpose,Zden,Z,ZO,T,M,Y,Q,Q_re,C,&prim,&dual,row,col,row1,col1,mu,lam,data_size,BBt,MminusZ,ZminusZO,iden);
 	//loop_cu(xy, B, B_transpose, Z, ZO, Zden, Y, Q, Q_re, M, C, E, T, iden, I_m, mu, constant, row, col, row1, col1, data_size,h_temp_Bt_mui);
+/*
 	dump_to_file("Zden",Zden,row1,row1);
 	dump_to_file("d_temp1",B_transpose,col,row1);
 	dump_to_file("innerinv",iden,col,col);
@@ -936,8 +937,10 @@ int main(void)
 	dump_to_file("Y",Y,row,row1);
 	dump_to_file("MminusZ",MminusZ,row,row1);
 	dump_to_file("ZminusZO",ZminusZO,row,row1);
+*/
 
-/*        //calculation of BBt
+/*
+        //calculation of BBt
 	TransposeOnCPU(B,B_transpose,row1,col);
 	//cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
         //gpuMultShared(B,B_transpose,BBt,row1,col,col,row1);
@@ -1024,6 +1027,7 @@ int main(void)
 		}
 	}
 */
+
 	delete[] xy;
         delete[] mean;
 	delete[] B;

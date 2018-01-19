@@ -732,7 +732,7 @@ __global__ void resCalcGPU(float *d_M,float *d_Z,float *d_Z0,float *d_MminusZ,fl
 }
 
 
-__host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,float *T,float *M,float *Y,float *Q,float *Q_re,float *C,float *prim, float *dual,int row,int col,int row1,int col1,float mu,float lam,int data_size, float *bbt, float *MminusZ, float *ZminusZO, float *inner_inv)
+__host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,float *T,float *M,float *Y,float *Q,float *Q_re,float *C,float *prim, float *dual,int row,int col,int row1,int col1,float mu,float lam,int data_size)
 {
 	float *d_xy;
 	float *d_B;

@@ -20,11 +20,8 @@
 using std::string;
 using namespace std;
 
-//extern void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col);
-extern void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *ZO,float *T,float *M,float *Y,float *Q,float *Q_re,float *C,float *prim, float *dual,int row,int col,int row1,int col1,float mu,float lam,int data_size,float *bbt,float *MminusZ,float *ZminusZO, float *inner_inv);
-//extern void loop_cu(float *xy, float *B, float *B_t, float *Z, float *ZO,float *Zden, float *Y, float *Q, float *Q_re,float *M, float *C,float *E, float *T, float *iden, float *I_m, float mu, float constant, int row, int col, int row1, int col1, int data_size,float *temp_mui_B);
-//extern void gpuProx_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size);
-//extern void gpuMultShared(float *h_A, float *h_B, float *h_C, const int A_rows, const int A_cols,const int B_rows,const int B_cols);
+extern void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *ZO,float *T,float *M,float *Y,float *Q,float *Q_re,float *C,float *prim, float *dual,int row,int col,int row1,int col1,float mu,float lam,int data_size);
+
 
 int readValues(char *text, float *variable, int i,int row,int col)
 {
@@ -918,112 +915,10 @@ int main(void)
 	mu = meanCalc(xy,col,row);
 
 	mu_inv = 1/mu;
-
-	for(int i = 0;i<row1;i++)
-	{
-		I_m[i] = mu_inv;
-	}
-
-	//eye(Zden,row1,row1);
-	loop(xy,B,B_transpose,Zden,Z,ZO,T,M,Y,Q,Q_re,C,&prim,&dual,row,col,row1,col1,mu,lam,data_size,BBt,MminusZ,ZminusZO,iden);
-	//loop_cu(xy, B, B_transpose, Z, ZO, Zden, Y, Q, Q_re, M, C, E, T, iden, I_m, mu, constant, row, col, row1, col1, data_size,h_temp_Bt_mui);
-	dump_to_file("Zden",Zden,row1,row1);
-	dump_to_file("d_temp1",B_transpose,col,row1);
-	dump_to_file("innerinv",iden,col,col);
-	dump_to_file("Z",Z,row,row1);
-	dump_to_file("ZO",ZO,row,row1);
-	dump_to_file("M",M,row,row1);
-	dump_to_file("Y",Y,row,row1);
-	dump_to_file("MminusZ",MminusZ,row,row1);
-	dump_to_file("ZminusZO",ZminusZO,row,row1);
-
-/*        //calculation of BBt
-	TransposeOnCPU(B,B_transpose,row1,col);
-	//cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
-        //gpuMultShared(B,B_transpose,BBt,row1,col,col,row1);
-	//addScalarToDiagonal(Zden,BBt,mu,row1,row1);
 	
-	//gpu inverse
-	//eye(Zden_inv,row1,row1);
-	//gpuInverseOfMatrix(Zden,Zden_inv,row1);
+	loop(xy,B,B_transpose,Zden,Z,ZO,T,M,Y,Q,Q_re,C,&prim,&dual,row,col,row1,col1,mu,lam,data_size);
 
-	//cpu inverse
-	//status = matInv(Zden,row1);
-	//eye(Zden_inv,row1,row1);
-	//cpuInverseOfMatrix(Zden, Zden_inv, row1);
 
-	//woodburry inverse
-	Zden_cacl(B,B_transpose,Zden,mu,row1,col);
-
-	for(iter = 0; iter < 500; iter++)
-	{
-		count1 = iter;
-		initialize(ZO,Z,row1,row);
-		
-		if(flag == 1)
-		{
-			//cpu inverse
-			//addScalarToDiagonal(Zden,BBt,mu,row1,row1);
-			//status = matInv(Zden,row1);
-			//eye(Zden_inv,row1,row1);
-			//cpuInverseOfMatrix(Zden, Zden_inv, row1);
-
-			//gpuinverse
-			//addScalarToDiagonal(Zden,BBt,mu,row1,row1);
-			//eye(Zden_inv,row1,row1);
-			//gpuInverseOfMatrix(Zden,Zden_inv,row1);
-
-			//woodburry inverse
-			Zden_cacl(B, B_transpose,Zden,mu,row1,col);
-		}
-		
-		//cpu
-		calculateZ_preZden(Z, Zden,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
-
-		//gpu
-		//calculateZ_preZden(Z, Zden_inv,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
-
-		calculateQ(Q,Q_re,Z,Y,mu,row,row1,data_size);
-	
-		//cpu	
-		//prox_2norm(Q_re,M,C,lam/mu,row,row1,data_size);
-
-		//gpu
-		gpuProx_2norm(Q_re,M,C,lam/mu,row,row1,data_size);	
-
-		updateDualvariable(Y,mu,M,Z,row,row1);
-		
-		PrimRes = resCalc_PrimRes(M,Z,ZO,mu,row,row1);
-		DualRes = resCalc_DualRes(Z,ZO,mu,row,row1);
-		
-		//if ((verb == true) && ((iter%10) == 0))
-		//{
-		//	cout << "Iter "<< iter+1 <<": PrimRes = "<<PrimRes <<", DualRes = "<<DualRes<<", mu = "<< mu <<endl; 
-		//}
-
-		if((PrimRes < tol) && (DualRes < tol))
-		{
-		break;
-		}
-		else
-		{
-			if(PrimRes > (10*DualRes))
-			{
-				mu = 2 * mu;
-				flag = 1;
-			}
-			else if(DualRes > (10*PrimRes))
-			{
-				mu = mu/2;
-				flag = 1;
-			}
-			else
-			{
-				flag = 0;
-			}
-		}
-	}
-*/
 	delete[] xy;
         delete[] mean;
 	delete[] B;
