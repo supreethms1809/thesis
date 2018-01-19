@@ -16,6 +16,7 @@ SRCS = pose_estimation.cpp
 LIB = 
 
 OBJ = pose_estimation.o wood_gpu_call.o
+#OBJ = pose_estimation.o gpu_call.o
 
 EXE = pose_estimation
 

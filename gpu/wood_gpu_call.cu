@@ -94,16 +94,208 @@ __global__ void matrixMultiply(float * A, float * B, float * C, int numARows, in
 }
 
 
-__global__ void transposeOnGPU(float *d_B, float *d_Bt, int rows, int cols)
+__global__ void transposeOnGPU(float *d_B, float *d_Bt, int rows, int cols,float mu)
 {
 	unsigned int iy = threadIdx.x + (blockIdx.x*blockDim.x);
 	unsigned int ix = threadIdx.y + (blockIdx.y*blockDim.y);
+	if(iy==1&&ix==1)
+	{
+		d_mu = mu;
+		d_tol = 1e-04;
+	//	printf("value of d_mu: %f \n",d_mu);
+	}
 
 	if (ix < rows && iy < cols)
 	{
 		d_Bt[iy*rows + ix] = d_B[ix*cols + iy];
 	}
 }
+
+__global__ void VecMatMulrow(float *d_B,float *d_mui_B ,int m,int n)
+{
+	int col = threadIdx.x + blockIdx.x * blockDim.x; 	
+	int row = threadIdx.y + blockIdx.y * blockDim.y; 
+	float muinv = 1/d_mu;
+	
+	if(col < n && row < m)
+	{
+		d_mui_B[row*n+col] = muinv*d_B[row*n+col];	
+	}	
+}
+
+__global__ void MatVecMulrow(float *d_Bt,float *d_Bt_mui ,int m,int n)
+{
+	int col = threadIdx.x + blockIdx.x * blockDim.x; 	
+	int row = threadIdx.y + blockIdx.y * blockDim.y; 
+	float muinv = 1/d_mu;
+	
+//	if(col==0&&row==0)
+//	printf("value of muinv: %f \n",muinv);
+	if(col < n && row < m)
+	{
+		d_Bt_mui[row*n+col] = d_Bt[row*n+col]*muinv;	
+	}	
+}
+
+__global__ void InnerMultiplication(float * A, float * B, float * C, int numARows, int numAColumns, int numBRows, int numBColumns, int numCRows, int numCColumns) 
+{
+	__shared__ float ds_M[TILE_WIDTH][TILE_WIDTH];
+	__shared__ float ds_N[TILE_WIDTH][TILE_WIDTH];
+	int bx = blockIdx.x;
+	int by = blockIdx.y;
+	int tx = threadIdx.x; 
+	int ty = threadIdx.y;
+	int Row = by * TILE_WIDTH + ty;
+	int Col = bx * TILE_WIDTH + tx;
+	float fSum = 0;
+
+	for (int m = 0; m < (numAColumns-1)/TILE_WIDTH+1; ++m) 
+	{
+		if (Row < numARows && m*TILE_WIDTH+tx < numAColumns)
+		{
+			ds_M[ty][tx] = A[Row*numAColumns + m*TILE_WIDTH+tx];
+		}
+		else
+		{
+			ds_M[ty][tx] = 0;
+		}
+
+		if (Col < numBColumns && m*TILE_WIDTH+ty < numBRows)
+		{
+			ds_N[ty][tx] = B[(m*TILE_WIDTH+ty)*numBColumns+Col];
+		}
+		else
+		{
+			ds_N[ty][tx] = 0;
+		}
+
+		__syncthreads();
+       
+		for (int k = 0; k < TILE_WIDTH; ++k)
+		{
+			fSum += ds_M[ty][k] * ds_N[k][tx];
+		}
+		
+		__syncthreads();
+	}
+
+	if (Row < numCRows && Col < numCColumns)
+	{
+		if (Row == Col)
+		{
+			C[Row*numCColumns+Col] = fSum + 1;
+		}
+		else
+		{
+			C[Row*numCColumns+Col] = fSum;
+		}
+	}
+}
+
+__global__ void OuterMultiplication1(float * A, float * B, float * C, int numARows, int numAColumns, int numBRows, int numBColumns, int numCRows, int numCColumns) 
+{
+	__shared__ float ds_M[TILE_WIDTH][TILE_WIDTH];
+	__shared__ float ds_N[TILE_WIDTH][TILE_WIDTH];
+	int bx = blockIdx.x;
+	int by = blockIdx.y;
+	int tx = threadIdx.x; 
+	int ty = threadIdx.y;
+	int Row = by * TILE_WIDTH + ty;
+	int Col = bx * TILE_WIDTH + tx;
+	float fSum = 0;
+
+	for (int m = 0; m < (numAColumns-1)/TILE_WIDTH+1; ++m) 
+	{
+		if (Row < numARows && m*TILE_WIDTH+tx < numAColumns)
+		{
+			ds_M[ty][tx] = A[Row*numAColumns + m*TILE_WIDTH+tx];
+		}
+		else
+		{
+			ds_M[ty][tx] = 0;
+		}
+
+		if (Col < numBColumns && m*TILE_WIDTH+ty < numBRows)
+		{
+			ds_N[ty][tx] = B[(m*TILE_WIDTH+ty)*numBColumns+Col];
+		}
+		else
+		{
+			ds_N[ty][tx] = 0;
+		}
+
+		__syncthreads();
+       
+		for (int k = 0; k < TILE_WIDTH; ++k)
+		{
+			fSum += ds_M[ty][k] * ds_N[k][tx];
+		}
+		
+		__syncthreads();
+	}
+
+	if (Row < numCRows && Col < numCColumns)
+	{
+			C[Row*numCColumns+Col] = fSum;
+	}
+}
+
+__global__ void OuterMultiplication2_sub(float * A, float * B, float * C, int numARows, int numAColumns, int numBRows, int numBColumns, int numCRows, int numCColumns) 
+{
+	__shared__ float ds_M[TILE_WIDTH][TILE_WIDTH];
+	__shared__ float ds_N[TILE_WIDTH][TILE_WIDTH];
+	int bx = blockIdx.x;
+	int by = blockIdx.y;
+	int tx = threadIdx.x; 
+	int ty = threadIdx.y;
+	int Row = by * TILE_WIDTH + ty;
+	int Col = bx * TILE_WIDTH + tx;
+	float fSum = 0;
+	float muinv = 1/d_mu;
+
+	for (int m = 0; m < (numAColumns-1)/TILE_WIDTH+1; ++m) 
+	{
+		if (Row < numARows && m*TILE_WIDTH+tx < numAColumns)
+		{
+			ds_M[ty][tx] = A[Row*numAColumns + m*TILE_WIDTH+tx];
+		}
+		else
+		{
+			ds_M[ty][tx] = 0;
+		}
+
+		if (Col < numBColumns && m*TILE_WIDTH+ty < numBRows)
+		{
+			ds_N[ty][tx] = B[(m*TILE_WIDTH+ty)*numBColumns+Col];
+		}
+		else
+		{
+			ds_N[ty][tx] = 0;
+		}
+
+		__syncthreads();
+       
+		for (int k = 0; k < TILE_WIDTH; ++k)
+		{
+			fSum += ds_M[ty][k] * ds_N[k][tx];
+		}
+		
+		__syncthreads();
+	}
+
+	if (Row < numCRows && Col < numCColumns)
+	{
+		if (Row == Col)
+		{
+			C[Row*numCColumns+Col] = muinv - fSum;
+		}
+		else
+		{
+			C[Row*numCColumns+Col] = 0.0f - fSum;
+		}
+	}
+}
+
 
 __global__ void check_diag_zero(float *d_m , float *d_i , const int n)
 {
@@ -540,7 +732,7 @@ __global__ void resCalcGPU(float *d_M,float *d_Z,float *d_Z0,float *d_MminusZ,fl
 }
 
 
-__host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,float *T,float *M,float *Y,float *Q,float *Q_re,float *C,float *prim, float *dual,int row,int col,int row1,int col1,float mu,float lam,int data_size, float *bbt, float *MminusZ, float *ZminusZO)
+__host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,float *T,float *M,float *Y,float *Q,float *Q_re,float *C,float *prim, float *dual,int row,int col,int row1,int col1,float mu,float lam,int data_size, float *bbt, float *MminusZ, float *ZminusZO, float *inner_inv)
 {
 	float *d_xy;
 	float *d_B;
@@ -561,6 +753,12 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	float *d_C;
 	float *d_MminusZ;
 	float *d_ZminusZ0;
+	float *d_mui_B;
+	float *d_Bt_mui;
+	float *d_temp_inner;
+	float *d_temp_inner_inv;
+	float *d_temp1;
+
 	float MminusZ_norm = 0.0f;
 	float ZminusZ0_norm = 0.0f;
 	float Z0_norm = 0.0f;
@@ -586,6 +784,8 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	const int Y_size = row*row1*sizeof(float);
 	const int Q_size = row*row1*sizeof(float);
 	const int element_size = 1*sizeof(float);
+	const int mui_size = row1*sizeof(float);
+	const int innerinv_size = col*col*sizeof(float);
 
 
 	CHECK(cudaMalloc((void**)&d_xy,xy_size));
@@ -609,6 +809,12 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	CHECK(cudaMalloc((void**)&d_ZminusZ0,Q_size));
 	CHECK(cudaMalloc((void**)&d_flag, sizeof(int)));
 
+	CHECK(cudaMalloc((void**)&d_mui_B,B_size));
+	CHECK(cudaMalloc((void**)&d_Bt_mui,Bt_size));
+	CHECK(cudaMalloc((void**)&d_temp_inner,innerinv_size));
+	CHECK(cudaMalloc((void**)&d_temp_inner_inv,innerinv_size));
+	CHECK(cudaMalloc((void**)&d_temp1,Bt_size));
+
 	CHECK(cudaMemcpy(d_xy,xy,xy_size,cudaMemcpyHostToDevice));	
 	CHECK(cudaMemcpy(d_B,B,B_size,cudaMemcpyHostToDevice));	
 	CHECK(cudaMemcpy(d_flag, &flag, sizeof(int), cudaMemcpyHostToDevice));
@@ -622,22 +828,44 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	int dimy_bbt = 16;
 	dim3 block_bbt(dimx_bbt,dimy_bbt);
 	dim3 grid_bbt((row1+block_bbt.x-1)/block_bbt.x,(row1+block_bbt.y-1)/block_bbt.y);
+	
+	int dimx_Zcalc_muiB = 16;
+	int dimy_Zcalc_muiB = 16;
+	dim3 block_Zcalc_muiB(dimx_Zcalc_muiB,dimy_Zcalc_muiB);
+	dim3 grid_Zcalc_muiB((col+block_Zcalc_muiB.x-1)/block_Zcalc_muiB.x,(row1+block_Zcalc_muiB.y-1)/block_Zcalc_muiB.y);
+
+	int dimx_Zcalc_Btmui = 16;
+	int dimy_Zcalc_Btmui = 16;
+	dim3 block_Zcalc_Btmui(dimx_Zcalc_Btmui,dimy_Zcalc_Btmui);
+	dim3 grid_Zcalc_Btmui((row1+block_Zcalc_Btmui.x-1)/block_Zcalc_Btmui.x,(col+block_Zcalc_Btmui.y-1)/block_Zcalc_Btmui.y);
+
+	int dimx_wood_inner_mult = 16;
+	int dimy_wood_inner_mult = 16;
+	dim3 block_wood_inner_mult(dimx_wood_inner_mult,dimy_wood_inner_mult);
+	dim3 grid_wood_inner_mult((col+block_wood_inner_mult.x-1)/block_wood_inner_mult.x,(col+block_wood_inner_mult.y-1)/block_wood_inner_mult.y);
+
 
 	//2D grid and 2D block
-        int dimx2 = row1;
+        int dimx2 = col;
         int dimy2 = 1;
         dim3 block2(dimx2,dimy2);   
         dim3 grid2(1,1); 
 	
-	int dimx_fixcol = row1;
+	int dimx_fixcol = col;
         int dimy_fixcol = 1;
         dim3 block_fixcol(dimx_fixcol,dimy_fixcol);     
-	dim3 grid_fixcol(row1,1); 
+	dim3 grid_fixcol(col,1); 
 
-        int dimx3 = 32;
-        int dimy3 = 32;
+        int dimx3 = 16;
+        int dimy3 = 16;
         dim3 block3(dimx3,dimy3); 
-	dim3 grid3((row1+block3.x-1)/block3.x,(row1+block3.y-1)/block3.y);
+	dim3 grid3((col+block3.x-1)/block3.x,(col+block3.y-1)/block3.y);
+
+        int dimx_wood_inv = 16;
+        int dimy_wood_inv = 16;
+        dim3 block_wood_inv(dimx_wood_inv,dimy_wood_inv); 
+	dim3 grid_wood_inv((row1+block_wood_inv.x-1)/block_wood_inv.x,(row1+block_wood_inv.y-1)/block_wood_inv.y);
+
 
 	int dimx_ini = 16;
 	int dimy_ini = 16;
@@ -654,40 +882,45 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	dim3 block_re(dimx_re,dimy_re);
 	dim3 grid_re(data_size,1);
 
-	transposeOnGPU << <grid_transpose, block_transpose >> >(d_B, d_Bt, row1, col1);
+	transposeOnGPU << <grid_transpose, block_transpose >> >(d_B, d_Bt, row1, col1,mu);
 //	cudaThreadSynchronize();
 
-	//matrixMultiply<<<grid_bbt, block_bbt>>>(d_B, d_Bt, d_bbt, row1, col, col, row1, row1, row1);
+	VecMatMulrow<< <grid_Zcalc_muiB,block_Zcalc_muiB >> >(d_B,d_mui_B , row1, col);
+	MatVecMulrow<< <grid_Zcalc_Btmui,block_Zcalc_Btmui >> >(d_Bt,d_Bt_mui ,col,row1);
+	InnerMultiplication<< <grid_wood_inner_mult,block_wood_inner_mult >> >(d_Bt, d_mui_B, d_temp_inner, col, row1, row1, col, col, col); 
+	eye_gpu<<<grid_bbt,block_bbt>>>(d_temp_inner_inv,col, col);
+	
+	check_diag_zero << <grid3, block3 >> >(d_temp_inner, d_temp_inner_inv, col);
+	for (int i = 0; i<col; i++)
+	{
+		fixRow_shared << <grid2, block2 >> >(d_temp_inner, d_temp_inner_inv, col, i);
+		fixColumn_shared << <grid_fixcol, block_fixcol >> >(d_temp_inner, d_temp_inner_inv, col, i);
+	}
+	
+	OuterMultiplication1<<<grid_Zcalc_Btmui,block_Zcalc_Btmui >>>(d_temp_inner_inv, d_Bt_mui, d_temp1, col, col, col, row1, col, row1); 
+	OuterMultiplication2_sub<<<grid_wood_inv,block_wood_inv >>>(d_mui_B, d_temp1, d_Zden, row1, col, col, row1, row1, row1); 
 //	cudaThreadSynchronize();
 	
-	//eye_gpu<<<grid_bbt,block_bbt>>>(d_Zden,row1, row1);
-	//addmu_diagonal<<<grid_bbt,block_bbt>>>(d_bbt,d_Zden_bbt,mu,row1,row1);
-	
-	//check_diag_zero << <grid3, block3 >> >(d_Zden_bbt, d_Zden, row1);
-	//for (int i = 0; i<row1; i++)
-	//{
-	//	fixRow_shared << <grid2, block2 >> >(d_Zden_bbt, d_Zden, row1, i);
-	//	fixColumn_shared << <grid_fixcol, block_fixcol >> >(d_Zden_bbt, d_Zden, row1, i);
-	//}
-//	cudaThreadSynchronize();
-/*	
-	for(int iter=0;iter<1;iter++)
+	for(int iter=0;iter<500;iter++)
 	{
 		initializeZGPU<< <grid_ini,block_ini >> >(d_Z,d_Z0,row,row1);
 
 		if(flag == 1)
 		{
-			eye_gpu<<<grid_bbt,block_bbt>>>(d_Zden,row1, row1);
-			cudaThreadSynchronize();
-			addmu_diagonalgpumu<<<grid_bbt,block_bbt>>>(d_bbt,d_Zden_bbt,row1,row1);
+		VecMatMulrow<< <grid_Zcalc_muiB,block_Zcalc_muiB >> >(d_B,d_mui_B , row1, col);
+		MatVecMulrow<< <grid_Zcalc_Btmui,block_Zcalc_Btmui >> >(d_Bt,d_Bt_mui ,col,row1);
+		InnerMultiplication<< <grid_wood_inner_mult,block_wood_inner_mult >> >(d_Bt, d_mui_B, d_temp_inner, col, row1, row1, col, col, col); 
+		eye_gpu<<<grid_bbt,block_bbt>>>(d_temp_inner_inv,col, col);
 	
-			check_diag_zero << <grid3, block3 >> >(d_Zden_bbt, d_Zden, row1);
-			for (int i = 0; i<row1; i++)
-			{
-				fixRow_shared << <grid2, block2 >> >(d_Zden_bbt, d_Zden, row1, i);
-				fixColumn_shared << <grid_fixcol, block_fixcol >> >(d_Zden_bbt, d_Zden, row1, i);
-			}
-//			cudaThreadSynchronize();
+		check_diag_zero << <grid3, block3 >> >(d_temp_inner, d_temp_inner_inv, col);
+		for (int i = 0; i<col; i++)
+		{
+			fixRow_shared << <grid2, block2 >> >(d_temp_inner, d_temp_inner_inv, col, i);
+			fixColumn_shared << <grid_fixcol, block_fixcol >> >(d_temp_inner, d_temp_inner_inv, col, i);
+		}
+	
+		OuterMultiplication1<<<grid_Zcalc_Btmui,block_Zcalc_Btmui >>>(d_temp_inner_inv, d_Bt_mui, d_temp1, col, col, col, row1, col, row1); 
+		OuterMultiplication2_sub<<<grid_wood_inv,block_wood_inv >>>(d_mui_B, d_temp1, d_Zden, row1, col, col, row1, row1, row1); 
 
 		}
 
@@ -720,6 +953,7 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 		resCalcGPU<<<grid_ini,block_ini>>>(d_M,d_Z,d_Z0,d_MminusZ,d_ZminusZ0,row,row1,d_flag);	
 //		cudaThreadSynchronize();
 
+//		cout << "iter = "<<iter+1<<endl;
 		CHECK(cudaMemcpy( &flag,d_flag, sizeof(int), cudaMemcpyDeviceToHost));
 		if(flag == 2)
                 {
@@ -728,9 +962,9 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 		}
 	}
 
-*/
-	CHECK(cudaMemcpy(Bt, d_Bt, Bt_size, cudaMemcpyDeviceToHost));
-	CHECK(cudaMemcpy(bbt, d_bbt, bbt_size, cudaMemcpyDeviceToHost));
+/*
+	CHECK(cudaMemcpy(Bt, d_temp1, Bt_size, cudaMemcpyDeviceToHost));
+	CHECK(cudaMemcpy(inner_inv, d_temp_inner_inv, innerinv_size, cudaMemcpyDeviceToHost));
 	CHECK(cudaMemcpy(Zden, d_Zden, Zden_size, cudaMemcpyDeviceToHost));
 	CHECK(cudaMemcpy(Z0, d_Z0, Z_size, cudaMemcpyDeviceToHost));
 	CHECK(cudaMemcpy(Z, d_Z, Z_size, cudaMemcpyDeviceToHost));
@@ -739,6 +973,7 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	CHECK(cudaMemcpy(Y, d_Y, Q_size, cudaMemcpyDeviceToHost));
 	CHECK(cudaMemcpy(MminusZ,d_MminusZ,Q_size,cudaMemcpyDeviceToHost));
 	CHECK(cudaMemcpy(ZminusZO,d_ZminusZ0,Q_size,cudaMemcpyDeviceToHost));
+*/
 
 	//gpu memory free
 	CHECK(cudaFree(d_xy));
@@ -760,5 +995,9 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	CHECK(cudaFree(d_C));
 	CHECK(cudaFree(d_MminusZ));	
 	CHECK(cudaFree(d_ZminusZ0));
-
+	CHECK(cudaFree(d_mui_B));
+	CHECK(cudaFree(d_Bt_mui));
+	CHECK(cudaFree(d_temp_inner));
+	CHECK(cudaFree(d_temp_inner_inv));
+	CHECK(cudaFree(d_temp1));
 }
