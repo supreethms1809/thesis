@@ -5,10 +5,10 @@ NVCC = nvcc
 OPT = -O3 -g 
 
 #CUDA_PATH = /cm/extra/apps/CUDA/9.0.176_384.81/
-CUDA_PATH = /usr/local/cuda-9.0/
+#CUDA_PATH = /usr/local/cuda-9.0/
 
-INCLUDES := -I$(CUDA_PATH)/include
-LIBS := -L$(CUDA_PATH)/lib64/
+#INCLUDES := -I$(CUDA_PATH)/include
+#LIBS := -L$(CUDA_PATH)/lib64/
 
 
 SRCS = pose_estimation.cpp
@@ -29,8 +29,8 @@ all:
 #	$(NVCC) -std=c++11 -O3 -g -arch=sm_35 -gencode=arch=compute_35,code=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart MatMulShared.cu -c
 #	$(NVCC) -std=c++11 -O3 -g -arch=sm_35 -gencode=arch=compute_35,code=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart loop_cuda.cu -c
 #	$(NVCC) -std=c++11 -O3 -g -arch=sm_35 -gencode=arch=compute_35,code=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart -lcublas gpu_call.cu -c
-	$(NVCC) -std=c++11 -O3 -g -arch=sm_35 -gencode=arch=compute_35,code=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart -lcublas wood_gpu_call.cu -c
-	$(CC)  $(OPT) $(SRCS) $(LIB) -c -lcudart -lcublas -lm
-	$(CC) $(OBJ) -o $(EXE) $(LIBS) $(OPT) -lcudart -lcublas -lm 
+	$(NVCC) -std=c++11 -O3 -g -arch=sm_35 -gencode=arch=compute_35,code=sm_35 -Xptxas -dlcm=cg wood_gpu_call.cu -c
+	$(CC)  $(OPT) $(SRCS) $(LIB) -c -Mcuda -lm
+	$(CC) $(OBJ) -o $(EXE) $(LIBS) $(OPT) -Mcuda -lm 
 clean: 
 	rm ./pose_estimation
