@@ -29,7 +29,7 @@ all:
 #	$(NVCC) -std=c++11 -O3 -g -arch=sm_35 -gencode=arch=compute_35,code=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart MatMulShared.cu -c
 #	$(NVCC) -std=c++11 -O3 -g -arch=sm_35 -gencode=arch=compute_35,code=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart loop_cuda.cu -c
 #	$(NVCC) -std=c++11 -O3 -g -arch=sm_35 -gencode=arch=compute_35,code=sm_35 -Xptxas -dlcm=cg -I$(INC) $(INCLUDES) -lcudart -lcublas gpu_call.cu -c
-	$(NVCC) -std=c++11 -O3 -g -arch=sm_35 -gencode=arch=compute_35,code=sm_35 -Xptxas -dlcm=cg wood_gpu_call.cu -c
+	$(NVCC) -std=c++11 -O3 -g -arch=sm_70 -gencode=arch=compute_70,code=sm_70 -Xptxas -dlcm=cg wood_gpu_call.cu -c
 	$(CC)  $(OPT) $(SRCS) $(LIB) -c -Mcuda -lm
 	$(CC) $(OBJ) -o $(EXE) $(LIBS) $(OPT) -Mcuda -lm 
 clean: 

@@ -769,6 +769,11 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	int * d_flag;
 	
 	cublasHandle_t handle;
+	cudaEvent_t kernel_start;
+        cudaEvent_t kernel_stop;
+
+        CHECK(cudaEventCreate(&kernel_start));
+        CHECK(cudaEventCreate(&kernel_stop));
 
 	const int xy_size = row*col*sizeof(float);
 	const int B_size = row1*col1*sizeof(float);
@@ -882,6 +887,8 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	dim3 block_re(dimx_re,dimy_re);
 	dim3 grid_re(data_size,1);
 
+        CHECK(cudaEventRecord(kernel_start));
+
 	transposeOnGPU << <grid_transpose, block_transpose >> >(d_B, d_Bt, row1, col1,mu);
 //	cudaThreadSynchronize();
 
@@ -961,6 +968,14 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 			break;
 		}
 	}
+
+        cudaThreadSynchronize();
+
+        CHECK(cudaEventRecord(kernel_stop));
+        CHECK(cudaEventSynchronize(kernel_stop));
+        float milliseconds = 0;
+        CHECK(cudaEventElapsedTime(&milliseconds, kernel_start, kernel_stop));
+        cout << "Time in ms : "<<milliseconds << " ms"<<endl;
 
 /*
 	CHECK(cudaMemcpy(Bt, d_temp1, Bt_size, cudaMemcpyDeviceToHost));
