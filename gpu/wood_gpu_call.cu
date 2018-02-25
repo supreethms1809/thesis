@@ -791,6 +791,7 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	const int element_size = 1*sizeof(float);
 	const int mui_size = row1*sizeof(float);
 	const int innerinv_size = col*col*sizeof(float);
+	const int data_size_in_bytes = data_size*sizeof(float);
 
 
 	CHECK(cudaMalloc((void**)&d_xy,xy_size));
@@ -809,7 +810,7 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	CHECK(cudaMalloc((void**)&d_Y,Y_size));
 	CHECK(cudaMalloc((void**)&d_Q,Q_size));
 	CHECK(cudaMalloc((void**)&d_Q_re,Q_size));
-	CHECK(cudaMalloc((void**)&d_C,data_size));
+	CHECK(cudaMalloc((void**)&d_C,data_size_in_bytes));
 	CHECK(cudaMalloc((void**)&d_MminusZ,Q_size));
 	CHECK(cudaMalloc((void**)&d_ZminusZ0,Q_size));
 	CHECK(cudaMalloc((void**)&d_flag, sizeof(int)));
