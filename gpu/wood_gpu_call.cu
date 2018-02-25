@@ -636,7 +636,6 @@ __global__ void svd_2_3_gpu(float *d_Q,float *d_M,float *d_C,float lam,int row,i
 
 	d_C[blockid] = sig[0];
 
-
 }
 
 __global__ void updateYGPU(float *d_Y,float *d_M,float *d_Z,int row,int col)
@@ -791,6 +790,7 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	const int element_size = 1*sizeof(float);
 	const int mui_size = row1*sizeof(float);
 	const int innerinv_size = col*col*sizeof(float);
+	const int data_size_in_bytes = data_size*sizeof(float);
 
 
 	CHECK(cudaMalloc((void**)&d_xy,xy_size));
@@ -809,7 +809,7 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	CHECK(cudaMalloc((void**)&d_Y,Y_size));
 	CHECK(cudaMalloc((void**)&d_Q,Q_size));
 	CHECK(cudaMalloc((void**)&d_Q_re,Q_size));
-	CHECK(cudaMalloc((void**)&d_C,data_size));
+	CHECK(cudaMalloc((void**)&d_C,data_size_in_bytes));
 	CHECK(cudaMalloc((void**)&d_MminusZ,Q_size));
 	CHECK(cudaMalloc((void**)&d_ZminusZ0,Q_size));
 	CHECK(cudaMalloc((void**)&d_flag, sizeof(int)));
@@ -961,7 +961,7 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 		resCalcGPU<<<grid_ini,block_ini>>>(d_M,d_Z,d_Z0,d_MminusZ,d_ZminusZ0,row,row1,d_flag);	
 //		cudaThreadSynchronize();
 
-//		cout << "iter = "<<iter+1<<endl;
+		cout << "iter = "<<iter+1<<endl;
 		CHECK(cudaMemcpy( &flag,d_flag, sizeof(int), cudaMemcpyDeviceToHost));
 		if(flag == 2)
                 {
@@ -978,10 +978,11 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	CHECK(cudaEventElapsedTime(&milliseconds, kernel_start, kernel_stop));
 	cout << "Time in ms : "<<milliseconds << " ms"<<endl;
 
-/*
-	CHECK(cudaMemcpy(Bt, d_temp1, Bt_size, cudaMemcpyDeviceToHost));
-	CHECK(cudaMemcpy(inner_inv, d_temp_inner_inv, innerinv_size, cudaMemcpyDeviceToHost));
-	CHECK(cudaMemcpy(Zden, d_Zden, Zden_size, cudaMemcpyDeviceToHost));
+
+	CHECK(cudaMemcpy(M, d_M, M_size, cudaMemcpyDeviceToHost));
+	CHECK(cudaMemcpy(C, d_C, data_size_in_bytes, cudaMemcpyDeviceToHost));
+
+/*	CHECK(cudaMemcpy(Zden, d_Zden, Zden_size, cudaMemcpyDeviceToHost));
 	CHECK(cudaMemcpy(Z0, d_Z0, Z_size, cudaMemcpyDeviceToHost));
 	CHECK(cudaMemcpy(Z, d_Z, Z_size, cudaMemcpyDeviceToHost));
 	CHECK(cudaMemcpy(Q_re, d_Q_re, Q_size, cudaMemcpyDeviceToHost));

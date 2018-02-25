@@ -500,8 +500,8 @@ void Zden_cacl(float *B, float *Bt, float *Zden,float mu,const int m,const int n
                 }
         }	
 
-omp_set_num_threads(24);
-#pragma omp parallel for
+//omp_set_num_threads(24);
+//#pragma omp parallel for
 	for (int i = 0; i < m; i++)
         {
                 for (int j = 0; j < m; j++)
@@ -690,8 +690,8 @@ void svd_2_3_alt(float *a, float *u,float *sig, float *vt, int m,int n)
 void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size)
 {
 
-omp_set_num_threads(24);
-#pragma omp parallel for 
+//omp_set_num_threads(24);
+//#pragma omp parallel for 
 	for(int i = 0;i < data_size;i++)
 	{
 	
@@ -914,10 +914,9 @@ int main(void)
 
 	mu = meanCalc(xy,col,row);
 
-	mu_inv = 1/mu;
-	
 	loop(xy,B,B_transpose,Zden,Z,ZO,T,M,Y,Q,Q_re,C,&prim,&dual,row,col,row1,col1,mu,lam,data_size);
 
+//	constructRandS;
 
 	delete[] xy;
         delete[] mean;
