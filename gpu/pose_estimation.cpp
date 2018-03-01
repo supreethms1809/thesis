@@ -84,7 +84,7 @@ void displayValues(float *variable, int items)
 	cout.precision(17);
 	for (int i =0; i < items; i++)
 	{
-		cout << "Value of variable :"<< variable[i] << endl;
+		cout << "Value of variable :"<< i << " = " << variable[i] << endl;
 	}
 }
 
@@ -318,291 +318,6 @@ void eye(float *I, int m, int n)
         }
 }
 
-/*
-lapack_int matInv(float *A, int n)
-{
-	int ipiv[n+1];
-	lapack_int ret;
-	
-	ret = LAPACKE_sgetrf(LAPACK_ROW_MAJOR,n,n,A,n,ipiv);
-	
-	if(ret != 0)
-	{
-		return ret;
-	}
-	
-	ret = LAPACKE_sgetri(LAPACK_ROW_MAJOR,n,A,n,ipiv);
-	return ret;
-
-}
-*/
-
-void inv_mu_i(float mu,float *I,int m)
-{
-	for(int i=0;i<m;i++)
-	{
-		for(int j=0;j<m;j++)
-		{
-			if(i == j)
-			{
-			I[(i*m)+j] = 1 / (I[(i*m)+j] * mu);
-			}
-		}
-	}
-}
-
-void add_iden(float *temp1,int n)
-{
-	for(int i=0;i<n;i++)
-	{
-		for(int j=0;j<n;j++)
-		{
-			if(i==j)
-			{
-			temp1[(i*n)+j] = temp1[(i*n)+j] + 1.0f;
-			}
-		}
-	}
-
-}
-
-void sub_wood(float *I_n,float *temp1,float *inv,int m,int n)
-{
-	for(int i=0;i<m;i++)
-	{
-		for(int j=0;j<n;j++)
-		{
-			inv[(i*n)+j] = I_n[(i*n)+j] - temp1[(i*n)+j];
-		}
-	}
-}
-
-void cpuInverseOfMatrix(float *matrix, float *I, int col)
-{
-
-	for (int m = 0; m < col; m++)
-	{
-		//Checking if diagonal element is 0
-		if (matrix[((col) + 1)*m] == 0)
-		{
-			//checking if the row is last row. If it is last row add the previous row to make it non zero
-                	if (m == (col - 1))
-			{
-				for (int i = 0; i < (col); i++)
-				{					
-				matrix[(m * (col)) + i] = matrix[((m - 1) * (col)) + i] + matrix[(m * (col)) + i];
-				I[(m * (col)) + i] = matrix[((m - 1) * (col)) + i] + matrix[(m * (col)) + i];
-				}
-			}
-			else	//if it is not last row, add the next row.
-			{
-			        for (int i = 0; i < (2 * col); i++)
-				{
-				matrix[(m * col) + i] = matrix[((m + 1) * col) + i] + matrix[(m * col) + i];
-				I[(m * col) + i] = matrix[((m + 1) * col) + i] + matrix[(m * col) + i];
-				}
-			}
-		}
-
-		float initialValue = matrix[((col) + 1)*m];
-
-		//Make the diagonal elements 1 along with the whole row(divide).
-		for (int j = 0; j < (col); j++)
-		{
-		matrix[(m * (col)) + j] = matrix[(m * (col)) + j] / initialValue;
-		I[(m * (col)) + j] = I[(m * (col)) + j] / initialValue;
-		}
-
-//omp_set_num_threads(24);
-//#pragma omp parallel for
-		//Making the elements of the row to zero
-		for (int k = 0; k < col; k++)
-		{
-			float tempIni;
-			tempIni = matrix[m + (k * (col))];
-			if (k != m)
-			{	
-				for (int l = 0; l < (col); l++)
-				{
-					matrix[k*col+l] = matrix[k*col+l] - ((tempIni*matrix[m*col+l])/matrix[m*col+m]);
-					I[k*col+l] = I[k*col+l] - ((tempIni*I[m*col+l])/matrix[m*col+m]);
-
-				}
-			}
-
-		}
-
-	}
-}
-
-void Zden_cacl(float *B, float *Bt, float *Zden,float mu,const int m,const int n)
-{
-
-	float mu_inv =0.0f;
-        float *I_m = new float [m];
-	float *temp_mui_B = new float [m*n];
-	float *temp_Bt_mui = new float [m*n];
-	float *temp_inv = new float [n*n];
-	float *temp_I = new float [n*n];
-	float *temp_mult = new float [n*m];
-	float *temp_sub = new float [m*m];
-
-	mu_inv = 1/mu;
-
-	for(int i = 0;i<m;i++)
-	{
-		I_m[i] = mu_inv;
-	}
-	for(int i = 0;i<m;i++)
-	{
-		for(int j=0;j<n;j++)
-		{
-			temp_mui_B[(i*n)+j] = I_m[i] * B[(i*n)+j];
-			temp_Bt_mui[(i*n)+j] = Bt[(i*n)+j] * I_m[j];
-		}
-	}
-	
-	float fSum;
-        for (int i = 0; i < n; i++)
-        {
-                for (int j = 0; j < n; j++)
-                {
-                fSum = 0.0;
-                        for (int k = 0; k < m; k++)
-                        {
-                        fSum += (Bt[(i*m) + k] * temp_mui_B[(k*n) + j]);
-                        }
-		if(i==j)
-		{
-                temp_inv[(i*n) + j] = fSum + 1;
-		}
-		else
-		{
-                temp_inv[(i*n) + j] = fSum;
-		}
-                }
-        }	
-
-	//matInv(temp_inv,n);
-	eye(temp_I,n,n);
-	cpuInverseOfMatrix(temp_inv, temp_I, n);
-	
-	for (int i = 0; i < n; i++)
-        {
-                for (int j = 0; j < m; j++)
-                {
-                fSum = 0.0;
-                        for (int k = 0; k < n; k++)
-                        {
-                        fSum += (temp_I[(i*n) + k] * temp_Bt_mui[(k*m) + j]);
-                        }
-                temp_mult[(i*m) + j] = fSum;
-                }
-        }	
-
-//omp_set_num_threads(24);
-//#pragma omp parallel for
-	for (int i = 0; i < m; i++)
-        {
-                for (int j = 0; j < m; j++)
-                {
-                fSum = 0.0;
-                        for (int k = 0; k < n; k++)
-                        {
-                        fSum += (temp_mui_B[(i*n) + k] * temp_mult[(k*m) + j]);
-                        }
-		if(i==j)
-		{
-			Zden[(i*m)+j] = I_m[i] - fSum;
-			//temp_sub[(i*m)+j];
-		}
-		else
-		{
-			Zden[(i*m)+j] = 0.0 - fSum;
-			//temp_sub[(i*m)+j];
-		}
-                //temp_sub[(i*m) + j] = fSum;
-                }
-        }	
-       
-	delete [] I_m;
-	delete [] temp_mui_B;
-	delete [] temp_Bt_mui;
-	delete [] temp_inv;
-	delete [] temp_mult;
-	delete [] temp_sub;
-
-}
-
-
-void calculateZ_preZden(float *Z,float *Zden,float *xy, float *E, float *T, float *B_transpose, float mu, float *M, float *Y,const int row,const int col,const int row1)
-{
-	//calculateZ_preZden(Z, Zden, xy, E, T, B_transpose,mu_orig,M,Y,row,col,row1);
-
-        float *temp = new float [row*col];
-        float *temp2 = new float [row*row1];
-        float *temp3 = new float [row*row1];
-        float *Znum = new float [row*row1];
-        int status = 0;
-
-        //numerator
-        //temp = (W-E-T*ones(1,p))
-        for (int i = 0;i < row;i++)
-        {
-                for (int j = 0;j < col;j++)
-                {
-                temp[(i*col) + j] = xy[(i*col) + j] - E[(i*col) + j] - T[i];
-                }
-        }
-        //temp2 = temp * B'
-        //CPU//
-	cpuMatrixMult(temp, B_transpose, temp2, row, col, row1);
-        //GPU//
-	//gpuMultShared(temp, B_transpose, temp2, row, col, col, row1);
-
-        //temp3 = mu*M
-
-        //Znum = ((W-E-T*ones(1,p))*B'+mu*M+Y) 
-        sumOfMatrix(Znum,temp2, M, Y, mu, row, row1);
-
-	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
-        //CPU//
-	cpuMatrixMult(Znum, Zden, Z, row, row1, row1);
-	//GPU//
-	//gpuMultShared(Znum, Zden, Z, row, row1, row1, row1);
-
-	delete [] temp;
-        delete [] temp2;
-        delete [] temp3;
-        delete [] Znum;
-
-}
-
-void calculateQ(float *Q,float *Q_re, float *Z, float *Y,float mu, int row, int row1,int data_size)
-{
-	float oneovermu;
-	oneovermu = 1/mu;
-	for (int i = 0;i < row;i++)
-        {
-                for (int j = 0;j < row1;j++)
-                {
-                Q[(i*row1) + j] = Z[(i*row1) + j] - ((oneovermu)*Y[(i*row1) + j]) ;
-                }
-        }
-
-	for(int i = 0;i < data_size;i++)
-        {
-                for(int j = 0;j<2;j++)
-                {
-                        for(int k=0;k<3;k++)
-                        {
-
-                        Q_re[(i*6)+(j * 3) + k] = Q[(3 * i) + (j*row1) + k];
-                        }
-                }
-        }
-
-}
 
 void svd_2_3_alt(float *a, float *u,float *sig, float *vt, int m,int n)
 {
@@ -750,92 +465,60 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 
 }
 
-
-void updateDualvariable(float *Y,float mu,float *M,float *Z,int row,int row1)
+void reconstruct(float *R,float *B,float *C,float *M,float *xyz,float *kron,float *temp_mult,int row,int col,int row1, int col1,int data_size,int threeD_row)
 {
-	for(int i=0;i<row;i++)
+	for(int i = 0;i<data_size;i++)
 	{
-		for(int j = 0;j<row1;j++)
+		if(C[i] != 0)
 		{
-			Y[(i*row1)+j] += mu*(M[(i*row1)+j] - Z[(i*row1)+j]); 
+			for(int j = 0;j<3;j++)
+                	{
+				if(j<2)
+				{
+                        		for(int k=0;k<3;k++)
+                        		{
+	                       		R[(3 * i) + (j*row1) + k] = M[(3 * i) + (j*row1) + k] / C[i];
+        	               		}
+				}
+				else
+				{
+					
+	                       	R[(3 * i) + (j*row1) + 0] = R[(3 * i) + (0*row1) + 1] * R[(3 * i) + (1*row1) + 2] -  R[(3 * i) + (0*row1) + 2] * R[(3 * i) + (1*row1) + 1] ;
+	                       	R[(3 * i) + (j*row1) + 1] = R[(3 * i) + (0*row1) + 0] * R[(3 * i) + (1*row1) + 2] -  R[(3 * i) + (0*row1) + 2] * R[(3 * i) + (1*row1) + 0] ;
+	                       	R[(3 * i) + (j*row1) + 2] = R[(3 * i) + (0*row1) + 0] * R[(3 * i) + (1*row1) + 1] -  R[(3 * i) + (0*row1) + 1] * R[(3 * i) + (1*row1) + 0] ;
+        	               		
+				}
+                	}
 		}
 	}
-}
 
-float febNorm(float *a, int row, int col)
-{
-        float norm = 0.0;
-        float sum = 0.0;
-        for(int i=0;i<row;i++)
-        {
-                for(int j=0;j<col;j++)
-                {
-                  sum +=(a[(i*col)+j]) * (a[(i*col)+j]);
-                }
-        }
-        norm=sqrt(sum);
-        return norm;
-}
-
-void resCalc(float *PrimRes, float *DualRes, float *M, float *Z, float *ZO,float mu, int row, int row1)
-{
-	float *MminusZ = new float [row*row1];
-	float *ZminusZO = new float [row*row1];
-
-	for(int i = 0; i< row ;i++)
+	for(int i=0;i<data_size;i++)
 	{
-		for(int j = 0; j<row1 ; j++)
+		for(int j=0;j<data_size;j++)
 		{
-			MminusZ[(i*row1)+j] = M[(i*row1)+j] - Z[(i*row1)+j];
-			ZminusZO[(i*row1)+j] = Z[(i*row1)+j] - ZO[(i*row1)+j];
+			if(i == j)
+			{
+			for(int k=0;k<3;k++)
+			{
+				for(int l=0;l<3;l++)
+				{
+					if(k == l)
+					{
+					kron[(3*row1*j)+(3*i)+(k*row1)+l] = C[i]*1;
+					}
+					else
+					{
+					kron[(3*row1*j)+(3*i)+(k*row1)+l] = C[i]*0;
+					}
+				}
+			}
+			}
 		}
 	}
-	
-		
-	*PrimRes = febNorm(MminusZ,row,row1)/febNorm(ZO,row,row1);
-	*DualRes = mu * febNorm(ZminusZO,row,row1)/febNorm(ZO,row,row1);
-	
-	delete[] MminusZ;
-	delete[] ZminusZO;
-}
 
-float resCalc_PrimRes(float *M, float *Z, float *ZO,float mu, int row, int row1)
-{
-	float *MminusZ = new float [row*row1];
-	float temp = 0.0f;
+	cpuMatrixMult(kron, B, temp_mult, row1, row1,col);
+	cpuMatrixMult(R, temp_mult, xyz, threeD_row, row1,col);
 
-	for(int i = 0; i< row ;i++)
-	{
-		for(int j = 0; j<row1 ; j++)
-		{
-			MminusZ[(i*row1)+j] = M[(i*row1)+j] - Z[(i*row1)+j];
-		}
-	}
-	
-		
-	temp = febNorm(MminusZ,row,row1)/febNorm(ZO,row,row1);
-	
-	delete[] MminusZ;
-	return temp;
-}
-
-float resCalc_DualRes(float *Z, float *ZO,float mu, int row, int row1)
-{
-	float *ZminusZO = new float [row*row1];
-	float temp = 0.0f;
-
-	for(int i = 0; i< row ;i++)
-	{
-		for(int j = 0; j<row1 ; j++)
-		{
-			ZminusZO[(i*row1)+j] = Z[(i*row1)+j] - ZO[(i*row1)+j];
-		}
-	}	
-		
-	temp = mu * febNorm(ZminusZO,row,row1)/febNorm(ZO,row,row1);
-	
-	delete[] ZminusZO;
-	return temp;
 }
 
 
@@ -846,9 +529,11 @@ int main(void)
 	const int col = 15;
 	const int row1 = 384;
 	const int col1 = 15;
+	const int threeD_row = 3;
 	float tol = 1e-04;
 
 	float *xy = new float [row*col];
+	float *xyz = new float [threeD_row*col];
 	float *mean = new float [row];
 	float *B = new float [row1*col1];
 	float *B_transpose = new float [col1*row1];
@@ -891,10 +576,11 @@ int main(void)
 	//allocate precomputed Zden
 	float *Zden = new float [row1*row1];
         int status = 0;
-	float *Zden_inv = new float [row1*row1];
+	float *kron = new float [row1*row1];
+	float *temp_mult = new float [row1*col1];
 
-	float *MminusZ = new float [row*row1];
-	float *ZminusZO = new float [row*row1];
+	float *R = new float [threeD_row*row1];
+
 	//read the 15 points from 15 point model
 	items = readValues("messi2.txt",xy,items,row,col);
 	
@@ -911,14 +597,21 @@ int main(void)
 	initializeMat(M,Z,Y,row,row1);
 	initializeVec(C,data_size);
 	initializeZero(E,row,col);
+	initializeZero(R,threeD_row,col);
 
 	mu = meanCalc(xy,col,row);
 
 	loop(xy,B,B_transpose,Zden,Z,ZO,T,M,Y,Q,Q_re,C,&prim,&dual,row,col,row1,col1,mu,lam,data_size);
 
-//	constructRandS;
+	reconstruct(R,B,C,M,xyz,kron,temp_mult,row,col,row1,col1,data_size,threeD_row);
+
+
+	displayValues(xyz,threeD_row*col);
+	//displayValues(temp_mult,row1);
+
 
 	delete[] xy;
+	delete[] xyz;
         delete[] mean;
 	delete[] B;
 	delete[] B_transpose;
@@ -935,11 +628,11 @@ int main(void)
 	delete[] Q_re;
 	delete[] iden;
 	delete[] Zden;
-	delete[] Zden_inv;
+	delete[] kron;
+	delete[] temp_mult;
 	delete[] I_m;
 	delete[] h_temp_Bt_mui;
-	delete[] MminusZ;
-	delete[] ZminusZO;
+	delete[] R;
 
 }
 

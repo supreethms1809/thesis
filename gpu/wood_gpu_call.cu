@@ -961,7 +961,7 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 		resCalcGPU<<<grid_ini,block_ini>>>(d_M,d_Z,d_Z0,d_MminusZ,d_ZminusZ0,row,row1,d_flag);	
 //		cudaThreadSynchronize();
 
-		cout << "iter = "<<iter+1<<endl;
+		//cout << "iter = "<<iter+1<<endl;
 		CHECK(cudaMemcpy( &flag,d_flag, sizeof(int), cudaMemcpyDeviceToHost));
 		if(flag == 2)
                 {
