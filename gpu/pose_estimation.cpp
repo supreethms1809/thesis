@@ -473,7 +473,7 @@ void reconstruct(float *R,float *B,float *C,float *M,float *xyz,float *kron,floa
 		{
 			for(int j = 0;j<3;j++)
                 	{
-				if(j<2)
+				if(j == 0 || j == 1)
 				{
                         		for(int k=0;k<3;k++)
                         		{
@@ -484,7 +484,7 @@ void reconstruct(float *R,float *B,float *C,float *M,float *xyz,float *kron,floa
 				{
 					
 	                       	R[(3 * i) + (j*row1) + 0] = R[(3 * i) + (0*row1) + 1] * R[(3 * i) + (1*row1) + 2] -  R[(3 * i) + (0*row1) + 2] * R[(3 * i) + (1*row1) + 1] ;
-	                       	R[(3 * i) + (j*row1) + 1] = R[(3 * i) + (0*row1) + 0] * R[(3 * i) + (1*row1) + 2] -  R[(3 * i) + (0*row1) + 2] * R[(3 * i) + (1*row1) + 0] ;
+	                       	R[(3 * i) + (j*row1) + 1] = R[(3 * i) + (0*row1) + 2] * R[(3 * i) + (1*row1) + 0] -  R[(3 * i) + (0*row1) + 0] * R[(3 * i) + (1*row1) + 2] ;
 	                       	R[(3 * i) + (j*row1) + 2] = R[(3 * i) + (0*row1) + 0] * R[(3 * i) + (1*row1) + 1] -  R[(3 * i) + (0*row1) + 1] * R[(3 * i) + (1*row1) + 0] ;
         	               		
 				}
