@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -101,7 +100,7 @@ __global__ void transposeOnGPU(float *d_B, float *d_Bt, int rows, int cols,float
 	if(iy==1&&ix==1)
 	{
 		d_mu = mu;
-		d_tol = 1e-04;
+		d_tol = 1e-03;
 	//	printf("value of d_mu: %f \n",d_mu);
 	}
 
@@ -364,7 +363,7 @@ __global__ void addmu_diagonal(float *d_bbt,float *d_Zden_bbt,float mu,int row, 
 	if(ix==0 && iy==0)
 	{
 		d_mu = mu;
-		d_tol = 1e-04;
+		d_tol = 1e-03;
 	}
 
 	if (ix < row && iy < col)
@@ -909,7 +908,7 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	OuterMultiplication2_sub<<<grid_wood_inv,block_wood_inv >>>(d_mui_B, d_temp1, d_Zden, row1, col, col, row1, row1, row1); 
 //	cudaThreadSynchronize();
 	
-	for(int iter=0;iter<500;iter++)
+	for(int iter=0;iter<1000;iter++)
 	{
 		initializeZGPU<< <grid_ini,block_ini >> >(d_Z,d_Z0,row,row1);
 

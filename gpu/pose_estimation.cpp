@@ -582,7 +582,7 @@ int main(void)
 	float *R = new float [threeD_row*row1];
 
 	//read the 15 points from 15 point model
-	items = readValues("messi2.txt",xy,items,row,col);
+	items = readValues("FAUST_image001_xy_coor.txt",xy,items,row,col);
 	
 	//normalize the input
 	normalizeS(xy,row,col,T);
@@ -606,6 +606,7 @@ int main(void)
 	reconstruct(R,B,C,M,xyz,kron,temp_mult,row,col,row1,col1,data_size,threeD_row);
 
 
+	dump_to_file("xyz", xyz, threeD_row, col);
 	displayValues(xyz,threeD_row*col);
 	//displayValues(temp_mult,row1);
 
