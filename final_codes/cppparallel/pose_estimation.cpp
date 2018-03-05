@@ -6,8 +6,11 @@
 #include <math.h>
 #include <stdlib.h>
 #include <limits>
+#include <chrono>
 #include <ctime>
 #include <omp.h>
+#include <mkl.h>
+#include <mkl_lapack.h>
 
 #define LAPACK_ROW_MAJOR   101
 #define min(a,b) ((a)>(b)?(b):(a))
@@ -20,10 +23,7 @@
 
 using std::string;
 using namespace std;
-
-extern void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col);
-extern void gpuProx_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size);
-extern void gpuMultShared(float *h_A, float *h_B, float *h_C, const int A_rows, const int A_cols,const int B_rows,const int B_cols);
+using namespace std::chrono;
 
 int readValues(char *text, float *variable, int i,int row,int col)
 {
@@ -320,7 +320,7 @@ void eye(float *I, int m, int n)
         }
 }
 
-/*
+
 lapack_int matInv(float *A, int n)
 {
 	int ipiv[n+1];
@@ -337,7 +337,7 @@ lapack_int matInv(float *A, int n)
 	return ret;
 
 }
-*/
+
 
 void inv_mu_i(float mu,float *I,int m)
 {
@@ -569,9 +569,9 @@ void calculateZ_preZden(float *Z,float *Zden,float *xy, float *E, float *T, floa
 
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
         //CPU//
-	//cpuMatrixMult(Znum, Zden, Z, row, row1, row1);
+	cpuMatrixMult(Znum, Zden, Z, row, row1, row1);
 	//GPU//
-	gpuMultShared(Znum, Zden, Z, row, row1, row1, row1);
+	//gpuMultShared(Znum, Zden, Z, row, row1, row1, row1);
 
 	delete [] temp;
         delete [] temp2;
@@ -843,6 +843,11 @@ float resCalc_DualRes(float *Z, float *ZO,float mu, int row, int row1)
 
 int main(void)
 {
+        const int iter_num = 100;
+        high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4,t5[500],t6[500];
+        for(int p = 0;p<iter_num;p++)
+        {       //t3 = high_resolution_clock::now();
+
 	struct timeval start,end;
         float fElapsedTime;
         float fMemoryCopyTime = 0.0f;
@@ -850,7 +855,7 @@ int main(void)
 	const int col = 15;
 	const int row1 = 384;
 	const int col1 = 15;
-	float tol = 1e-04;
+	float tol = 1e-03;
 
 	float *xy = new float [row*col];
 	float *mean = new float [row];
@@ -891,7 +896,6 @@ int main(void)
         int status = 0;
 	float *Zden_inv = new float [row1*row1];
 	
-	gettimeofday(&start,NULL);
 
 	//read the 15 points from 15 point model
 	items = readValues("messi2.txt",xy,items,row,col);
@@ -912,10 +916,10 @@ int main(void)
 
 	mu = meanCalc(xy,col,row);
 
+	t1[p] = high_resolution_clock::now();
         //calculation of BBt
 	TransposeOnCPU(B,B_transpose,row1,col);
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
-        //gpuMultShared(B,B_transpose,BBt,row1,col,col,row1);
 	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
 
 	//cpu inverse
@@ -987,9 +991,10 @@ int main(void)
 			}
 		}
 	}
-	gettimeofday(&end,NULL);
-	double fSequential_time = ((end.tv_sec*1e6+end.tv_usec)-(start.tv_sec*1e6+start.tv_usec))/1000;
-	cout<<" The Sequential Execution time is : "<<fSequential_time<<" ms"<<endl;
+
+        t2[p] = high_resolution_clock::now();
+        duration<float> time_span1 = duration_cast<duration<float>>(t2[p] - t1[p]);
+        cout << "Time in miliseconds each section is : " << time_span1.count() * 1000 << " ms" << endl;
 
 	delete[] xy;
         delete[] mean;
@@ -1008,6 +1013,15 @@ int main(void)
 	delete[] Q_re;
 	delete[] Zden;
 	delete[] Zden_inv;
+
+        }
+
+        duration<float> time_span;
+        for(int p=0;p<iter_num;p++)
+        {
+                time_span += duration_cast<duration<float>>(t2[p] - t1[p]);
+        }
+        cout << "Time in miliseconds: "<< (time_span.count()/iter_num) * 1000 << " ms"<<endl;
 	
 
 }

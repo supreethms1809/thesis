@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <sys/time.h>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -21,9 +20,11 @@
 using std::string;
 using namespace std;
 
-extern void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col);
-extern void gpuProx_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size);
-extern void gpuMultShared(float *h_A, float *h_B, float *h_C, const int A_rows, const int A_cols,const int B_rows,const int B_cols);
+//extern void gpuInverseOfMatrix(float *h_matrix,float *h_iden_mat, int col);
+extern void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *ZO,float *T,float *M,float *Y,float *Q,float *Q_re,float *C,float *prim, float *dual,int row,int col,int row1,int col1,float mu,float lam,int data_size,float *bbt,float *MminusZ,float *ZminusZO, float *inner_inv);
+//extern void loop_cu(float *xy, float *B, float *B_t, float *Z, float *ZO,float *Zden, float *Y, float *Q, float *Q_re,float *M, float *C,float *E, float *T, float *iden, float *I_m, float mu, float constant, int row, int col, int row1, int col1, int data_size,float *temp_mui_B);
+//extern void gpuProx_2norm(float *Q, float *M, float *C, float constant, int row, int col, int data_size);
+//extern void gpuMultShared(float *h_A, float *h_B, float *h_C, const int A_rows, const int A_cols,const int B_rows,const int B_cols);
 
 int readValues(char *text, float *variable, int i,int row,int col)
 {
@@ -463,7 +464,7 @@ void Zden_cacl(float *B, float *Bt, float *Zden,float mu,const int m,const int n
 			temp_Bt_mui[(i*n)+j] = Bt[(i*n)+j] * I_m[j];
 		}
 	}
-
+	
 	float fSum;
         for (int i = 0; i < n; i++)
         {
@@ -569,9 +570,9 @@ void calculateZ_preZden(float *Z,float *Zden,float *xy, float *E, float *T, floa
 
 	//Z = ((W-E-T*ones(1,p))*B'+mu*M+Y)/(BBt+mu*eye(3*k))
         //CPU//
-	//cpuMatrixMult(Znum, Zden, Z, row, row1, row1);
+	cpuMatrixMult(Znum, Zden, Z, row, row1, row1);
 	//GPU//
-	gpuMultShared(Znum, Zden, Z, row, row1, row1, row1);
+	//gpuMultShared(Znum, Zden, Z, row, row1, row1, row1);
 
 	delete [] temp;
         delete [] temp2;
@@ -843,9 +844,7 @@ float resCalc_DualRes(float *Z, float *ZO,float mu, int row, int row1)
 
 int main(void)
 {
-	struct timeval start,end;
-        float fElapsedTime;
-        float fMemoryCopyTime = 0.0f;
+	
 	const int row = 2;
 	const int col = 15;
 	const int row1 = 384;
@@ -882,17 +881,23 @@ int main(void)
 	float *ZO = new float [row*row1];
 	float *Q = new float [row*row1];
 	float *Q_re = new float [row*row1];
-	float mu = 0.0;
-	float PrimRes;
-	float DualRes;
+	float *iden = new float [col*col];
+	float *I_m = new float [row1];
+	float *h_temp_Bt_mui = new float [col*row1];
+
+	float mu = 0.0f;
+	float mu_inv = 0.0f;
+	float constant = 0.0f;
+	float prim=0.0f;
+	float dual=0.0f;
 
 	//allocate precomputed Zden
 	float *Zden = new float [row1*row1];
         int status = 0;
 	float *Zden_inv = new float [row1*row1];
-	
-	gettimeofday(&start,NULL);
 
+	float *MminusZ = new float [row*row1];
+	float *ZminusZO = new float [row*row1];
 	//read the 15 points from 15 point model
 	items = readValues("messi2.txt",xy,items,row,col);
 	
@@ -912,19 +917,46 @@ int main(void)
 
 	mu = meanCalc(xy,col,row);
 
+	mu_inv = 1/mu;
+
+	for(int i = 0;i<row1;i++)
+	{
+		I_m[i] = mu_inv;
+	}
+
+	//eye(Zden,row1,row1);
+	loop(xy,B,B_transpose,Zden,Z,ZO,T,M,Y,Q,Q_re,C,&prim,&dual,row,col,row1,col1,mu,lam,data_size,BBt,MminusZ,ZminusZO,iden);
+	//loop_cu(xy, B, B_transpose, Z, ZO, Zden, Y, Q, Q_re, M, C, E, T, iden, I_m, mu, constant, row, col, row1, col1, data_size,h_temp_Bt_mui);
+/*
+	dump_to_file("Zden",Zden,row1,row1);
+	dump_to_file("d_temp1",B_transpose,col,row1);
+	dump_to_file("innerinv",iden,col,col);
+	dump_to_file("Z",Z,row,row1);
+	dump_to_file("ZO",ZO,row,row1);
+	dump_to_file("M",M,row,row1);
+	dump_to_file("Y",Y,row,row1);
+	dump_to_file("MminusZ",MminusZ,row,row1);
+	dump_to_file("ZminusZO",ZminusZO,row,row1);
+*/
+
+/*
         //calculation of BBt
 	TransposeOnCPU(B,B_transpose,row1,col);
-	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
+	//cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
         //gpuMultShared(B,B_transpose,BBt,row1,col,col,row1);
-	addScalarToDiagonal(Zden,BBt,mu,row1,row1);
+	//addScalarToDiagonal(Zden,BBt,mu,row1,row1);
+	
+	//gpu inverse
+	//eye(Zden_inv,row1,row1);
+	//gpuInverseOfMatrix(Zden,Zden_inv,row1);
 
 	//cpu inverse
-	status = matInv(Zden,row1);
+	//status = matInv(Zden,row1);
 	//eye(Zden_inv,row1,row1);
 	//cpuInverseOfMatrix(Zden, Zden_inv, row1);
 
 	//woodburry inverse
-	//Zden_cacl(B,B_transpose,Zden,mu,row1,col);
+	Zden_cacl(B,B_transpose,Zden,mu,row1,col);
 
 	for(iter = 0; iter < 500; iter++)
 	{
@@ -934,13 +966,18 @@ int main(void)
 		if(flag == 1)
 		{
 			//cpu inverse
-			addScalarToDiagonal(Zden,BBt,mu,row1,row1);
-			status = matInv(Zden,row1);
+			//addScalarToDiagonal(Zden,BBt,mu,row1,row1);
+			//status = matInv(Zden,row1);
 			//eye(Zden_inv,row1,row1);
 			//cpuInverseOfMatrix(Zden, Zden_inv, row1);
 
+			//gpuinverse
+			//addScalarToDiagonal(Zden,BBt,mu,row1,row1);
+			//eye(Zden_inv,row1,row1);
+			//gpuInverseOfMatrix(Zden,Zden_inv,row1);
+
 			//woodburry inverse
-			//Zden_cacl(B, B_transpose,Zden,mu,row1,col);
+			Zden_cacl(B, B_transpose,Zden,mu,row1,col);
 		}
 		
 		//cpu
@@ -952,8 +989,10 @@ int main(void)
 		calculateQ(Q,Q_re,Z,Y,mu,row,row1,data_size);
 	
 		//cpu	
-		prox_2norm(Q_re,M,C,lam/mu,row,row1,data_size);
+		//prox_2norm(Q_re,M,C,lam/mu,row,row1,data_size);
 
+		//gpu
+		gpuProx_2norm(Q_re,M,C,lam/mu,row,row1,data_size);	
 
 		updateDualvariable(Y,mu,M,Z,row,row1);
 		
@@ -987,9 +1026,7 @@ int main(void)
 			}
 		}
 	}
-	gettimeofday(&end,NULL);
-	double fSequential_time = ((end.tv_sec*1e6+end.tv_usec)-(start.tv_sec*1e6+start.tv_usec))/1000;
-	cout<<" The Sequential Execution time is : "<<fSequential_time<<" ms"<<endl;
+*/
 
 	delete[] xy;
         delete[] mean;
@@ -1006,9 +1043,13 @@ int main(void)
 	delete[] ZO;
 	delete[] Q;
 	delete[] Q_re;
+	delete[] iden;
 	delete[] Zden;
 	delete[] Zden_inv;
-	
+	delete[] I_m;
+	delete[] h_temp_Bt_mui;
+	delete[] MminusZ;
+	delete[] ZminusZO;
 
 }
 
