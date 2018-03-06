@@ -50,6 +50,41 @@ int readValues(char *text, float *variable, int i,int row,int col)
 	return i;
 }
 
+int readValuesxy(char *text, float *variable, int i,int row,int col,int imagenumber)
+{
+ 	float temp;
+	ifstream myReadFile;
+	myReadFile.open(text, ios::in);
+	if (myReadFile.is_open()) 
+	{
+		while (!myReadFile.eof())
+		{
+			if(i < (row*col*imagenumber))
+			{
+			myReadFile >> temp;
+			variable[i] = temp;
+			i++;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+  	myReadFile.close();
+	return i;
+}
+
+
+void get_xy_data(float *xy, float *image_data, int image_num, int items)
+{
+	for(int it = 0;it<items;it++)
+	{
+		xy[it] = image_data[(image_num * items)+it];
+	}
+}
+
+
 void dump_to_file(char *filename, float *matrix, int row, int col)
 {
 	ofstream fs;
@@ -843,7 +878,7 @@ float resCalc_DualRes(float *Z, float *ZO,float mu, int row, int row1)
 
 int main(void)
 {
-        const int iter_num = 100;
+        const int iter_num = 50;
         high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4,t5[500],t6[500];
         for(int p = 0;p<iter_num;p++)
         {       //t3 = high_resolution_clock::now();
@@ -895,10 +930,25 @@ int main(void)
 	float *Zden = new float [row1*row1];
         int status = 0;
 	float *Zden_inv = new float [row1*row1];
-	
+
+	int imagenumber = 40;
+
+	//read image xy data
+	float *image_data = new float [row*col*imagenumber];
+	int total_items = 0;
+	items = row*col;
+
+	total_items = readValuesxy("xy_40_images.txt",image_data,total_items,row,col,imagenumber);
+	//cout << "total items = "<< total_items << endl;
+
+	t1[p] = high_resolution_clock::now();
+	for(int i_num=0;i_num<imagenumber;i_num++)
+	{
+	get_xy_data(xy, image_data, i_num, items);
+
 
 	//read the 15 points from 15 point model
-	items = readValues("messi2.txt",xy,items,row,col);
+	//items = readValues("messi2.txt",xy,items,row,col);
 	
 	//normalize the input
 	normalizeS(xy,row,col,T);
@@ -916,7 +966,6 @@ int main(void)
 
 	mu = meanCalc(xy,col,row);
 
-	t1[p] = high_resolution_clock::now();
         //calculation of BBt
 	TransposeOnCPU(B,B_transpose,row1,col);
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
@@ -924,8 +973,6 @@ int main(void)
 
 	//cpu inverse
 	status = matInv(Zden,row1);
-	//eye(Zden_inv,row1,row1);
-	//cpuInverseOfMatrix(Zden, Zden_inv, row1);
 
 	//woodburry inverse
 	//Zden_cacl(B,B_transpose,Zden,mu,row1,col);
@@ -940,8 +987,6 @@ int main(void)
 			//cpu inverse
 			addScalarToDiagonal(Zden,BBt,mu,row1,row1);
 			status = matInv(Zden,row1);
-			//eye(Zden_inv,row1,row1);
-			//cpuInverseOfMatrix(Zden, Zden_inv, row1);
 
 			//woodburry inverse
 			//Zden_cacl(B, B_transpose,Zden,mu,row1,col);
@@ -990,6 +1035,7 @@ int main(void)
 				flag = 0;
 			}
 		}
+	}
 	}
 
         t2[p] = high_resolution_clock::now();

@@ -37,6 +37,7 @@ int readValues(char *text, float *variable, int i,int row,int col)
 			myReadFile >> temp;
 			variable[i] = temp;
 			i++;
+			//cout << "variable value is "<<variable[i]<<endl;
 			}
 			else
 			{
@@ -47,6 +48,41 @@ int readValues(char *text, float *variable, int i,int row,int col)
   	myReadFile.close();
 	return i;
 }
+
+int readValuesxy(char *text, float *variable, int i,int row,int col,int imagenumber)
+{
+ 	float temp;
+	ifstream myReadFile;
+	myReadFile.open(text, ios::in);
+	if (myReadFile.is_open()) 
+	{
+		while (!myReadFile.eof())
+		{
+			if(i < (row*col*imagenumber))
+			{
+			myReadFile >> temp;
+			variable[i] = temp;
+			i++;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+  	myReadFile.close();
+	return i;
+}
+
+
+void get_xy_data(float *xy, float *image_data, int image_num, int items)
+{
+	for(int it = 0;it<items;it++)
+	{
+		xy[it] = image_data[(image_num * items)+it];
+	}
+}
+
 
 void dump_to_file(char *filename, float *matrix, int row, int col)
 {
@@ -295,7 +331,6 @@ void AugmentIdentity(float *matrix, float *augmatrix, int n)
 
 void cpuInverseOfMatrix(float *matrix, int col)
 {
-//#pragma omp parallel for 
 	for (int m = 0; m < col; m++)
 	{
 		//Checking if diagonal element is 0
@@ -569,7 +604,6 @@ void prox_2norm(float *Q, float *M, float *C, float constant, int row, int col, 
 	float *Qtemp1 = new float [4];
 	float *Qtemp2 = new float [6];
 
-//#pragma omp parallel for
 	for(int i = 0;i < data_size;i++)
 	{
 		for(int j = 0;j<2;j++)
@@ -715,7 +749,7 @@ void resCalc(float *PrimRes, float *DualRes, float *M, float *Z, float *ZO,float
 
 int main(void)
 {
-	const int iter_num = 100;
+	const int iter_num = 50;
 	high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4;
 	for(int p = 0;p<iter_num;p++)
 	{	//t3 = high_resolution_clock::now();
@@ -755,11 +789,22 @@ int main(void)
 	float mu = 0.0;
 	float PrimRes;
 	float DualRes;
+	int imagenumber = 40;
 
-	//t3 = high_resolution_clock::now();
+	//read image xy data
+	float *image_data = new float [row*col*imagenumber];
+	int total_items = 0;
+	items = row*col;
+
+	total_items = readValuesxy("xy_40_images.txt",image_data,total_items,row,col,imagenumber);
+	//cout << "total items = "<< total_items << endl;
+
 	t1[p] = high_resolution_clock::now();
+	for(int i_num=0;i_num<imagenumber;i_num++)
+	{
+	get_xy_data(xy, image_data, i_num, items);
+	//displayValues(xy,items);	
 	
-	items = readValues("messi2.txt",xy,items,row,col);
 	rowMean(xy, col, row, mean);
         Scalc(xy, col, row, mean);
         rowMean(xy, col, row, mean);
@@ -778,38 +823,23 @@ int main(void)
 	initializeZero(Z,row1,row);
 	initializeZero(Y,row1,row);
 	
-	//displayValues(xy,items);
-	
 	mu = meanCalc(xy,col,row);
-	//cout << "value of mu is " << mu << endl;
 
 	TransposeOnCPU(B,B_transpose,row1,col);
 	cpuTransMatrixMult(B, B_transpose, BBt, row1, col);
 	//Zden
 	
-	//t4 = high_resolution_clock::now();
-	//duration<float> time_span = duration_cast<duration<float>>(t4 - t3);
-	//cout << "Time in miliseconds for first section is : " << time_span.count() * 1000 << " ms" << endl;
-	
 
 	for(int iter = 0; iter < 500; iter++)
 	{
-		//t1 = high_resolution_clock::now();
 		initialize(ZO,Z,row1,row);
-		//displayValues(Z,row1*row);
 		calculateZ(Z, BBt,xy, E, T, B_transpose,mu,M,Y,row,col,row1);
-	//	t1 = high_resolution_clock::now();
 		calculateQ(Q,Z,Y,mu,row,row1);
-	//	t2 = high_resolution_clock::now();
-		//displayValues(Z,row*row1);
 
-		//t1 = high_resolution_clock::now();
 		prox_2norm(Q,M,C,lam/mu,row,row1,data_size);
-		//t2 = high_resolution_clock::now();
 		
 		updateDualvariable(Y,mu,M,Z,row,row1);
 		resCalc(&PrimRes,&DualRes,M,Z,ZO,mu,row,row1);
-		//displayValues(M,row*row1);
 		
 		//if ((verb == true) && ((iter%10) == 0))
 		//{
@@ -834,13 +864,10 @@ int main(void)
 			{
 			}
 		}
-		//t2 = high_resolution_clock::now();
-		//duration<float> time_span = duration_cast<duration<float>>(t2 - t1);
-		//cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
 
 	}
+	}
 	t2[p] = high_resolution_clock::now();
-	//t2 = high_resolution_clock::now();
 	duration<float> time_span = duration_cast<duration<float>>(t2[p] - t1[p]);
 	cout << "Time in miliseconds: " << time_span.count() * 1000 << " ms" << endl;
 
@@ -865,6 +892,6 @@ int main(void)
 	{
 		time_span += duration_cast<duration<float>>(t2[p] - t1[p]);
 	}	
-	cout << "Time in miliseconds: "<< (time_span.count()/iter_num) * 1000 << " ms"<<endl; 
+	cout << "Final Time in miliseconds: "<< (time_span.count()/iter_num) * 1000 << " ms"<<endl; 
 }
 

@@ -908,7 +908,7 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	OuterMultiplication1<<<grid_Zcalc_Btmui,block_Zcalc_Btmui >>>(d_temp_inner_inv, d_Bt_mui, d_temp1, col, col, col, row1, col, row1); 
 	OuterMultiplication2_sub<<<grid_wood_inv,block_wood_inv >>>(d_mui_B, d_temp1, d_Zden, row1, col, col, row1, row1, row1); 
 	
-	for(int iter=0;iter<1000;iter++)
+	for(int iter=0;iter<500;iter++)
 	{
 		initializeZGPU<< <grid_ini,block_ini >> >(d_Z,d_Z0,row,row1);
 
@@ -955,7 +955,7 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 		CHECK(cudaMemcpy( &flag,d_flag, sizeof(int), cudaMemcpyDeviceToHost));
 		if(flag == 2)
                 {
-			cout << "iter = "<<iter+1<<endl;
+			//cout << "iter = "<<iter+1<<endl;
 			break;
 		}
 	}

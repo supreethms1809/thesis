@@ -1,7 +1,7 @@
 # compiler option
 CC = icc
 
-OPT = -qopenmp -O3 -g -mkl -heap-arrays -parallel -ip -std=c++11
+OPT = -qopenmp -O3 -g -mkl -heap-arrays -std=c++11
 
 CUDA_PATH = /usr/local/cuda-9.0
 

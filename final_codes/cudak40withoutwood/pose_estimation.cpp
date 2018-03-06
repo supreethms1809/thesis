@@ -48,6 +48,41 @@ int readValues(char *text, float *variable, int i,int row,int col)
 	return i;
 }
 
+int readValuesxy(char *text, float *variable, int i,int row,int col,int imagenumber)
+{
+ 	float temp;
+	ifstream myReadFile;
+	myReadFile.open(text, ios::in);
+	if (myReadFile.is_open()) 
+	{
+		while (!myReadFile.eof())
+		{
+			if(i < (row*col*imagenumber))
+			{
+			myReadFile >> temp;
+			variable[i] = temp;
+			i++;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+  	myReadFile.close();
+	return i;
+}
+
+
+void get_xy_data(float *xy, float *image_data, int image_num, int items)
+{
+	for(int it = 0;it<items;it++)
+	{
+		xy[it] = image_data[(image_num * items)+it];
+	}
+}
+
+
 void dump_to_file(char *filename, float *matrix, int row, int col)
 {
 	ofstream fs;
@@ -366,7 +401,22 @@ int main(void)
 	float *R = new float [threeD_row*row1];
 
 	//read the 15 points from 15 point model
-	items = readValues("FAUST_image001_xy_coor.txt",xy,items,row,col);
+	//items = readValues("FAUST_image001_xy_coor.txt",xy,items,row,col);
+	int imagenumber = 40;
+
+	//read image xy data
+	float *image_data = new float [row*col*imagenumber];
+	int total_items = 0;
+	items = row*col;
+
+	total_items = readValuesxy("xy_40_images.txt",image_data,total_items,row,col,imagenumber);
+	//cout << "total items = "<< total_items << endl;
+
+	for(int i_num=0;i_num<imagenumber;i_num++)
+	{
+	get_xy_data(xy, image_data, i_num, items);
+	//displayValues(xy,items);	
+
 	
 	//normalize the input
 	normalizeS(xy,row,col,T);
@@ -393,7 +443,7 @@ int main(void)
 	//dump_to_file("xyz", xyz, threeD_row, col);
 	//displayValues(xyz,threeD_row*col);
 	//displayValues(temp_mult,row1);
-
+	}
 
 	delete[] xy;
 	delete[] xyz;

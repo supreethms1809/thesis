@@ -721,7 +721,7 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 		CHECK(cudaMemcpy( &flag,d_flag, sizeof(int), cudaMemcpyDeviceToHost));
 		if(flag == 2)
                 {
-			cout << "iter = "<<iter+1<<endl;
+			//cout << "iter = "<<iter+1<<endl;
 			break;
 		}
 	}
@@ -734,7 +734,8 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	CHECK(cudaEventSynchronize(kernel_stop));
 
 	CHECK(cudaEventElapsedTime(&milliseconds, kernel_start, kernel_stop));
-	cout << "Time in ms : "<<milliseconds << " ms"<<endl;
+	float time =time + milliseconds; 
+	cout << "Time in ms : "<<time << " ms"<<endl;
 
 	//gpu memory free
 	CHECK(cudaFree(d_xy));
