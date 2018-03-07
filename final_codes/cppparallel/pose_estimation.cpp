@@ -878,7 +878,7 @@ float resCalc_DualRes(float *Z, float *ZO,float mu, int row, int row1)
 
 int main(void)
 {
-        const int iter_num = 50;
+        const int iter_num = 100;
         high_resolution_clock::time_point t1[iter_num],t2[iter_num],t3,t4,t5[500],t6[500];
         for(int p = 0;p<iter_num;p++)
         {       //t3 = high_resolution_clock::now();

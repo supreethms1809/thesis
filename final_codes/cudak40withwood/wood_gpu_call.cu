@@ -659,9 +659,9 @@ __device__ void norm1()
 //	printf("Z0_norm %f \t",Z0_norm);
 	d_dual = (d_mu*ZminusZ0_norm/Z0_norm);
 //	printf("ZminusZ0_norm %f \t",ZminusZ0_norm);
-//	printf("d_prim %f \t",d_prim);
-//	printf("d_dual %f \t",d_dual);
-//	printf("d_mu %f \n",d_mu);
+	printf("d_prim %f \t",d_prim);
+	printf("d_dual %f \t",d_dual);
+	printf("d_mu %f \n",d_mu);
 
 
 }
@@ -969,7 +969,7 @@ __host__ void loop(float *xy,float *B,float *Bt,float *Zden,float *Z,float *Z0,f
 	CHECK(cudaEventSynchronize(kernel_stop));
 	float milliseconds = 0;
 	CHECK(cudaEventElapsedTime(&milliseconds, kernel_start, kernel_stop));
-	cout << "Time in ms : "<<milliseconds << " ms"<<endl;
+	cout <<milliseconds <<endl;
 
 
 	//gpu memory free

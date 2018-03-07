@@ -402,14 +402,14 @@ int main(void)
 
 	//read the 15 points from 15 point model
 	//items = readValues("FAUST_image001_xy_coor.txt",xy,items,row,col);
-	int imagenumber = 40;
+	int imagenumber = 25;
 
 	//read image xy data
 	float *image_data = new float [row*col*imagenumber];
 	int total_items = 0;
 	items = row*col;
 
-	total_items = readValuesxy("xy_40_images.txt",image_data,total_items,row,col,imagenumber);
+	total_items = readValuesxy("xy_CMU.txt",image_data,total_items,row,col,imagenumber);
 	//cout << "total items = "<< total_items << endl;
 
 	for(int i_num=0;i_num<imagenumber;i_num++)
